@@ -1,0 +1,716 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.2 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{nyt/global//global/global}
+    \entry{Lei:5194:1966}{misc}{}
+      \name{author}{1}{}{%
+        {{hash=aa43becf0d21463be7540bf3b40bf243}{%
+           family={{Brasil}},
+           familyi={B\bibinitperiod}}}%
+      }
+      \strng{namehash}{aa43becf0d21463be7540bf3b40bf243}
+      \strng{fullhash}{aa43becf0d21463be7540bf3b40bf243}
+      \strng{bibnamehash}{aa43becf0d21463be7540bf3b40bf243}
+      \strng{authorbibnamehash}{aa43becf0d21463be7540bf3b40bf243}
+      \strng{authornamehash}{aa43becf0d21463be7540bf3b40bf243}
+      \strng{authorfullhash}{aa43becf0d21463be7540bf3b40bf243}
+      \field{extraname}{1}
+      \field{sortinit}{B}
+      \field{sortinithash}{d7095fff47cda75ca2589920aae98399}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Disponível em: \url{https://www.planalto.gov.br/ccivil_03/leis/l5194.htm}}
+      \field{month}{dez}
+      \field{note}{Regula o exercício das profissões de Engenheiro, Arquiteto e Engenheiro-Agrônomo, e dá outras providências}
+      \field{title}{Lei N{º} 5.194, de 24 de dezembro de 1966}
+      \field{year}{1966}
+    \endentry
+    \entry{Lei:13005:2014}{misc}{}
+      \name{author}{1}{}{%
+        {{hash=aa43becf0d21463be7540bf3b40bf243}{%
+           family={{Brasil}},
+           familyi={B\bibinitperiod}}}%
+      }
+      \strng{namehash}{aa43becf0d21463be7540bf3b40bf243}
+      \strng{fullhash}{aa43becf0d21463be7540bf3b40bf243}
+      \strng{bibnamehash}{aa43becf0d21463be7540bf3b40bf243}
+      \strng{authorbibnamehash}{aa43becf0d21463be7540bf3b40bf243}
+      \strng{authornamehash}{aa43becf0d21463be7540bf3b40bf243}
+      \strng{authorfullhash}{aa43becf0d21463be7540bf3b40bf243}
+      \field{extraname}{2}
+      \field{sortinit}{B}
+      \field{sortinithash}{d7095fff47cda75ca2589920aae98399}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Disponível em: \url{https://www.planalto.gov.br/ccivil_03/_ato2004-2006/2004/lei/l10.861.htm}}
+      \field{month}{6}
+      \field{note}{Aprova o Plano Nacional de Educação - PNE e dá outras providências}
+      \field{title}{Lei N{º} 13.005, de 25 de junho de 2014}
+      \field{year}{2014}
+    \endentry
+    \entry{mec2014pne}{misc}{}
+      \name{author}{1}{}{%
+        {{hash=aa43becf0d21463be7540bf3b40bf243}{%
+           family={{Brasil}},
+           familyi={B\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Brasília}%
+      }
+      \list{organization}{1}{%
+        {Ministério da Educação}%
+      }
+      \strng{namehash}{aa43becf0d21463be7540bf3b40bf243}
+      \strng{fullhash}{aa43becf0d21463be7540bf3b40bf243}
+      \strng{bibnamehash}{aa43becf0d21463be7540bf3b40bf243}
+      \strng{authorbibnamehash}{aa43becf0d21463be7540bf3b40bf243}
+      \strng{authornamehash}{aa43becf0d21463be7540bf3b40bf243}
+      \strng{authorfullhash}{aa43becf0d21463be7540bf3b40bf243}
+      \field{extraname}{3}
+      \field{sortinit}{B}
+      \field{sortinithash}{d7095fff47cda75ca2589920aae98399}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Disponível em: \url{https://pne.mec.gov.br/18-planos-subnacionais-de-educacao/543-plano-nacional-de-educacao-lei-n-13-005-2014}}
+      \field{note}{Aprova o Plano Nacional de Educação - PNE e dá outras providências.}
+      \field{title}{Plano Nacional de Educação, Lei nº 13.005/2014}
+      \field{year}{2014}
+    \endentry
+    \entry{Decreto:12456:2025}{misc}{}
+      \name{author}{1}{}{%
+        {{hash=aa43becf0d21463be7540bf3b40bf243}{%
+           family={{Brasil}},
+           familyi={B\bibinitperiod}}}%
+      }
+      \strng{namehash}{aa43becf0d21463be7540bf3b40bf243}
+      \strng{fullhash}{aa43becf0d21463be7540bf3b40bf243}
+      \strng{bibnamehash}{aa43becf0d21463be7540bf3b40bf243}
+      \strng{authorbibnamehash}{aa43becf0d21463be7540bf3b40bf243}
+      \strng{authornamehash}{aa43becf0d21463be7540bf3b40bf243}
+      \strng{authorfullhash}{aa43becf0d21463be7540bf3b40bf243}
+      \field{extraname}{4}
+      \field{sortinit}{B}
+      \field{sortinithash}{d7095fff47cda75ca2589920aae98399}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Disponível em: \url{https://www.planalto.gov.br/ccivil_03/_Ato2023-2026/2025/Decreto/D12456.htm}}
+      \field{month}{mai}
+      \field{note}{Dispõe sobre a oferta de educação a distância por instituições de educação superior em cursos de graduação e altera o Decreto nº 9.235, de 15 de dezembro de 2017, que dispõe sobre o exercício das funções de regulação, supervisão e avaliação das instituições de educação superior e dos cursos superiores de graduação e de pós-graduação no sistema federal de ensino}
+      \field{title}{Decreto N{º} 12.456, de 19 de maio de 2025}
+      \field{year}{2025}
+    \endentry
+    \entry{MEC:Portaria:21:2017}{misc}{}
+      \name{author}{1}{}{%
+        {{hash=863d85fb6889b805c94c07bcc1f64033}{%
+           family={{Brasil. Ministério da Educação (MEC).}},
+           familyi={B\bibinitperiod}}}%
+      }
+      \strng{namehash}{863d85fb6889b805c94c07bcc1f64033}
+      \strng{fullhash}{863d85fb6889b805c94c07bcc1f64033}
+      \strng{bibnamehash}{863d85fb6889b805c94c07bcc1f64033}
+      \strng{authorbibnamehash}{863d85fb6889b805c94c07bcc1f64033}
+      \strng{authornamehash}{863d85fb6889b805c94c07bcc1f64033}
+      \strng{authorfullhash}{863d85fb6889b805c94c07bcc1f64033}
+      \field{sortinit}{B}
+      \field{sortinithash}{d7095fff47cda75ca2589920aae98399}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Disponível em: \url{https://abmes.org.br/arquivos/legislacoes/Portaria21-2017-sistema-emec.pdf}}
+      \field{month}{dez}
+      \field{note}{Dispõe sobre o sistema e-MEC, sistema eletrônico de fluxo de trabalho e gerenciamento de informações relativas aos processos de regulação, avaliação e supervisão da educação superior no sistema federal de educação, e o Cadastro Nacional de Cursos e Instituições de Educação Superior Cadastro e-MEC.}
+      \field{title}{Portaria N{º} 21, de 21 de dezembro de 2017}
+      \field{year}{2017}
+    \endentry
+    \entry{MEC:CNE:CES:136:2012}{misc}{}
+      \name{author}{1}{}{%
+        {{hash=72a6c396cde9a21e6eec77f677e87bf8}{%
+           family={{Brasil. Ministério da Educação (MEC). Conselho Nacional de Educação (CNE). Câmara de Educação Superior (CES)}},
+           familyi={B\bibinitperiod}}}%
+      }
+      \strng{namehash}{72a6c396cde9a21e6eec77f677e87bf8}
+      \strng{fullhash}{72a6c396cde9a21e6eec77f677e87bf8}
+      \strng{bibnamehash}{72a6c396cde9a21e6eec77f677e87bf8}
+      \strng{authorbibnamehash}{72a6c396cde9a21e6eec77f677e87bf8}
+      \strng{authornamehash}{72a6c396cde9a21e6eec77f677e87bf8}
+      \strng{authorfullhash}{72a6c396cde9a21e6eec77f677e87bf8}
+      \field{extraname}{1}
+      \field{sortinit}{B}
+      \field{sortinithash}{d7095fff47cda75ca2589920aae98399}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Disponível em: \url{https://portal.mec.gov.br/index.php?option=com_docman&view=download&alias=11205-pces136-11-pdf&category_slug=julho-2012-pdf&Itemid=30192}}
+      \field{month}{mai}
+      \field{note}{Diretrizes Curriculares Nacionais para os cursos de graduação em Computação}
+      \field{title}{Parecer CNE/CES N{º} 136/2012}
+      \field{year}{2012}
+    \endentry
+    \entry{MEC:CNE:CES:5:2016}{misc}{}
+      \name{author}{1}{}{%
+        {{hash=72a6c396cde9a21e6eec77f677e87bf8}{%
+           family={{Brasil. Ministério da Educação (MEC). Conselho Nacional de Educação (CNE). Câmara de Educação Superior (CES)}},
+           familyi={B\bibinitperiod}}}%
+      }
+      \strng{namehash}{72a6c396cde9a21e6eec77f677e87bf8}
+      \strng{fullhash}{72a6c396cde9a21e6eec77f677e87bf8}
+      \strng{bibnamehash}{72a6c396cde9a21e6eec77f677e87bf8}
+      \strng{authorbibnamehash}{72a6c396cde9a21e6eec77f677e87bf8}
+      \strng{authornamehash}{72a6c396cde9a21e6eec77f677e87bf8}
+      \strng{authorfullhash}{72a6c396cde9a21e6eec77f677e87bf8}
+      \field{extraname}{2}
+      \field{sortinit}{B}
+      \field{sortinithash}{d7095fff47cda75ca2589920aae98399}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Disponível em: \url{https://portal.mec.gov.br/index.php?option=com_docman&view=download&alias=52101-rces005-16-pdf&category_slug=novembro-2016-pdf&Itemid=30192}}
+      \field{month}{11}
+      \field{note}{Institui as Diretrizes Curriculares Nacionais para os cursos de graduação na área da Computação, abrangendo os cursos de bacharelado em Ciência da Computação, em Sistemas de Informação, em Engenharia de Computação, em Engenharia de Software e de licenciatura em Computação, e dá outras providências}
+      \field{title}{Resolução N{º} 5, de 16 de Novembro de 2016}
+      \field{year}{2016}
+    \endentry
+    \entry{MEC:CNE:CES:2:2007}{misc}{}
+      \name{author}{1}{}{%
+        {{hash=72a6c396cde9a21e6eec77f677e87bf8}{%
+           family={{Brasil. Ministério da Educação (MEC). Conselho Nacional de Educação (CNE). Câmara de Educação Superior (CES)}},
+           familyi={B\bibinitperiod}}}%
+      }
+      \strng{namehash}{72a6c396cde9a21e6eec77f677e87bf8}
+      \strng{fullhash}{72a6c396cde9a21e6eec77f677e87bf8}
+      \strng{bibnamehash}{72a6c396cde9a21e6eec77f677e87bf8}
+      \strng{authorbibnamehash}{72a6c396cde9a21e6eec77f677e87bf8}
+      \strng{authornamehash}{72a6c396cde9a21e6eec77f677e87bf8}
+      \strng{authorfullhash}{72a6c396cde9a21e6eec77f677e87bf8}
+      \field{extraname}{3}
+      \field{sortinit}{B}
+      \field{sortinithash}{d7095fff47cda75ca2589920aae98399}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Disponível em: \url{https://portal.mec.gov.br/index.php?option=com_docman&view=download&alias=16872-res-cne-ces-002-18062007&Itemid=30192}}
+      \field{month}{6}
+      \field{note}{Dispõe sobre carga horária mínima e procedimentos relativos à integralização e duração dos cursos de graduação, bacharelados, na modalidade presencial.}
+      \field{title}{Resolução N{º} 2, de 18 de junho de 2007}
+      \field{year}{2018}
+    \endentry
+    \entry{MEC:CNE:CES:7:2018}{misc}{}
+      \name{author}{1}{}{%
+        {{hash=72a6c396cde9a21e6eec77f677e87bf8}{%
+           family={{Brasil. Ministério da Educação (MEC). Conselho Nacional de Educação (CNE). Câmara de Educação Superior (CES)}},
+           familyi={B\bibinitperiod}}}%
+      }
+      \strng{namehash}{72a6c396cde9a21e6eec77f677e87bf8}
+      \strng{fullhash}{72a6c396cde9a21e6eec77f677e87bf8}
+      \strng{bibnamehash}{72a6c396cde9a21e6eec77f677e87bf8}
+      \strng{authorbibnamehash}{72a6c396cde9a21e6eec77f677e87bf8}
+      \strng{authornamehash}{72a6c396cde9a21e6eec77f677e87bf8}
+      \strng{authorfullhash}{72a6c396cde9a21e6eec77f677e87bf8}
+      \field{extraname}{4}
+      \field{sortinit}{B}
+      \field{sortinithash}{d7095fff47cda75ca2589920aae98399}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Disponível em: \url{https://portal.mec.gov.br/index.php?option=com_docman&view=download&alias=105102-rces007-18&Itemid=30192}}
+      \field{month}{dez}
+      \field{note}{Estabelece as Diretrizes para a Extensão na Educação Superior Brasileira e regimenta o disposto na Meta 12.7 da Lei n{º} 13.005/2014}
+      \field{title}{Resolução N{º} 7, de 18 de dezembro de 2018}
+      \field{year}{2018}
+    \endentry
+    \entry{Utley2025}{report}{}
+      \name{author}{1}{}{%
+        {{hash=cf37f05f21e374fd814e10e02b63baec}{%
+           family={{Capgemini Research Institute}},
+           familyi={C\bibinitperiod}}}%
+      }
+      \list{institution}{1}{%
+        {Capgemini Research Institute}%
+      }
+      \strng{namehash}{cf37f05f21e374fd814e10e02b63baec}
+      \strng{fullhash}{cf37f05f21e374fd814e10e02b63baec}
+      \strng{bibnamehash}{cf37f05f21e374fd814e10e02b63baec}
+      \strng{authorbibnamehash}{cf37f05f21e374fd814e10e02b63baec}
+      \strng{authornamehash}{cf37f05f21e374fd814e10e02b63baec}
+      \strng{authorfullhash}{cf37f05f21e374fd814e10e02b63baec}
+      \field{sortinit}{C}
+      \field{sortinithash}{4d103a86280481745c9c897c925753c0}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{note}{Entrevista com Jeremy Utley, Professor de IA e Design Thinking da Universidade de Stanford.}
+      \field{series}{Conversations for Tomorrow}
+      \field{title}{Creativity in the age of AI: A conversation with Jeremy Utley}
+      \field{type}{techreport}
+      \field{year}{2025}
+    \endentry
+    \entry{UFU2025GuiaIA}{report}{}
+      \name{author}{1}{}{%
+        {{hash=f5146fdd175a1e43cb45ffc9f3ded90c}{%
+           family={{Comissão IA UFU}},
+           familyi={C\bibinitperiod}}}%
+      }
+      \list{institution}{1}{%
+        {Universidade Federal de Uberlândia}%
+      }
+      \strng{namehash}{f5146fdd175a1e43cb45ffc9f3ded90c}
+      \strng{fullhash}{f5146fdd175a1e43cb45ffc9f3ded90c}
+      \strng{bibnamehash}{f5146fdd175a1e43cb45ffc9f3ded90c}
+      \strng{authorbibnamehash}{f5146fdd175a1e43cb45ffc9f3ded90c}
+      \strng{authornamehash}{f5146fdd175a1e43cb45ffc9f3ded90c}
+      \strng{authorfullhash}{f5146fdd175a1e43cb45ffc9f3ded90c}
+      \field{sortinit}{C}
+      \field{sortinithash}{4d103a86280481745c9c897c925753c0}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{month}{4}
+      \field{note}{Proposta de guia. Documento interno em elaboração, não publicado. Versão 01.}
+      \field{title}{Guia de Princípios para o Uso Ético e Responsável de Inteligência Artificial na Universidade Federal de Uberlândia}
+      \field{type}{techreport}
+      \field{year}{2025}
+    \endentry
+    \entry{ACM:CC2020}{report}{}
+      \name{author}{1}{}{%
+        {{hash=b2b8dae8784ade24fff584f685b7e77b}{%
+           family={Computing\bibnamedelima Curricula},
+           familyi={C\bibinitperiod\bibinitdelim C\bibinitperiod},
+           given={ACM/IEEE-CS\bibnamedelimb Joint\bibnamedelimb Task\bibnamedelima Force},
+           giveni={A\bibinithyphendelim C\bibinitperiod\bibinitdelim J\bibinitperiod\bibinitdelim T\bibinitperiod\bibinitdelim F\bibinitperiod},
+           prefix={on},
+           prefixi={o\bibinitperiod}}}%
+      }
+      \list{institution}{1}{%
+        {Association for Computing Machinery}%
+      }
+      \list{location}{1}{%
+        {New York, NY, USA}%
+      }
+      \strng{namehash}{b2b8dae8784ade24fff584f685b7e77b}
+      \strng{fullhash}{b2b8dae8784ade24fff584f685b7e77b}
+      \strng{bibnamehash}{b2b8dae8784ade24fff584f685b7e77b}
+      \strng{authorbibnamehash}{b2b8dae8784ade24fff584f685b7e77b}
+      \strng{authornamehash}{b2b8dae8784ade24fff584f685b7e77b}
+      \strng{authorfullhash}{b2b8dae8784ade24fff584f685b7e77b}
+      \field{sortinit}{C}
+      \field{sortinithash}{4d103a86280481745c9c897c925753c0}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Disponível em: \url{https://www.acm.org/binaries/content/assets/education/curricula-recommendations/cc2020.pdf}}
+      \field{title}{Computing Curricula 2020: Paradigms for Global Computing Education}
+      \field{type}{techreport}
+      \field{year}{2020}
+      \verb{doi}
+      \verb 10.1145/3408839
+      \endverb
+    \endentry
+    \entry{CONFEA:218:1973}{misc}{}
+      \name{author}{1}{}{%
+        {{hash=7ac1c5640477901f6f361643ecbec2eb}{%
+           family={{Conselho Federal de Engenharia e Agronomia (CONFEA)}},
+           familyi={C\bibinitperiod}}}%
+      }
+      \strng{namehash}{7ac1c5640477901f6f361643ecbec2eb}
+      \strng{fullhash}{7ac1c5640477901f6f361643ecbec2eb}
+      \strng{bibnamehash}{7ac1c5640477901f6f361643ecbec2eb}
+      \strng{authorbibnamehash}{7ac1c5640477901f6f361643ecbec2eb}
+      \strng{authornamehash}{7ac1c5640477901f6f361643ecbec2eb}
+      \strng{authorfullhash}{7ac1c5640477901f6f361643ecbec2eb}
+      \field{extraname}{1}
+      \field{sortinit}{C}
+      \field{sortinithash}{4d103a86280481745c9c897c925753c0}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Disponível em: \url{https://normativos.confea.org.br/Ementas/Visualizar?id=266}}
+      \field{month}{6}
+      \field{note}{Discrimina atividades das diferentes modalidades profissionais da Engenharia, Arquitetura e Agronomia}
+      \field{title}{Resolução N{º} 218, de 29 de junho de 1973}
+      \field{year}{1973}
+    \endentry
+    \entry{CONFEA:380:1993}{misc}{}
+      \name{author}{1}{}{%
+        {{hash=7ac1c5640477901f6f361643ecbec2eb}{%
+           family={{Conselho Federal de Engenharia e Agronomia (CONFEA)}},
+           familyi={C\bibinitperiod}}}%
+      }
+      \strng{namehash}{7ac1c5640477901f6f361643ecbec2eb}
+      \strng{fullhash}{7ac1c5640477901f6f361643ecbec2eb}
+      \strng{bibnamehash}{7ac1c5640477901f6f361643ecbec2eb}
+      \strng{authorbibnamehash}{7ac1c5640477901f6f361643ecbec2eb}
+      \strng{authornamehash}{7ac1c5640477901f6f361643ecbec2eb}
+      \strng{authorfullhash}{7ac1c5640477901f6f361643ecbec2eb}
+      \field{extraname}{2}
+      \field{sortinit}{C}
+      \field{sortinithash}{4d103a86280481745c9c897c925753c0}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Disponível em: \url{https://normativos.confea.org.br/Ementas/Visualizar?id=428}}
+      \field{month}{dez}
+      \field{note}{Dispõe sobre o título de Engenheiro de Computação}
+      \field{title}{Resolução N{º} 380, de 17 de dezembro de 1993}
+      \field{year}{1993}
+    \endentry
+    \entry{CONFEA:473:2002}{misc}{}
+      \name{author}{1}{}{%
+        {{hash=7ac1c5640477901f6f361643ecbec2eb}{%
+           family={{Conselho Federal de Engenharia e Agronomia (CONFEA)}},
+           familyi={C\bibinitperiod}}}%
+      }
+      \strng{namehash}{7ac1c5640477901f6f361643ecbec2eb}
+      \strng{fullhash}{7ac1c5640477901f6f361643ecbec2eb}
+      \strng{bibnamehash}{7ac1c5640477901f6f361643ecbec2eb}
+      \strng{authorbibnamehash}{7ac1c5640477901f6f361643ecbec2eb}
+      \strng{authornamehash}{7ac1c5640477901f6f361643ecbec2eb}
+      \strng{authorfullhash}{7ac1c5640477901f6f361643ecbec2eb}
+      \field{extraname}{3}
+      \field{sortinit}{C}
+      \field{sortinithash}{4d103a86280481745c9c897c925753c0}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Disponível em: \url{https://normativos.confea.org.br/Ementas/Visualizar?id=521}}
+      \field{month}{11}
+      \field{note}{Dispõe sobre o título profissional de Engenheiro de Computação e dá outras providências}
+      \field{title}{Resolução N{º} 473, de 26 de novembro de 2002}
+      \field{year}{2002}
+    \endentry
+    \entry{CONFEA:1073:2016}{misc}{}
+      \name{author}{1}{}{%
+        {{hash=7ac1c5640477901f6f361643ecbec2eb}{%
+           family={{Conselho Federal de Engenharia e Agronomia (CONFEA)}},
+           familyi={C\bibinitperiod}}}%
+      }
+      \strng{namehash}{7ac1c5640477901f6f361643ecbec2eb}
+      \strng{fullhash}{7ac1c5640477901f6f361643ecbec2eb}
+      \strng{bibnamehash}{7ac1c5640477901f6f361643ecbec2eb}
+      \strng{authorbibnamehash}{7ac1c5640477901f6f361643ecbec2eb}
+      \strng{authornamehash}{7ac1c5640477901f6f361643ecbec2eb}
+      \strng{authorfullhash}{7ac1c5640477901f6f361643ecbec2eb}
+      \field{extraname}{4}
+      \field{sortinit}{C}
+      \field{sortinithash}{4d103a86280481745c9c897c925753c0}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Disponível em: \url{https://normativos.confea.org.br/Ementas/Visualizar?id=59111}}
+      \field{month}{abr}
+      \field{note}{Regulamenta a atribuição de títulos, atividades, competências e campos de atuação profissionais aos profissionais registrados no Sistema Confea/Crea para efeito de fiscalização do exercício profissional no âmbito da Engenharia e da Agronomia}
+      \field{title}{Resolução N{º} 1.073, de 19 de abril de 2016}
+      \field{year}{2016}
+    \endentry
+    \entry{CC:BY-ND:4.0}{misc}{}
+      \name{author}{1}{}{%
+        {{hash=42cef1da263e6f8e017a4942c4a82bbb}{%
+           family={{Creative Commons}},
+           familyi={C\bibinitperiod}}}%
+      }
+      \strng{namehash}{42cef1da263e6f8e017a4942c4a82bbb}
+      \strng{fullhash}{42cef1da263e6f8e017a4942c4a82bbb}
+      \strng{bibnamehash}{42cef1da263e6f8e017a4942c4a82bbb}
+      \strng{authorbibnamehash}{42cef1da263e6f8e017a4942c4a82bbb}
+      \strng{authornamehash}{42cef1da263e6f8e017a4942c4a82bbb}
+      \strng{authorfullhash}{42cef1da263e6f8e017a4942c4a82bbb}
+      \field{sortinit}{C}
+      \field{sortinithash}{4d103a86280481745c9c897c925753c0}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Disponível em: \url{https://creativecommons.org/licenses/by-nd/4.0/}}
+      \field{title}{Attribution-NoDerivatives 4.0 International (CC BY-ND 4.0)}
+      \field{year}{2013}
+    \endentry
+    \entry{UNESCO:Eng4SusDev:2021}{book}{}
+      \name{author}{1}{}{%
+        {{hash=6e184238781c389628261a9c8ec58f41}{%
+           family={{United Nations Educational, Scientific and Cultural Organization (UNESCO)}},
+           familyi={U\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Paris}%
+      }
+      \list{publisher}{1}{%
+        {UNESCO Publishing}%
+      }
+      \strng{namehash}{6e184238781c389628261a9c8ec58f41}
+      \strng{fullhash}{6e184238781c389628261a9c8ec58f41}
+      \strng{bibnamehash}{6e184238781c389628261a9c8ec58f41}
+      \strng{authorbibnamehash}{6e184238781c389628261a9c8ec58f41}
+      \strng{authornamehash}{6e184238781c389628261a9c8ec58f41}
+      \strng{authorfullhash}{6e184238781c389628261a9c8ec58f41}
+      \field{sortinit}{U}
+      \field{sortinithash}{6901a00e45705986ee5e7ca9fd39adca}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Disponível em: \url{https://unesdoc.unesco.org/ark:/48223/pf0000375644}}
+      \field{note}{Report number: SC-2021/WS/7}
+      \field{title}{Engineering for Sustainable Development: Delivering on the Sustainable Development Goals}
+      \field{year}{2021}
+    \endentry
+    \entry{UFU:CONSUN:20:2012}{misc}{}
+      \name{author}{1}{}{%
+        {{hash=c2f13f692b79f6985f8d5f65724f4ce2}{%
+           family={{Universidade Federal de Uberlândia (UFU)}},
+           familyi={U\bibinitperiod}}}%
+      }
+      \strng{namehash}{c2f13f692b79f6985f8d5f65724f4ce2}
+      \strng{fullhash}{c2f13f692b79f6985f8d5f65724f4ce2}
+      \strng{bibnamehash}{c2f13f692b79f6985f8d5f65724f4ce2}
+      \strng{authorbibnamehash}{c2f13f692b79f6985f8d5f65724f4ce2}
+      \strng{authornamehash}{c2f13f692b79f6985f8d5f65724f4ce2}
+      \strng{authorfullhash}{c2f13f692b79f6985f8d5f65724f4ce2}
+      \field{extraname}{1}
+      \field{sortinit}{U}
+      \field{sortinithash}{6901a00e45705986ee5e7ca9fd39adca}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Disponível em: \url{https://feelt.ufu.br/system/files/conteudo/resolucaoconsun-2012-20_criacao_do_curso.pdf}}
+      \field{note}{Cria o Curso de Engenharia de Computação}
+      \field{title}{Resolução N{º} 20/2012 do Conselho Universitário}
+      \field{year}{2012}
+    \endentry
+    \entry{UFU:CONGRAD:15:2016}{misc}{}
+      \name{author}{1}{}{%
+        {{hash=c2f13f692b79f6985f8d5f65724f4ce2}{%
+           family={{Universidade Federal de Uberlândia (UFU)}},
+           familyi={U\bibinitperiod}}}%
+      }
+      \strng{namehash}{c2f13f692b79f6985f8d5f65724f4ce2}
+      \strng{fullhash}{c2f13f692b79f6985f8d5f65724f4ce2}
+      \strng{bibnamehash}{c2f13f692b79f6985f8d5f65724f4ce2}
+      \strng{authorbibnamehash}{c2f13f692b79f6985f8d5f65724f4ce2}
+      \strng{authornamehash}{c2f13f692b79f6985f8d5f65724f4ce2}
+      \strng{authorfullhash}{c2f13f692b79f6985f8d5f65724f4ce2}
+      \field{extraname}{2}
+      \field{sortinit}{U}
+      \field{sortinithash}{6901a00e45705986ee5e7ca9fd39adca}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Disponível em: \url{http://www.reitoria.ufu.br/Resolucoes/resolucaoCONGRAD-2016-15.pdf}}
+      \field{month}{mai}
+      \field{note}{Dispõe sobre a elaboração e/ou reformulação de Projetos Pedagógicos de Cursos de Graduação, e dá outras providências}
+      \field{title}{Resolução N{º} 15/2016, de 25 de maio de 2016}
+      \field{year}{2016}
+    \endentry
+    \entry{UFU:CONGRAD:13:2019}{misc}{}
+      \name{author}{1}{}{%
+        {{hash=c2f13f692b79f6985f8d5f65724f4ce2}{%
+           family={{Universidade Federal de Uberlândia (UFU)}},
+           familyi={U\bibinitperiod}}}%
+      }
+      \strng{namehash}{c2f13f692b79f6985f8d5f65724f4ce2}
+      \strng{fullhash}{c2f13f692b79f6985f8d5f65724f4ce2}
+      \strng{bibnamehash}{c2f13f692b79f6985f8d5f65724f4ce2}
+      \strng{authorbibnamehash}{c2f13f692b79f6985f8d5f65724f4ce2}
+      \strng{authornamehash}{c2f13f692b79f6985f8d5f65724f4ce2}
+      \strng{authorfullhash}{c2f13f692b79f6985f8d5f65724f4ce2}
+      \field{extraname}{3}
+      \field{sortinit}{U}
+      \field{sortinithash}{6901a00e45705986ee5e7ca9fd39adca}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Disponível em: \url{http://www.reitoria.ufu.br/Resolucoes/ataCONGRAD-2019-13.pdf}}
+      \field{month}{set}
+      \field{note}{Regulamenta a inserção de atividades de extensão nos Currículos dos Cursos de Graduação da Universidade Federal de Uberlândia}
+      \field{title}{Resolução N{º} 13/2019, de 25 de setembro de 2019}
+      \field{year}{2019}
+    \endentry
+    \entry{UFU:CONSUN:25:2019}{misc}{}
+      \name{author}{1}{}{%
+        {{hash=c2f13f692b79f6985f8d5f65724f4ce2}{%
+           family={{Universidade Federal de Uberlândia (UFU)}},
+           familyi={U\bibinitperiod}}}%
+      }
+      \strng{namehash}{c2f13f692b79f6985f8d5f65724f4ce2}
+      \strng{fullhash}{c2f13f692b79f6985f8d5f65724f4ce2}
+      \strng{bibnamehash}{c2f13f692b79f6985f8d5f65724f4ce2}
+      \strng{authorbibnamehash}{c2f13f692b79f6985f8d5f65724f4ce2}
+      \strng{authornamehash}{c2f13f692b79f6985f8d5f65724f4ce2}
+      \strng{authorfullhash}{c2f13f692b79f6985f8d5f65724f4ce2}
+      \field{extraname}{4}
+      \field{sortinit}{U}
+      \field{sortinithash}{6901a00e45705986ee5e7ca9fd39adca}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Disponível em: \url{http://www.reitoria.ufu.br/Resolucoes/resolucaoCONSUN-2019-25.pdf}}
+      \field{month}{dez}
+      \field{note}{Aprova a Política de Extensão da Universidade Federal de Uberlândia}
+      \field{title}{Resolução N{º} 25/2019, de 17 de dezembro de 2019}
+      \field{year}{2019}
+    \endentry
+    \entry{UFU:CONSEX:5:2020}{misc}{}
+      \name{author}{1}{}{%
+        {{hash=c2f13f692b79f6985f8d5f65724f4ce2}{%
+           family={{Universidade Federal de Uberlândia (UFU)}},
+           familyi={U\bibinitperiod}}}%
+      }
+      \strng{namehash}{c2f13f692b79f6985f8d5f65724f4ce2}
+      \strng{fullhash}{c2f13f692b79f6985f8d5f65724f4ce2}
+      \strng{bibnamehash}{c2f13f692b79f6985f8d5f65724f4ce2}
+      \strng{authorbibnamehash}{c2f13f692b79f6985f8d5f65724f4ce2}
+      \strng{authornamehash}{c2f13f692b79f6985f8d5f65724f4ce2}
+      \strng{authorfullhash}{c2f13f692b79f6985f8d5f65724f4ce2}
+      \field{extraname}{5}
+      \field{sortinit}{U}
+      \field{sortinithash}{6901a00e45705986ee5e7ca9fd39adca}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Disponível em: \url{http://www.reitoria.ufu.br/Resolucoes/resolucaoCONSEX-2020-5.pdf}}
+      \field{month}{mai}
+      \field{note}{Regulamenta o Plano de Extensão da Unidade Acadêmica - PEX}
+      \field{title}{Resolução N{º} 5/2020, de 20 de maio de 2020}
+      \field{year}{2020}
+    \endentry
+    \entry{UFU:CONSEX:20:2022}{misc}{}
+      \name{author}{1}{}{%
+        {{hash=c2f13f692b79f6985f8d5f65724f4ce2}{%
+           family={{Universidade Federal de Uberlândia (UFU)}},
+           familyi={U\bibinitperiod}}}%
+      }
+      \strng{namehash}{c2f13f692b79f6985f8d5f65724f4ce2}
+      \strng{fullhash}{c2f13f692b79f6985f8d5f65724f4ce2}
+      \strng{bibnamehash}{c2f13f692b79f6985f8d5f65724f4ce2}
+      \strng{authorbibnamehash}{c2f13f692b79f6985f8d5f65724f4ce2}
+      \strng{authornamehash}{c2f13f692b79f6985f8d5f65724f4ce2}
+      \strng{authorfullhash}{c2f13f692b79f6985f8d5f65724f4ce2}
+      \field{extraname}{6}
+      \field{sortinit}{U}
+      \field{sortinithash}{6901a00e45705986ee5e7ca9fd39adca}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Disponível em: \url{http://www.reitoria.ufu.br/Resolucoes/resolucaoCONSEX-2022-20.pdf}}
+      \field{month}{out}
+      \field{note}{Dispõe sobre a Política de Assistência Estudantil da Universidade Federal de Uberlândia}
+      \field{title}{Resolução N{º} 20/2022, de 21 de outubro de 2022}
+      \field{year}{2022}
+    \endentry
+    \entry{UFU:CONGRAD:93:2023}{misc}{}
+      \name{author}{1}{}{%
+        {{hash=c2f13f692b79f6985f8d5f65724f4ce2}{%
+           family={{Universidade Federal de Uberlândia (UFU)}},
+           familyi={U\bibinitperiod}}}%
+      }
+      \strng{namehash}{c2f13f692b79f6985f8d5f65724f4ce2}
+      \strng{fullhash}{c2f13f692b79f6985f8d5f65724f4ce2}
+      \strng{bibnamehash}{c2f13f692b79f6985f8d5f65724f4ce2}
+      \strng{authorbibnamehash}{c2f13f692b79f6985f8d5f65724f4ce2}
+      \strng{authornamehash}{c2f13f692b79f6985f8d5f65724f4ce2}
+      \strng{authorfullhash}{c2f13f692b79f6985f8d5f65724f4ce2}
+      \field{extraname}{7}
+      \field{sortinit}{U}
+      \field{sortinithash}{6901a00e45705986ee5e7ca9fd39adca}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Disponível em: \url{http://www.reitoria.ufu.br/Resolucoes/ataCONGRAD-2023-93.pdf}}
+      \field{month}{fev}
+      \field{note}{Aprova as Normas Gerais de Estágio de Graduação da UFU}
+      \field{title}{Resolução N{º} 93/2023, de 06 de fevereiro de 2023}
+      \field{year}{2023}
+    \endentry
+    \entry{UFU:GuiaPPC:2021}{book}{}
+      \name{author}{1}{}{%
+        {{hash=d1c0b1863a645a9a71d9ea8e72238e2a}{%
+           family={{Universidade Federal de Uberlândia (UFU), Pró-Reitoria de Graduação (PROGRAD), Diretoria de Ensino (DIREN)}},
+           familyi={U\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Uberlândia, MG}%
+      }
+      \strng{namehash}{d1c0b1863a645a9a71d9ea8e72238e2a}
+      \strng{fullhash}{d1c0b1863a645a9a71d9ea8e72238e2a}
+      \strng{bibnamehash}{d1c0b1863a645a9a71d9ea8e72238e2a}
+      \strng{authorbibnamehash}{d1c0b1863a645a9a71d9ea8e72238e2a}
+      \strng{authornamehash}{d1c0b1863a645a9a71d9ea8e72238e2a}
+      \strng{authorfullhash}{d1c0b1863a645a9a71d9ea8e72238e2a}
+      \field{sortinit}{U}
+      \field{sortinithash}{6901a00e45705986ee5e7ca9fd39adca}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{edition}{3}
+      \field{howpublished}{Disponível em: \url{https://prograd.ufu.br/sites/prograd.ufu.br/files/media/arquivo/guia_ppc_3a_edicao.pdf}}
+      \field{title}{Guia de Elaboração de Projetos Pedagógicos dos Cursos de Graduação da UFU}
+      \field{year}{2021}
+    \endentry
+    \entry{UFU:CONSUN:31:2022}{misc}{}
+      \name{author}{1}{}{%
+        {{hash=39dcb5de755a3faa918e9992cee2789e}{%
+           family={{Universidade Federal de Uberlândia (UFU). Conselho Universitário (CONSUN)}},
+           familyi={U\bibinitperiod}}}%
+      }
+      \strng{namehash}{39dcb5de755a3faa918e9992cee2789e}
+      \strng{fullhash}{39dcb5de755a3faa918e9992cee2789e}
+      \strng{bibnamehash}{39dcb5de755a3faa918e9992cee2789e}
+      \strng{authorbibnamehash}{39dcb5de755a3faa918e9992cee2789e}
+      \strng{authornamehash}{39dcb5de755a3faa918e9992cee2789e}
+      \strng{authorfullhash}{39dcb5de755a3faa918e9992cee2789e}
+      \field{sortinit}{U}
+      \field{sortinithash}{6901a00e45705986ee5e7ca9fd39adca}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Disponível em: \url{http://www.reitoria.ufu.br/Resolucoes/resolucaoCONSUN-2022-31.pdf} (resolução) ou \url{https://proplad.ufu.br/sites/proplad.ufu.br/files/media/arquivo/pide_2022-2027_-_revisado.pdf} (plano em sua versão revisada)}
+      \field{month}{3}
+      \field{note}{Estabelece o Plano Institucional de Desenvolvimento e Expansão (PIDE) da Universidade Federal de Uberlândia, e dá outras providências}
+      \field{title}{Resolução N{º} 3/2017, de 18 de março de 2022}
+      \field{year}{2022}
+    \endentry
+    \entry{UFU:FEELT:PPC:EC:2019}{misc}{}
+      \name{author}{1}{}{%
+        {{hash=06f6302badae665cd57788de0052a488}{%
+           family={{Universidade Federal de Uberlândia (UFU). Faculdade de Engenharia Elétrica (FEELT)}},
+           familyi={U\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Uberlândia, MG}%
+      }
+      \strng{namehash}{06f6302badae665cd57788de0052a488}
+      \strng{fullhash}{06f6302badae665cd57788de0052a488}
+      \strng{bibnamehash}{06f6302badae665cd57788de0052a488}
+      \strng{authorbibnamehash}{06f6302badae665cd57788de0052a488}
+      \strng{authornamehash}{06f6302badae665cd57788de0052a488}
+      \strng{authorfullhash}{06f6302badae665cd57788de0052a488}
+      \field{extraname}{1}
+      \field{sortinit}{U}
+      \field{sortinithash}{6901a00e45705986ee5e7ca9fd39adca}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Disponível em: \url{https://feelt.ufu.br/system/files/conteudo/ppc_ec_final.pdf}}
+      \field{note}{Versão Curricular: 2019-1}
+      \field{title}{Projeto Pedagógico de Curso: Graduação em Engenharia de Computação}
+      \field{year}{2019}
+    \endentry
+    \entry{UFU:FEELT:Regimento:2023}{misc}{}
+      \name{author}{1}{}{%
+        {{hash=06f6302badae665cd57788de0052a488}{%
+           family={{Universidade Federal de Uberlândia (UFU). Faculdade de Engenharia Elétrica (FEELT)}},
+           familyi={U\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Uberlândia, MG}%
+      }
+      \strng{namehash}{06f6302badae665cd57788de0052a488}
+      \strng{fullhash}{06f6302badae665cd57788de0052a488}
+      \strng{bibnamehash}{06f6302badae665cd57788de0052a488}
+      \strng{authorbibnamehash}{06f6302badae665cd57788de0052a488}
+      \strng{authornamehash}{06f6302badae665cd57788de0052a488}
+      \strng{authorfullhash}{06f6302badae665cd57788de0052a488}
+      \field{extraname}{2}
+      \field{sortinit}{U}
+      \field{sortinithash}{6901a00e45705986ee5e7ca9fd39adca}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Disponível em: \url{https://feelt.ufu.br/system/files/conteudo/regimento_interno_da_feelt_12.2023.pdf}}
+      \field{month}{12}
+      \field{note}{Aprova o Regimento Interno da Faculdade de Engenharia Elétrica da Universidade Federal de Uberlândia, e dá outras providências.}
+      \field{title}{Regimento Interno da Faculdade de Engenharia Elétrica}
+      \field{year}{2023}
+    \endentry
+  \enddatalist
+\endrefsection
+\endinput
+

@@ -1,0 +1,157 @@
+% CREATED BY DAVID FRISK, 2018
+% Title page and last page updated by Magnus Gustaver, 2020
+% Updates in Settings and addition of Acronyms and Nomenclature templates by Kyriaki Antoniadou-Plytaria, 2021
+% Updates for degree project report and chalmers/gu parameterization by Fredrik Albers, 2023
+% MODIFIED BY Igor S Peretta, 2023
+
+
+% IMPORT SETTINGS
+\documentclass[12pt,a4paper,oneside,openright]{report}
+\input{include/settings/Settings}
+\usepackage[backend=biber, style=numeric, sorting=nyt]{biblatex}
+\addbibresource{include/backmatter/ppc2025.bib} % Use o mesmo arquivo .bib de antes
+
+\begin{document}
+ 
+% COVER PAGE, TITLE PAGE AND IMPRINT PAGE
+\pagenumbering{roman}			% Roman numbering (starting with i (one)) until first main chapter
+\input{include/frontmatter/Titlepage}
+
+% ABSTRACT
+% \newpage
+% \input{include/frontmatter/Abstract}
+
+% ACKNOWLEDGEMENTS
+% \newpage
+% \input{include/frontmatter/Acknowledgements}
+
+% Acronyms
+% \newpage
+% \addcontentsline{toc}{chapter}{List of Acronyms}
+% \input{include/frontmatter/Acronyms}
+
+% Nomenclature
+% \newpage
+% \addcontentsline{toc}{chapter}{Nomenclature}
+% \input{include/frontmatter/Nomenclature}
+
+% TABLE OF CONTENTS
+\newpage
+\tableofcontents
+
+% % OTHER FRONTMATTER
+% % List of figures (add to table of contents)
+% \cleardoublepage
+% \addcontentsline{toc}{chapter}{\listfigurename} 
+% \listoffigures
+% % List of tables (add to table of contents)
+% \cleardoublepage
+% \addcontentsline{toc}{chapter}{\listtablename}  
+% \listoftables
+
+
+% START OF MAIN DOCUMENT
+\cleardoublepage{}
+\setcounter{page}{1}
+\pagenumbering{arabic}			% Arabic numbering starting from 1 (one)
+\setlength{\parskip}{10pt plus 5pt}
+
+% INTRODUCTION
+% \input{include/Introduction}
+
+% Informações pré-textuais
+
+%     Capa
+
+%     Folha de rosto (Administração Superior + Comissão)
+
+%     Sumário
+
+% Elementos textuais principais
+
+%     Identificação do Curso
+
+%     Endereços institucionais
+
+%     Apresentação
+
+%     Justificativa e Histórico
+
+%     Princípios e Fundamentos
+
+%     Perfil Profissional do Egresso
+
+%     Objetivos do Curso (geral e específicos)
+
+%     Estrutura Curricular
+
+%         Núcleos (básico, tecnológico/profissional, específico)
+
+%         Optativas
+
+%         Atividades de extensão
+
+%         Atividades complementares
+
+%         Estágio supervisionado
+
+%         TCC
+
+%     Diretrizes Metodológicas do Ensino
+
+%     Atenção ao Estudante
+
+%     Avaliação (da aprendizagem e do curso)
+
+%     Acompanhamento de Egressos
+
+%     Considerações Finais
+
+%     Referências
+
+%     Fichas de Componentes Curriculares (SEI)
+
+% THEORY
+\input{include/Identificacao}
+\input{include/Apresentacao}
+\input{include/Apresentacao_ACM}
+\input{include/Justificativa}
+\input{include/Principios}
+\input{include/Egresso}
+\input{include/Objetivos}
+\input{include/Estrutura}
+\input{include/Diretrizes}
+\input{include/Atencao}
+\input{include/Avaliacao}
+\input{include/Acompanha_Egresso}
+\input{include/Consideracoes_Finais}
+
+% METHODS
+% \input{include/Methods}
+
+% RESULTS
+% \input{include/Results}
+
+% CONCLUSION
+% \input{include/Conclusion}
+
+
+% REFERENCES / BIBLIOGRAPHY
+\cleardoublepage{}
+% \addcontentsline{toc}{chapter}{Bibliography}
+% \input{include/backmatter/References}
+% \bibliographystyle{abntex2-num}
+% \bibliography{include/backmatter/ppc2025.bib}
+\printbibliography
+
+% APPENDICES
+\cleardoublepage{}
+\appendix
+\setcounter{page}{1}
+\pagenumbering{Roman}			% Capitalized roman numbering starting from I (one)
+
+% \input{include/backmatter/Appendix_1} 
+
+\input{include/backmatter/Lastpage}
+
+\end{document}
