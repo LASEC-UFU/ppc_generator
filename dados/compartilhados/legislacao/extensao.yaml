@@ -1,0 +1,12 @@
+# Referencial legal compartilhado entre perfis (Seção 8/8-compartilhados).
+# Aplica-se a qualquer curso de graduação, não apenas a um perfil específico.
+referenciais:
+  - id: MEC_CNE_CES_7_2018
+    nome: Diretrizes para a extensão na Educação Superior
+    tipo: resolucao
+    documento: Resolução CNE/CES nº 7, de 18 de dezembro de 2018
+    ano: 2018
+    observacoes: >
+      Base para o percentual mínimo de carga horária de extensão
+      (curriculo.percentual_minimo_extensao em perfil.yaml). Aplicável a
+      todos os cursos de graduação.

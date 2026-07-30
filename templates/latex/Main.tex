@@ -1,0 +1,43 @@
+% Esqueleto genérico do PPC — TEMPLATE, não contém texto de nenhum curso
+% específico (Seção 6). Nenhum perfil deve editar este arquivo: ele é
+% copiado para saida/<perfil_id>/latex/Main.tex no momento da geração
+% (ppcgen.geradores.latex.montar_arvore_latex) — para customizar a
+% estrutura de um perfil específico, use `overrides/latex/Main.tex` no
+% próprio perfil (ver docs/HERANCA_DE_PERFIS.md).
+\documentclass[12pt,a4paper,oneside,openright]{report}
+\input{configuracoes/Estilos}
+\input{gerado/curso_macros}
+\usepackage[backend=biber, style=numeric, sorting=nyt]{biblatex}
+\addbibresource{referencias/bibliografia.bib}
+
+\begin{document}
+
+\pagenumbering{roman}
+\input{gerado/frontmatter}
+\IfFileExists{frontmatter/folha_rosto.tex}{\input{frontmatter/folha_rosto}}{}
+
+\newpage
+\tableofcontents
+
+\cleardoublepage{}
+\setcounter{page}{1}
+\pagenumbering{arabic}
+\setlength{\parskip}{10pt plus 5pt}
+
+\input{textos/identificacao}
+\input{textos/apresentacao}
+\input{textos/justificativa}
+\input{textos/principios}
+\input{textos/perfil_egresso}
+\input{textos/objetivos}
+\input{textos/estrutura_curricular}
+\input{textos/diretrizes_pedagogicas}
+\input{textos/avaliacao}
+\input{textos/atendimento_estudante}
+\input{textos/acompanhamento_egresso}
+\input{textos/consideracoes_finais}
+
+\cleardoublepage{}
+\printbibliography
+
+\end{document}

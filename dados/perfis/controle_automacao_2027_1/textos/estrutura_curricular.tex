@@ -1,0 +1,79 @@
+\chapter{Estrutura Curricular do Curso}
+
+O currículo do \ppccurso\ está organizado em \input{gerado/par_numero_componentes} componentes curriculares ativos, com carga horária total de \textbf{\input{gerado/par_carga_horaria_total}}, distribuídos nos núcleos de Formação Básica, Formação Tecnológica e Profissional, Formação Humanística e de Extensão, e Formação Complementar e Optativa.
+
+O estudante deve integralizar, no mínimo, \textbf{\input{gerado/par_carga_horaria_optativa}} em disciplinas optativas (ver relação completa na Seção~\ref{sec:optativas}), além de \textbf{\input{gerado/par_carga_horaria_aac}} de Atividades Acadêmicas Complementares, \textbf{\input{gerado/par_carga_horaria_estagio}} de Estágio Supervisionado e \textbf{\input{gerado/par_carga_horaria_tcc}} de Trabalho de Conclusão de Curso. A carga horária de Extensão totaliza \textbf{\input{gerado/par_carga_horaria_extensao}} (\input{gerado/par_percentual_extensao} da carga total), e a carga em EaD corresponde a \input{gerado/par_percentual_ead} da carga total.
+
+\section{Núcleo de Formação Básica}
+\input{gerado/tab_nucleo_basico}
+
+\section{Núcleo de Formação Tecnológica e Profissional}
+\input{gerado/tab_nucleo_tecnologico}
+
+\section{Núcleo de Formação Humanística e de Extensão}
+\input{gerado/tab_nucleo_humanistico}
+
+\section{Núcleo de Formação Complementar}
+\input{gerado/tab_nucleo_complementar}
+
+\section{Carga Horária por Núcleo e por Área de Formação}
+\input{gerado/tab_carga_horaria_por_nucleo}
+\input{gerado/tab_carga_horaria_por_area}
+\input{gerado/tab_distribuicao_modalidades}
+
+\section{Fluxo Curricular}
+\label{sec:fluxo}
+
+O Quadro a seguir apresenta a sequência recomendada dos componentes
+curriculares por período, natureza (obrigatória/optativa), carga horária
+(teórica, prática, EaD e extensão), pré-requisitos, correquisitos e unidade
+acadêmica de oferta.
+
+\input{gerado/tab_fluxo_curricular}
+
+\newpage
+\section{Representação Gráfica do Fluxo Curricular}
+
+\begin{landscape}
+\input{gerado/representacao_grafica}
+\end{landscape}
+
+\newpage
+\section{Componentes Curriculares Obrigatórios}
+\input{gerado/tab_componentes_obrigatorios}
+
+\section{Disciplinas Optativas Pré-Aprovadas}
+\label{sec:optativas}
+\input{gerado/tab_disciplinas_optativas}
+
+\section{Pré-requisitos e Correquisitos}
+\input{gerado/tab_prerequisitos}
+
+\section{Conhecimentos e Temas Transversais}
+
+Com base nas resoluções e decretos configurados em
+\texttt{referenciais/legislacao.yaml}, apresentam-se a seguir os quadros que
+identificam os componentes curriculares que contemplam os temas
+transversais obrigatórios.
+
+\IfFileExists{gerado/tab_tema_relacoes_etnico_raciais.tex}{\input{gerado/tab_tema_relacoes_etnico_raciais}}{}
+\IfFileExists{gerado/tab_tema_libras.tex}{\input{gerado/tab_tema_libras}}{}
+\IfFileExists{gerado/tab_tema_direitos_humanos.tex}{\input{gerado/tab_tema_direitos_humanos}}{}
+\IfFileExists{gerado/tab_tema_educacao_ambiental.tex}{\input{gerado/tab_tema_educacao_ambiental}}{}
+\IfFileExists{gerado/tab_tema_prevencao_desastres.tex}{\input{gerado/tab_tema_prevencao_desastres}}{}
+
+\section{Aderência às Competências do Curso}
+
+Os quadros a seguir relacionam cada competência definida em
+\texttt{referenciais/competencias.yaml} aos componentes curriculares que a
+desenvolvem.
+
+\IfFileExists{gerado/tab_competencia_projetar_sistemas_controle.tex}{\input{gerado/tab_competencia_projetar_sistemas_controle}}{}
+\IfFileExists{gerado/tab_competencia_programar_clp_supervisorio.tex}{\input{gerado/tab_competencia_programar_clp_supervisorio}}{}
+\IfFileExists{gerado/tab_competencia_especificar_instrumentacao.tex}{\input{gerado/tab_competencia_especificar_instrumentacao}}{}
+\IfFileExists{gerado/tab_competencia_projetar_acionamentos.tex}{\input{gerado/tab_competencia_projetar_acionamentos}}{}
+\IfFileExists{gerado/tab_competencia_integrar_redes_industriais.tex}{\input{gerado/tab_competencia_integrar_redes_industriais}}{}
+\IfFileExists{gerado/tab_competencia_desenvolver_sistemas_embarcados.tex}{\input{gerado/tab_competencia_desenvolver_sistemas_embarcados}}{}
+\IfFileExists{gerado/tab_competencia_aplicar_seguranca_industrial.tex}{\input{gerado/tab_competencia_aplicar_seguranca_industrial}}{}
+\IfFileExists{gerado/tab_competencia_gerir_projetos_automacao.tex}{\input{gerado/tab_competencia_gerir_projetos_automacao}}{}
+\IfFileExists{gerado/tab_competencia_atuar_etica_sustentabilidade.tex}{\input{gerado/tab_competencia_atuar_etica_sustentabilidade}}{}

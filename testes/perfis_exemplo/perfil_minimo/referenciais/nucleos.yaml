@@ -1,0 +1,9 @@
+nucleos:
+  - id: BASICO
+    nome: Núcleo Básico de Teste
+  - id: TECNOLOGICO
+    nome: Núcleo Tecnológico de Teste
+  - id: HUMANISTICO
+    nome: Núcleo Humanístico de Teste
+  - id: OPTATIVO
+    nome: Núcleo Optativo de Teste

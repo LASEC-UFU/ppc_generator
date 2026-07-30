@@ -1,0 +1,11 @@
+referenciais:
+  - id: LEI_13425_2017
+    nome: Educação para Prevenção e Redução de Desastres
+    tipo: lei
+    documento: Lei nº 13.425, de 30 de março de 2017
+    ano: 2017
+    observacoes: >
+      A lei se refere explicitamente a cursos de Engenharia. Cada perfil
+      decide, em seu próprio referenciais/temas_transversais.yaml, se este
+      tema tem status "obrigatorio" ou "sugerido" — este arquivo compartilhado
+      só fornece a referência normativa, não a obrigatoriedade.

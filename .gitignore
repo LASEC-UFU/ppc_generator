@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.venv/
+venv/
+ppc/
+
+# LaTeX build artifacts do gerador legado (Main.tex/include/ na raiz)
+*.aux
+*.bbl
+*.bbl-SAVE-ERROR
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.run.xml
+*.synctex.gz
+*.toc
+*.tdo
+/Main.pdf
+
+# Tudo em saida/ é gerado por `python -m ppcgen gerar/compilar/completo`
+# (um subdiretório por perfil, saida/<perfil_id>/) — inteiramente
+# recriável a partir de dados/perfis/<id>/, nunca a fonte de nada. Cada
+# saida/<id>/latex/gerado/*.tex carrega um timestamp no cabeçalho, então
+# versionar produziria diff a cada execução mesmo sem mudança real (ver
+# docs/ARQUITETURA.md).
+/saida/
+
+# Fichas em processamento (não aprovadas) do gerador legado não deveriam
+# ser versionadas por padrão.
+/fichas/temporarias/*
+
+# Conveniência de desenvolvimento local — nunca usada em CI/testes/geração
+# oficial (ver docs/PERFIS.md).
+/.ppcgen.local.yaml

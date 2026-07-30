@@ -1,0 +1,26 @@
+# Áreas migradas das marcações CC_UO1..CC_HW6 (CC2020) do CSV legado.
+# Componentes sem marcação CC2020 receberam uma área de fallback
+# derivada do núcleo (ver scripts/migrar-perfil-legado.py) — registrado
+# como decisão de migração em docs/MIGRACAO.md, não uma inferência
+# silenciosa.
+areas:
+  - id: CC2020_ARQUITETURA_INFRAESTRUTURA
+    nome: "CC2020: Arquitetura e Infraestrutura de Sistemas"
+  - id: CC2020_DESENVOLVIMENTO_SOFTWARE
+    nome: "CC2020: Desenvolvimento de Software"
+  - id: CC2020_FUNDAMENTOS_SOFTWARE
+    nome: "CC2020: Fundamentos de Software"
+  - id: CC2020_HARDWARE
+    nome: "CC2020: Hardware"
+  - id: CC2020_MODELAGEM_SISTEMAS
+    nome: "CC2020: Modelagem de Sistemas"
+  - id: CC2020_USUARIOS_ORGANIZACOES
+    nome: "CC2020: Usuários e Organizações"
+  - id: FORMACAO_BASICA_GERAL
+    nome: "Formacao Basica Geral"
+  - id: FORMACAO_COMPLEMENTAR_GERAL
+    nome: "Formacao Complementar Geral"
+  - id: FORMACAO_HUMANISTICA_GERAL
+    nome: "Formacao Humanistica Geral"
+  - id: FORMACAO_TECNOLOGICA_GERAL
+    nome: "Formacao Tecnologica Geral"

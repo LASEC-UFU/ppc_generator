@@ -1,0 +1,96 @@
+# Perfil migrado do sistema legado (py/gen_docs.py + py/PPC_disciplinas_final.csv
+# + include/*.tex) — Seção 19. Os valores abaixo foram extraídos do estado
+# atual do curso (ver docs/MIGRACAO.md para a proveniência de cada um); não
+# são uma "nova" decisão curricular, apenas a mesma configuração já vigente
+# representada no novo formato.
+#
+# status: vigente — este é o PPC oficial em uso, gerado até agora por
+# py/gen_docs.py (mantido intocado para comparação — ver legado/README.md).
+
+perfil:
+  id: engenharia_computacao_2026_1
+  nome: "Engenharia de Computação com Inteligência Artificial Aplicada — Currículo 2026-1"
+  status: vigente
+  versao: "2026-1"
+  descricao: >
+    Curso de Engenharia de Computação da UFU, migrado do sistema legado
+    (py/gen_docs.py) para o formato de perfil do ppcgen. Ver docs/MIGRACAO.md.
+
+curso:
+  nome: "Engenharia de Computação com Inteligência Artificial Aplicada"
+  nome_curto: "Engenharia de Computação"
+  sigla: "ECP"
+  grau: "Bacharelado"
+  modalidade: "Presencial"
+  turno: "Vespertino"
+  regime_academico: "Semestral"
+  numero_periodos: 8
+  campus: "Santa Mônica"
+  municipio: "Uberlândia"
+  estado: "Minas Gerais"
+
+instituicao:
+  nome: "Universidade Federal de Uberlândia"
+  sigla: "UFU"
+  unidade_academica: "Faculdade de Engenharia Elétrica"
+
+curriculo:
+  carga_horaria_total: 3450
+  carga_obrigatoria: null
+  carga_optativa_minima: 90
+  carga_extensao: 345
+  carga_aac: 90
+  carga_estagio: null
+  carga_tcc: null
+  percentual_minimo_extensao: 10
+  percentual_maximo_ead: 20
+  carga_horaria_maxima_periodo: null
+  periodo_minimo_tcc: null
+  periodo_minimo_estagio: null
+
+arquivos:
+  matriz: "matriz_curricular.xlsx"
+  equivalencias: "equivalencias.xlsx"
+  bibliografia: "referencias/bibliografia.bib"
+  textos: "textos"
+  referenciais: "referenciais"
+  fichas: "fichas"
+  figuras: "figuras"
+  anexos: "anexos"
+  frontmatter: "frontmatter"
+  overrides: "overrides"
+
+geracao:
+  template: "padrao"
+  anexar_fichas: true
+  anexar_resolucoes: true
+  gerar_fluxo_curricular: true
+  gerar_representacao_grafica: true
+  gerar_relatorio_validacao: true
+  compilar_pdf: true
+  # Dados legados têm lacunas estruturais conhecidas e documentadas (área de
+  # formação ausente para componentes sem marcação CC2020, complementada por
+  # um fallback derivado do núcleo — ver docs/MIGRACAO.md) que o novo
+  # validador reporta como ERRO. Mantido como aviso visível no relatório de
+  # validação em vez de bloquear a geração deste perfil de comparação.
+  interromper_em_erro: false
+
+saida:
+  nome_base: "PPC_Engenharia_Computacao_2026_1"
+  gerar_corpo: true
+  gerar_completo: true
+
+heranca:
+  instituicao: "compartilhados/instituicao/ufu.yaml"
+  unidade: "compartilhados/instituicao/feelt.yaml"
+  identidade_visual: "compartilhados/identidade_visual/cores.yaml"
+  autoridades: "compartilhados/instituicao/autoridades.yaml"
+  referencias:
+    - "compartilhados/referencias/referencias_institucionais.bib"
+  legislacao:
+    - "compartilhados/legislacao/extensao.yaml"
+    - "compartilhados/legislacao/educacao_ambiental.yaml"
+    - "compartilhados/legislacao/direitos_humanos.yaml"
+    - "compartilhados/legislacao/libras.yaml"
+    - "compartilhados/legislacao/relacoes_etnico_raciais.yaml"
+    - "compartilhados/legislacao/prevencao_desastres.yaml"

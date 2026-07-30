@@ -1,0 +1,21 @@
+# Paleta de cores institucional compartilhada (extraída de
+# include/settings/Settings.tex, onde já era genérica — sem nenhuma
+# referência a um curso específico). Usada por
+# templates/latex/configuracoes/Estilos.tex via `heranca.identidade_visual`.
+cores:
+  azul_escuro: "14,64,151"
+  azul_claro: "41,102,189"
+  cinza_claro: "232,231,231"
+  cinza_meio: "172,175,180"
+  cinza_escuro: "113,119,130"
+  verde: "1,66,10"
+  amarelo: "232,171,2"
+  laranja: "204,85,0"
+  azul_marca: "220,230,241"
+  amarelo_vivo: "255,255,0"
+
+logos:
+  ufu: "identidade_visual/logo_ufu.png"
+  feelt: "identidade_visual/logo_feelt.png"
+  header_pattern: "identidade_visual/header_pattern.jpg"
+  selo_ccbynd: "identidade_visual/selo_ccbynd.png"

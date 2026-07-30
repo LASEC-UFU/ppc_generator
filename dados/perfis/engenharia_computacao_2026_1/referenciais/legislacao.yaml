@@ -1,0 +1,34 @@
+# Referenciais legais ESPECÍFICOS deste perfil (Engenharia de Computação).
+# Referenciais compartilháveis (extensão, educação ambiental, direitos
+# humanos, libras, relações étnico-raciais) vêm de
+# dados/compartilhados/legislacao/ via `heranca.legislacao` em perfil.yaml.
+referenciais:
+  - id: MEC_CNE_CES_136_2012
+    nome: Diretrizes Curriculares Nacionais para os cursos de graduação em Computação
+    tipo: parecer
+    documento: Parecer CNE/CES nº 136/2012
+    ano: 2012
+    observacoes: >
+      Base dos conteúdos obrigatórios em referenciais/conteudos.yaml deste
+      perfil (itens 3.1 e 3.3).
+
+  - id: MEC_CNE_CES_5_2016
+    nome: Diretrizes Curriculares Nacionais para os cursos da área de Computação
+    tipo: resolucao
+    documento: Resolução CNE/CES nº 5, de 16 de novembro de 2016
+    ano: 2016
+
+  - id: ACM_CC2020
+    nome: "Computing Curricula 2020: Paradigms for Global Computing Education"
+    tipo: referencial_internacional
+    documento: ACM/IEEE-CS Joint Task Force on Computing Curricula
+    ano: 2020
+    observacoes: >
+      Referencial curricular internacional adotado voluntariamente por este
+      curso (Seção 24: não é tratado como obrigatório para outros cursos).
+
+  - id: CONFEA_380_1993
+    nome: Título de Engenheiro de Computação
+    tipo: resolucao
+    documento: Resolução CONFEA nº 380, de 17 de dezembro de 1993
+    ano: 1993

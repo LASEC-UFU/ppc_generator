@@ -1,0 +1,28 @@
+# Autoridades institucionais (reitoria e direção de ensino), compartilháveis
+# por qualquer perfil sediado na UFU/FEELT — não dependem do curso.
+# Migrado de include/frontmatter/Titlepage.tex (conteúdo pré-existente no
+# repositório, apenas relocado — ver docs/MIGRAR_PERFIL.md).
+# Referenciado via `heranca.instituicao` (mesmo arquivo pode conter os dois
+# blocos, `instituicao:` e `autoridades:`, o carregador mescla cada um em
+# seu respectivo destino).
+autoridades:
+  - cargo: Reitor
+    nome: "Prof. Dr. Carlos Henrique de Carvalho"
+  - cargo: Vice-Reitora
+    nome: "Profa. Dra. Catarina Azeredo"
+  - cargo: Pró-Reitor de Graduação
+    nome: "Prof. Dr. Waldenor Barros Moraes Filho"
+  - cargo: Pró-Reitor de Pesquisa e Pós-Graduação
+    nome: "Prof. Dr. Thiago Gonçalves Paluma Rocha"
+  - cargo: Pró-Reitor de Extensão e Cultura
+    nome: "Prof. Dr. Florisvaldo Paulo Ribeiro Júnior"
+  - cargo: Pró-Reitor de Administração e Planejamento
+    nome: "Prof. Dr. Vinicius Vieira Favaro"
+  - cargo: Pró-Reitora de Assistência Estudantil
+    nome: "Profa. Dra. Luciana Saraiva da Silva"
+  - cargo: Pró-Reitor de Gestão de Pessoas
+    nome: "Prof. Dr. Sebastião Elias da Silveira"
+  - cargo: Diretor de Ensino
+    nome: "Prof. Dr. Roberto Bernardino Júnior"
+  - cargo: Diretor da Faculdade de Engenharia Elétrica
+    nome: "Prof. Dr. Lorenço Santos Vasconcelos"

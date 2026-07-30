@@ -1,0 +1,132 @@
+# Validações Curriculares
+
+Todas as regras abaixo são executadas por `python -m ppcgen validar` (e,
+implicitamente, por `gerar`/`completo`) através de
+`ppcgen.validadores.curriculo.validar_curriculo`. Cada mensagem carrega uma
+severidade (`ERRO`, `ALERTA`, `INFORMACAO`) e um `codigo_regra` estável, que
+aparece igual no terminal, no HTML e no JSON.
+
+Com `interromper_em_erro: true` (padrão), qualquer `ERRO` interrompe
+`gerar`/`compilar`/`completo` antes de produzir arquivos — `ALERTA` nunca
+interrompe.
+
+## Estrutura do perfil (`ppcgen.validadores.perfil`, prefixo `PERFIL-`)
+
+Roda **antes** da validação do currículo, via `python -m ppcgen
+perfil-validar` (isoladamente) ou implicitamente em `validar`/`completo`.
+Verifica que o perfil está minimamente bem-formado — não olha o conteúdo
+da matriz, só a presença/coerência dos arquivos declarados.
+
+| Código | Severidade | Condição |
+|---|---|---|
+| `PERFIL-000` | ERRO | `perfil.id` não bate com `^[a-z0-9_]+$` |
+| `PERFIL-001` | ERRO | matriz curricular não localizada (nem no perfil, nem no perfil base) |
+| `PERFIL-002` | ERRO | `perfil.extends` aponta para um perfil base inexistente |
+| `PERFIL-003` | ALERTA | um dos 12 capítulos obrigatórios de `textos/` está ausente ou vazio |
+| `PERFIL-004` | ALERTA | nenhuma ficha em `fichas/optativas/` (perfil nem perfil base) |
+| `PERFIL-005` | ALERTA | bibliografia (`arquivos.bibliografia`) não localizada |
+| `PERFIL-006` | ALERTA | uma das subpastas padrão de `fichas/` não existe (só quando o perfil não tem `extends`) |
+| `PERFIL-007` | ERRO | um recurso declarado em `heranca` não existe em `dados/compartilhados/` |
+| `PERFIL-008` | ERRO | `geracao.template` diferente de `"padrao"` e a pasta correspondente não existe em `templates/latex/` |
+
+## Identificação (`ppcgen.validadores.codigos`)
+
+| Código | Severidade | Condição |
+|---|---|---|
+| `CODIGO_DUPLICADO` | ERRO | mesmo `codigo` em duas ou mais linhas de `Componentes` |
+| `NOME_OBRIGATORIO` | ERRO | `nome` vazio |
+| `NOME_DUPLICADO` | ALERTA | dois componentes diferentes com o mesmo nome (normalizado) |
+| `CODIGO_CARACTERES_INVALIDOS` | ERRO | código fora do padrão `[A-Za-z0-9_!?-]+` |
+| `CODIGO_PROVISORIO` | ALERTA | `codigo_provisorio=TRUE` ou código contém `!`/`?` |
+| `NOME_COM_ASPAS` | INFORMACAO | nome contém `"` (possível artefato de exportação) |
+| `PERIODO_FORA_DO_INTERVALO` | ERRO | `periodo` fora de `1..numero_periodos` |
+
+## Estrutura curricular (`ppcgen.validadores.curriculo.validar_estrutura`)
+
+| Código | Severidade | Condição |
+|---|---|---|
+| `COMPONENTE_OBRIGATORIO_SEM_PERIODO` | ERRO | obrigatório, ativo, tipo que deveria ter período fixo (disciplina/projeto integrador/extensão/certificação), mas `periodo` vazio |
+| `COMPONENTE_INATIVO_OBRIGATORIO` | ALERTA | `ativo=FALSE` e `obrigatorio=TRUE` ao mesmo tempo |
+| `CLASSIFICACAO_CONTRADITORIA` | ERRO (ALERTA se `observacoes` preenchido) | `tipo=carga_optativa` e `obrigatorio=TRUE` |
+
+## Carga horária (`ppcgen.validadores.cargas`)
+
+| Código | Severidade | Condição |
+|---|---|---|
+| `CARGA_NEGATIVA` | ERRO | qualquer de CHT/CHP/CHD/CHE/TOT `< 0` |
+| `CARGA_TOTAL_INCONSISTENTE` | ERRO | `TOT ≠ CHT+CHP+CHD+CHE` quando todas as parcelas estão informadas |
+| `CARGA_TOTAL_CURSO_DIVERGENTE` | ERRO | carga oficial calculada (ver `ppcgen/calculo.py`) ≠ `curriculo.carga_horaria_total` configurado |
+| `POOL_OPTATIVAS_INSUFICIENTE` | ERRO | soma dos componentes `tipo=carga_optativa` < `curriculo.carga_optativa_minima` |
+| `CARGA_TIPO_DIVERGENTE` | ALERTA | soma de AAC/estágio/TCC na matriz ≠ configurado em `perfil.yaml` |
+| `CARGA_MAXIMA_PERIODO_EXCEDIDA` | ERRO | soma de um período > `curriculo.carga_horaria_maxima_periodo` |
+
+## Extensão (`ppcgen.validadores.extensao`)
+
+| Código | Severidade | Condição |
+|---|---|---|
+| `EXTENSAO_ABAIXO_DO_MINIMO` | ERRO | carga de componentes `tipo=extensao` / carga oficial < `curriculo.percentual_minimo_extensao` |
+
+## EaD (`ppcgen.validadores.ead`)
+
+| Código | Severidade | Condição |
+|---|---|---|
+| `EAD_ACIMA_DO_MAXIMO` | ERRO | carga em EaD dos componentes obrigatórios / carga oficial > `curriculo.percentual_maximo_ead` |
+
+Ambos os módulos só executam se o respectivo percentual estiver configurado
+(`None` = regra desativada, nunca assumida).
+
+## Pré-requisitos e correquisitos (`ppcgen.validadores.prerequisitos`)
+
+| Código | Severidade | Condição |
+|---|---|---|
+| `PREREQUISITO_MALFORMADO` | ERRO | pré-requisito sem código e sem carga horária mínima |
+| `PREREQUISITO_CODIGO_MAGICO` | ERRO | código de pré-requisito começando com `*` (deve usar `carga_horaria_minima`) |
+| `PREREQUISITO_AUTORREFERENCIA` | ERRO | componente é pré-requisito de si mesmo |
+| `PREREQUISITO_INEXISTENTE` | ERRO (ALERTA se `opcional=TRUE`) | código de pré-requisito não existe na matriz |
+| `PREREQUISITO_INATIVO` | ERRO | pré-requisito existe mas está `ativo=FALSE` |
+| `PREREQUISITO_PERIODO_INVALIDO` | ERRO | pré-requisito com período ≥ período do componente |
+| `CORREQUISITO_AUTORREFERENCIA` | ERRO | componente é correquisito de si mesmo |
+| `CORREQUISITO_INEXISTENTE` | ERRO (ALERTA se `opcional=TRUE`) | código de correquisito não existe |
+| `CORREQUISITO_PERIODO_DIVERGENTE` | ALERTA | correquisito em período diferente do componente |
+| `CICLO_PREREQUISITOS` | ERRO | ciclo detectado no grafo de pré-requisitos (caminho completo na mensagem, ex. `AUT201 → AUT302 → AUT401 → AUT201`) |
+
+## Referenciais (`ppcgen.validadores.referenciais`)
+
+| Código | Severidade | Condição |
+|---|---|---|
+| `COMPONENTE_SEM_NUCLEO` | ERRO | componente ativo sem `nucleo_id` |
+| `NUCLEO_INEXISTENTE` | ERRO | `nucleo_id` não existe em `referenciais/nucleos.yaml` |
+| `COMPONENTE_SEM_AREA` | ERRO | componente ativo sem nenhuma linha em `Areas` |
+| `AREA_INEXISTENTE` | ERRO | `area_id` não existe em `referenciais/areas_formacao.yaml` |
+| `TEMA_TRANSVERSAL_INEXISTENTE` | ERRO | `tema_id` não existe em `referenciais/temas_transversais.yaml` |
+| `COMPETENCIA_INEXISTENTE` | ERRO | `competencia_id` não existe em `referenciais/competencias.yaml` |
+| `COMPETENCIA_OBRIGATORIA_SEM_COBERTURA` | ALERTA | competência com `obrigatoria: true` sem nenhum componente ativo que a referencie |
+| `TEMA_TRANSVERSAL_OBRIGATORIO_SEM_COBERTURA` | ALERTA | tema com `status: obrigatorio` sem cobertura |
+| `CONTEUDO_INEXISTENTE` | ERRO | `conteudo_id` (aba `Conteudos`) não existe em `referenciais/conteudos.yaml` |
+| `CONTEUDO_OBRIGATORIO_SEM_COBERTURA` | ALERTA | conteúdo com `obrigatorio: true` sem nenhum componente ativo que o referencie |
+
+## Equivalências (`ppcgen.validadores.prerequisitos.validar_equivalencias`)
+
+| Código | Severidade | Condição |
+|---|---|---|
+| `EQUIVALENCIA_DESTINO_INEXISTENTE` | ALERTA | `codigo_destino` de uma equivalência não existe na matriz atual |
+| `EQUIVALENCIA_ORIGEM_AINDA_ATIVA` | ALERTA | `codigo_origem` ainda existe **e está ativo** na matriz atual — o caso normal é a origem ser um componente de um currículo anterior (inativo ou ausente); se ainda está ativo, confirme se a equivalência é mesmo intencional |
+
+## Fichas curriculares (`ppcgen.validadores.fichas`, com `--incluir-fichas` ou `validar-fichas`/`completo`)
+
+| Código | Severidade | Condição |
+|---|---|---|
+| `FICHA_AUSENTE` | ALERTA | nenhuma ficha localizada para o componente |
+| `FICHA_NAO_RECONHECIDA` | ALERTA | ficha localizada mas ilegível (ex. PDF sem texto — `confianca_extracao=0`) |
+| `FICHA_DUPLICADA` | ALERTA | mais de uma ficha reconhecida para o mesmo código |
+| `FICHA_NOME_DIVERGENTE` | ALERTA | nome na ficha ≠ nome na matriz |
+| `FICHA_CARGA_DIVERGENTE` | ERRO | carga total na ficha ≠ carga total na matriz |
+| `FICHA_PREREQUISITOS_DIVERGENTES` | ALERTA | pré-requisitos na ficha ≠ pré-requisitos na matriz |
+| `FICHA_CAMPO_VAZIO` | ALERTA | ementa/objetivos/programa/metodologia/avaliação/bibliografia básica ou complementar vazios |
+| `FICHA_SEM_COMPONENTE_CORRESPONDENTE` | ALERTA | ficha encontrada cujo código não existe na matriz atual (possível currículo anterior) |
+
+## Leitura (avisos que não são bem regras de negócio, mas não são silenciados)
+
+| Código | Severidade | Condição |
+|---|---|---|
+| `LEITURA_DADO_OMITIDO` | ALERTA | ex.: célula `ativo` em branco na aba `Componentes` (assumido `TRUE`, mas registrado) |

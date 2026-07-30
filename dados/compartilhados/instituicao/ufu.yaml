@@ -1,0 +1,13 @@
+# Dados institucionais compartilháveis por qualquer perfil sediado na UFU.
+# Referenciado via `heranca.instituicao` em perfil.yaml — não é lido
+# diretamente pelo código genérico.
+instituicao:
+  nome: Universidade Federal de Uberlândia
+  sigla: UFU
+  endereco: "Av. João Naves de Ávila, 2121, Campus Santa Mônica"
+  cep: "38400-902"
+  municipio: Uberlândia
+  estado: Minas Gerais
+  uf: MG
+  site: "http://www.ufu.br"
+  telefone: "(34) 3239 2911"

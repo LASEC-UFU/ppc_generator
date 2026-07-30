@@ -1,0 +1,5 @@
+competencias:
+  - id: C1
+    descricao: Competência de teste
+    obrigatoria: true
+    fonte: ""

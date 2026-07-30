@@ -1,0 +1,9 @@
+# Dados da unidade acadêmica, compartilháveis por qualquer perfil sediado
+# na Faculdade de Engenharia Elétrica. Referenciado via `heranca.unidade`.
+instituicao:
+  unidade_academica: Faculdade de Engenharia Elétrica
+  unidade_sigla: FEELT
+  unidade_endereco: "Av. João Naves de Ávila, 2121, Bloco 3N, Campus Santa Mônica"
+  unidade_cep: "38400-902"
+  unidade_site: "http://www.feelt.ufu.br"
+  unidade_telefone: "(34) 3239 4701"

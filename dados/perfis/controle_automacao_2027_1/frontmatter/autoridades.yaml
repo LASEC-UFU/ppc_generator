@@ -1,0 +1,8 @@
+# Autoridades ESPECÍFICAS deste curso (ex.: coordenador). Autoridades
+# institucionais (reitor, pró-reitores, diretor da unidade) vêm de
+# dados/compartilhados/instituicao/autoridades.yaml via `heranca.autoridades`
+# — não repita aqui.
+#
+# Ainda não há coordenador definido para este perfil (proposta inicial) —
+# não preencha com um nome não confirmado.
+autoridades: []
