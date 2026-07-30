@@ -87,9 +87,6 @@ class CargaHoraria:
             return None
         return sum(informadas)
 
-    def presencial(self) -> int:
-        return (self.teorica or 0) + (self.pratica or 0)
-
 
 # ---------------------------------------------------------------------------
 # Referenciais (núcleos, áreas, competências, temas, legislação)
@@ -225,37 +222,6 @@ class Curriculo:
 
 
 # ---------------------------------------------------------------------------
-# Curso
-# ---------------------------------------------------------------------------
-
-
-@dataclass
-class Curso:
-    nome: str
-    nome_curto: str = ""
-    sigla: str = ""
-    grau: str = ""
-    modalidade: str = ""
-    unidade_academica: str = ""
-    instituicao: str = ""
-    campus: str = ""
-    municipio: str = ""
-    estado: str = ""
-    versao_curricular: str = ""
-    ano_implantacao: int | None = None
-    turno: str = ""
-    regime_academico: str = ""
-
-
-@dataclass
-class VersaoCurricular:
-    identificador: str
-    caminho_arquivo: Path
-    data_geracao: str | None = None
-    descricao: str = ""
-
-
-# ---------------------------------------------------------------------------
 # Fichas curriculares
 # ---------------------------------------------------------------------------
 
@@ -322,9 +288,6 @@ class ResultadoValidacao:
 
     def adicionar(self, mensagem: MensagemValidacao) -> None:
         self.mensagens.append(mensagem)
-
-    def estender(self, outras: list[MensagemValidacao]) -> None:
-        self.mensagens.extend(outras)
 
     @property
     def erros(self) -> list[MensagemValidacao]:

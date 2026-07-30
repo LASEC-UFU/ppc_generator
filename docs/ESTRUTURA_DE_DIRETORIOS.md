@@ -11,11 +11,16 @@ dados/       -> dados: um perfil por curso/versão/proposta + compartilhados
 saida/       -> tudo gerado, um subdiretório por perfil, nunca versionado
 testes/      -> testes automatizados (unitários + integração)
 docs/        -> esta documentação
-scripts/     -> utilitários de linha de comando (migração, ambiente LaTeX)
-legado/, include/, py/, figure/, fichas/, Main.tex
-             -> o gerador antigo (`py/gen_docs.py`), preservado intacto
-                para comparação (ver docs/MIGRACAO.md) — não editar
+scripts/     -> utilitários de linha de comando (setup de ambiente LaTeX)
 ```
+
+O gerador anterior (script monolítico + LaTeX manual, usado antes desta
+reestruturação para o curso de Engenharia de Computação) não está mais no
+working tree — foi mantido e depois arquivado em `legado/sistema_antigo/`
+durante a migração, e removido depois de confirmada a equivalência de
+resultado com o perfil novo (ver `docs/MIGRACAO.md`, Seção 7.5). Continua
+recuperável pelo histórico do git (`CHANGELOG.md` tem a referência de
+commit).
 
 ## `ppcgen/` — código genérico
 
@@ -135,6 +140,13 @@ Cada perfil grava exclusivamente dentro do seu próprio `saida/<perfil_id>/`
 caminho que tente escapar da pasta do perfil, e a saída nunca é escrita
 dentro de `dados/perfis/<id>/`.
 
+**Exceção**: subpastas de `saida/` com prefixo `00` (ex.: `saida/00old/`)
+não são saída de nenhum perfil — são material de referência guardado
+manualmente por quem estiver comparando gerações (uma cópia antiga do PDF,
+por exemplo). `ppcgen limpar --todos` ignora essas pastas de propósito, e
+nenhum id de perfil pode começar com `00` (`PERFIL-000`) — assim o prefixo
+nunca colide com um perfil real.
+
 ## O que NÃO existe mais (arquitetura do Task 1, obsoleta)
 
 Se você encontrar referências a estes caminhos em documentação antiga ou em
@@ -152,13 +164,17 @@ anotações locais, elas descrevem a versão anterior a esta reestruturação:
 - `saida/PPC_corpo.pdf` (saída única na raiz de `saida/`) →
   `saida/<perfil_id>/PPC_..._corpo.pdf`.
 
-## O gerador legado (não tocar)
+## O gerador legado (arquivado no histórico do git)
 
-`Main.tex`, `include/`, `figure/`, `fichas/SEI/`, `fichas/Fichas disciplinas
-30h/`, `py/gen_docs.py` e `py/PPC_disciplinas_final.csv` são o script
-monolítico original, preservado **funcional e intocado** para permitir
-comparar a saída do novo sistema com a antiga (Seção 21 da especificação
-original). `legado/` guarda cópias adicionais (CSVs históricos redundantes e
-um PDF de referência) que não são mais lidas por nada em tempo de execução —
-apenas para consulta manual. Nenhum destes caminhos deve ser referenciado
-por `ppcgen/` ou por `templates/`.
+O script monolítico original (`Main.tex`, `include/`, `figure/`,
+`fichas/SEI/`, `fichas/Fichas disciplinas 30h/`, `py/gen_docs.py`,
+`py/PPC_disciplinas_final.csv`) foi preservado **funcional e intocado**
+durante toda a migração do curso de Engenharia de Computação — primeiro
+na raiz do repositório, depois arquivado em `legado/sistema_antigo/` —
+para permitir comparar a saída do novo sistema com a antiga (Seção 21 da
+especificação original). Confirmada a equivalência de resultado (ver
+`docs/MIGRACAO.md`, Seção 7.5), foi removido do working tree; continua
+recuperável pelo histórico do git (ver `CHANGELOG.md` para a referência
+de commit). Nenhum caminho do gerador antigo deve ser referenciado por
+`ppcgen/` ou por `templates/` — se você encontrar uma referência, é
+resíduo de documentação desatualizada, não uma dependência real.

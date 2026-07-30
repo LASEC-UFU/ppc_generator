@@ -3,8 +3,13 @@
 Guia para trazer um PPC que já existe em outro formato (planilha solta,
 CSV, um gerador LaTeX monolítico anterior...) para dentro da estrutura de
 perfis deste repositório. Usa como exemplo real a migração do curso de
-Engenharia de Computação (`py/gen_docs.py` + `py/PPC_disciplinas_final.csv`
-+ `include/*.tex`) para `dados/perfis/engenharia_computacao_2026_1/`.
+Engenharia de Computação (de um gerador LaTeX monolítico com CSV próprio)
+para `dados/perfis/engenharia_computacao_2026_1/` — ver `docs/MIGRACAO.md`
+para o relato completo dessa migração específica (decisões tomadas, bugs
+encontrados, comparação de resultado). O sistema antigo em si e o script
+que fez essa migração já cumpriram seu papel e não fazem mais parte deste
+repositório (só do histórico do git) — o que segue é o *processo*
+genérico, para migrar qualquer outro curso.
 
 ## Princípio geral: nunca perder dado silenciosamente
 
@@ -18,43 +23,48 @@ escrever um script de migração próprio.
 
 ## Passo a passo
 
-### 1. Não apague a fonte antiga
+### 1. Não apague a fonte antiga até validar a equivalência
 
-Mantenha o gerador/dados antigos funcionando até validar a equivalência
-(ver "Comparando com o resultado antigo" abaixo). Neste repositório isso
-significa: `Main.tex`, `include/`, `py/gen_docs.py` e
-`py/PPC_disciplinas_final.csv` continuam intactos — não editados, não
-apagados — mesmo depois de `engenharia_computacao_2026_1` estar completo.
-`legado/` guarda cópias adicionais (CSVs históricos, um PDF de baseline)
-só para consulta.
+Mantenha o gerador/dados antigos funcionando até confirmar que o perfil
+novo produz um resultado equivalente (ver "Comparando com o resultado
+antigo" abaixo) — só depois disso arquive ou remova a fonte antiga. Foi
+assim que a migração de Engenharia de Computação foi feita: o gerador
+antigo (`gen_docs.py` + `include/*.tex` + o CSV de origem) ficou
+preservado e funcional durante toda a migração — primeiro arquivado em
+`legado/sistema_antigo/` para comparação, e só removido do repositório
+depois de confirmada a equivalência e decidido que a capacidade de
+recompilar o original do zero não seria mais necessária (essa decisão é
+sua para cada migração — nada obriga a remover a fonte antiga depois).
 
 ### 2. Escreva um script de migração, não migre à mão
 
-`scripts/migrar-perfil-legado.py` é o script real usado para este curso —
-leia-o como referência de estrutura, mesmo migrando de uma fonte
-diferente. Ele:
+Um script de migração deve:
 
-- lê a fonte antiga com um leitor dedicado
-  (`ppcgen.leitores.csv.carregar_csv_legado` — só existe para
-  compatibilidade/migração, nunca é a fonte oficial do sistema novo);
-- escreve `matriz_curricular.xlsx` no schema novo
+- ler a fonte antiga com um leitor dedicado (ex.:
+  `ppcgen.leitores.csv.carregar_csv_legado`, usado para o CSV legado de
+  Engenharia de Computação — só existe para compatibilidade/migração,
+  nunca é a fonte oficial do sistema novo);
+- escrever `matriz_curricular.xlsx` no schema novo
   (`docs/DICIONARIO_DADOS.md`);
-- extrai catálogos hardcoded do gerador antigo (ex.: as listas de
-  conteúdo DCN que estavam like Python no `py/gen_docs.py`) para
-  `referenciais/*.yaml` — documentando de onde vieram, nunca inventando
-  ids novos silenciosamente;
-- copia fichas curriculares para as subpastas por tipo, usando o leitor
+- extrair catálogos hardcoded do gerador antigo (ex.: listas de conteúdo
+  fixas no código-fonte de um gerador anterior) para `referenciais/*.yaml`
+  — documentando de onde vieram, nunca inventando ids novos
+  silenciosamente;
+- copiar fichas curriculares para as subpastas por tipo, usando o leitor
   real de fichas (`ppcgen.leitores.fichas.carregar_fichas`) para casar
   cada arquivo com um componente da matriz — fichas não reconhecidas vão
   para `fichas/complementares/` e ficam sinalizadas para revisão manual,
   nunca descartadas nem "adivinhadas";
-- recusa sobrescrever um perfil já existente (proteção contra rodar
+- recusar sobrescrever um perfil já existente (proteção contra rodar
   duas vezes por engano e perder edições manuais feitas depois da
   primeira migração).
 
-Escreva o seu script seguindo o mesmo padrão: leitor dedicado → schema
-novo, com uma lista clara do que **não** foi possível migrar
-automaticamente.
+O script usado para migrar Engenharia de Computação seguiu exatamente
+esse padrão (ver `docs/MIGRACAO.md`, Seção 7.1, para o que ele fazia) —
+depois de a migração estar completa e confirmada, ele deixou de ter
+utilidade (não há mais fonte antiga para ler) e foi removido junto do
+gerador antigo. Continua disponível no histórico do git de quem quiser
+usá-lo como ponto de partida.
 
 ### 3. Decisões de migração são decisões, não bugs
 
@@ -137,11 +147,12 @@ Depois que o perfil novo compila:
   uma surpresa.
 
 Nesta migração específica, o resultado final ficou em ~95 páginas (corpo)
-contra 102 do PDF de referência do gerador antigo (`legado/main_pdf_baseline/`).
-A diferença remanescente vem de conteúdo bespoke do capítulo de estrutura
-curricular que o gerador antigo produzia via tabelas fixas em LaTeX
-(quadro de carga horária semanal por período, uma tabela alternativa de
-fluxo "conforme guia", e um quadro de mapeamento de conteúdo específico de
-IA) e que não foi reproduzido — cada um exigiria um gerador novo e
+contra 102 do PDF de referência do gerador antigo (comparação feita antes
+do gerador antigo ser removido do repositório — ver `docs/MIGRACAO.md`,
+Seção 7.5). A diferença remanescente vem de conteúdo bespoke do capítulo
+de estrutura curricular que o gerador antigo produzia via tabelas fixas em
+LaTeX (quadro de carga horária semanal por período, uma tabela alternativa
+de fluxo "conforme guia", e um quadro de mapeamento de conteúdo específico
+de IA) e que não foi reproduzido — cada um exigiria um gerador novo e
 dedicado, fora do escopo desta migração inicial. Ver comentário em
 `dados/perfis/engenharia_computacao_2026_1/textos/estrutura_curricular.tex`.

@@ -23,8 +23,6 @@ class RefPerfil:
     id: str
     caminho: Path
     ativo: bool = True
-    origem_registro: bool = False
-    """True se este perfil veio de dados/perfis.yaml (não de descoberta automática)."""
 
 
 def _pasta_perfis(raiz_dados: Path | None = None) -> Path:
@@ -62,7 +60,6 @@ def _ler_registro(raiz_dados: Path) -> dict[str, RefPerfil]:
             id=item["id"],
             caminho=raiz_dados / item["caminho"],
             ativo=item.get("ativo", True),
-            origem_registro=True,
         )
     return registro
 
@@ -102,17 +99,3 @@ def carregar(
 ) -> Perfil:
     caminho = resolver_perfil_dir(perfil_id=perfil_id, perfil_dir=perfil_dir, raiz_dados=raiz_dados)
     return carregar_perfil(caminho, raiz_dados=raiz_dados)
-
-
-def listar_perfis(raiz_dados: Path | None = None) -> list[Perfil]:
-    """Carrega todos os perfis descobertos/registrados (usado por `ppcgen perfis`
-    e pelos comandos em lote)."""
-
-    raiz_dados = raiz_dados or raiz_projeto() / "dados"
-    perfis = []
-    for ref in listar_referencias(raiz_dados).values():
-        try:
-            perfis.append(carregar_perfil(ref.caminho, raiz_dados=raiz_dados))
-        except Exception:  # noqa: BLE001 — um perfil quebrado não derruba a listagem dos demais
-            continue
-    return perfis

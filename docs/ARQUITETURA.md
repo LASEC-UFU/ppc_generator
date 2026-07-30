@@ -126,19 +126,22 @@ mudança curricular real — mudaria artificialmente esses percentuais.
   `dados/perfis/<id>/matriz_curricular.xlsx` sempre os recria de forma
   determinística (dado o mesmo insumo, o único campo que varia é o
   timestamp).
-- **`legado/`, `include/`, `Main.tex`, `py/` permanecem versionados,
-  intocados.** São a única forma de comparar a saída do gerador antigo
-  (`py/gen_docs.py`) com a do sistema novo sem precisar rodar o script
-  antigo a cada comparação — capacidade exigida pela especificação
-  original (Seção 21) e usada em `docs/MIGRACAO.md`.
+- **O gerador antigo não faz mais parte do working tree.** Durante a
+  migração do curso de Engenharia de Computação ele foi mantido
+  versionado e intocado (primeiro na raiz, depois arquivado em
+  `legado/sistema_antigo/`) exatamente para permitir essa comparação —
+  capacidade exigida pela especificação original (Seção 21) e usada em
+  `docs/MIGRACAO.md`. Uma vez confirmada a equivalência de resultado
+  (Seção 7.5 de `docs/MIGRACAO.md`), foi removido; continua recuperável
+  pelo histórico do git (ver `CHANGELOG.md`).
 
 ## Compatibilidade com o CSV legado
 
-`ppcgen.leitores.csv.carregar_csv_legado()` lê o formato de
-`py/PPC_disciplinas_final.csv` e converte para o novo modelo — usado para
-migração/comparação (ver `docs/MIGRACAO.md`/`docs/MIGRAR_PERFIL.md`), não
-como fonte oficial do novo sistema (essa é sempre
-`dados/perfis/<id>/matriz_curricular.xlsx`).
+`ppcgen.leitores.csv.carregar_csv_legado()` lê o formato usado pelo CSV
+do gerador antigo (`PPC_disciplinas_final.csv` — ver `docs/MIGRACAO.md`)
+e converte para o novo modelo — usado para migração/comparação (ver
+`docs/MIGRACAO.md`/`docs/MIGRAR_PERFIL.md`), não como fonte oficial do
+novo sistema (essa é sempre `dados/perfis/<id>/matriz_curricular.xlsx`).
 
 ## Fichas: adaptadores por formato, sem OCR como estratégia principal
 

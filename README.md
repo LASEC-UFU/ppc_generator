@@ -16,17 +16,20 @@ código. Ver `docs/PERFIS.md`.
 
 Este repositório traz três perfis de exemplo:
 
-- `engenharia_computacao_2026_1` — curso real, migrado do gerador anterior
-  (`py/gen_docs.py` + `Main.tex`), com dados/currículo/fichas reais.
+- `engenharia_computacao_2026_1` — curso real, migrado do gerador anterior,
+  com dados/currículo/fichas reais.
 - `controle_automacao_2027_1` — proposta de um Curso Superior de
   Tecnologia em Controle e Automação, construído para este novo sistema.
 - `perfil_minimo` (em `testes/perfis_exemplo/`) — perfil mínimo sintético
   usado pelos testes automatizados.
 
-O gerador anterior (`py/gen_docs.py` + `Main.tex` + `include/`), que
+O gerador anterior (`gen_docs.py` + `Main.tex` + `include/`), que
 produzia o PPC de Engenharia de Computação antes desta reestruturação,
-**continua funcionando exatamente como antes** — não foi tocado. Ver
-`legado/README.md` e `docs/MIGRACAO.md`/`docs/MIGRAR_PERFIL.md`.
+foi mantido funcional e intocado durante toda a migração — só removido
+do repositório depois de confirmada a equivalência de resultado com o
+perfil novo. Continua recuperável pelo histórico do git. Ver
+`docs/MIGRACAO.md`/`docs/MIGRAR_PERFIL.md` para o relato completo e
+`CHANGELOG.md` para a referência de commit.
 
 ## 2. Arquitetura
 
@@ -53,9 +56,7 @@ dados/
 saida/<id>/          PDFs e relatórios gerados (gitignorado)
 testes/              testes unitários e de integração (pytest)
 docs/                esta documentação
-scripts/             migração de dados legados, setup de ambiente LaTeX
-legado/, include/,   sistema anterior, preservado intacto para
-py/, Main.tex         comparação — não editar
+scripts/             setup de ambiente LaTeX
 ```
 
 ## 3. Requisitos

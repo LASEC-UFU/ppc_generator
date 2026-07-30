@@ -1,6 +1,6 @@
 [project]
 name = "ppcgen"
-version = "0.1.0"
+version = "0.3.0"
 description = "Gerador configurável de Projetos Pedagógicos de Curso (PPC)"
 readme = "README.md"
 requires-python = ">=3.11"

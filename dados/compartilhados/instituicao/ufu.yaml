@@ -4,6 +4,7 @@
 instituicao:
   nome: Universidade Federal de Uberlândia
   sigla: UFU
+  orgao_superior: "Ministério da Educação"
   endereco: "Av. João Naves de Ávila, 2121, Campus Santa Mônica"
   cep: "38400-902"
   municipio: Uberlândia

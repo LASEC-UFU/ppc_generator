@@ -25,7 +25,8 @@ dados/compartilhados/
 │   └── prevencao_desastres.yaml
 ├── identidade_visual/
 │   ├── cores.yaml           paleta RGB nomeada + mapa de logos
-│   ├── logo_ufu.png
+│   ├── logo_ufu.png         variante larga (faixa) — capa/cabeçalho
+│   ├── logo_ufu_quadrado.png variante compacta — blocos de endereço
 │   ├── logo_feelt.png
 │   ├── header_pattern.jpg
 │   └── selo_ccbynd.png
@@ -85,7 +86,8 @@ cores:
   azul_claro: "41,102,189"
   # ...
 logos:
-  ufu: "identidade_visual/logo_ufu.png"
+  ufu: "identidade_visual/logo_ufu.png"                    # larga, capa
+  ufu_quadrado: "identidade_visual/logo_ufu_quadrado.png"   # compacta, endereços
   feelt: "identidade_visual/logo_feelt.png"
   header_pattern: "identidade_visual/header_pattern.jpg"
   selo_ccbynd: "identidade_visual/selo_ccbynd.png"

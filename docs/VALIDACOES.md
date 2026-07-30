@@ -19,7 +19,7 @@ da matriz, só a presença/coerência dos arquivos declarados.
 
 | Código | Severidade | Condição |
 |---|---|---|
-| `PERFIL-000` | ERRO | `perfil.id` não bate com `^[a-z0-9_]+$` |
+| `PERFIL-000` | ERRO | `perfil.id` não bate com `^[a-z0-9_]+$`, ou começa com `00` (prefixo reservado para material de referência em `saida/`, ex. `saida/00old/`) |
 | `PERFIL-001` | ERRO | matriz curricular não localizada (nem no perfil, nem no perfil base) |
 | `PERFIL-002` | ERRO | `perfil.extends` aponta para um perfil base inexistente |
 | `PERFIL-003` | ALERTA | um dos 12 capítulos obrigatórios de `textos/` está ausente ou vazio |

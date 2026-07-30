@@ -15,7 +15,12 @@ cores:
   amarelo_vivo: "255,255,0"
 
 logos:
+  # Variante larga (faixa/banner) — usada na capa, junto do cabeçalho.
   ufu: "identidade_visual/logo_ufu.png"
+  # Variante quadrada/compacta — usada em blocos de endereço (ex.:
+  # capítulo "Endereços"), ao lado de texto, nunca a larga (fica
+  # espremida/ilegível num box estreito).
+  ufu_quadrado: "identidade_visual/logo_ufu_quadrado.png"
   feelt: "identidade_visual/logo_feelt.png"
   header_pattern: "identidade_visual/header_pattern.jpg"
   selo_ccbynd: "identidade_visual/selo_ccbynd.png"

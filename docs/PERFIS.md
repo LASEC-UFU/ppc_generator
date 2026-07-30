@@ -21,9 +21,13 @@ testes ou geração oficial.
 O `id` é o nome da pasta em `dados/perfis/` e também o campo `perfil.id`
 dentro do `perfil.yaml` — os dois precisam ser iguais. Formato exigido
 (validado como `PERFIL-000` se violado): letras minúsculas, dígitos e `_`
-apenas (`^[a-z0-9_]+$`). Convenção usada pelos perfis de exemplo deste
-repositório: `<curso>_<versao>`, ex. `engenharia_computacao_2026_1`,
-`controle_automacao_2027_1`.
+apenas (`^[a-z0-9_]+$`), e não pode começar com `00` — esse prefixo é
+reservado para material de referência mantido manualmente dentro de
+`saida/` (ex.: `saida/00old/`, uma cópia antiga guardada à mão para
+comparação), que `ppcgen limpar --todos` ignora de propósito por não
+começar com o nome de um perfil real. Convenção usada pelos perfis de
+exemplo deste repositório: `<curso>_<versao>`, ex.
+`engenharia_computacao_2026_1`, `controle_automacao_2027_1`.
 
 ## `perfil.yaml`: as seções
 

@@ -9,7 +9,7 @@ __pycache__/
 venv/
 ppc/
 
-# LaTeX build artifacts do gerador legado (Main.tex/include/ na raiz)
+# LaTeX build artifacts do gerador legado, arquivado em legado/sistema_antigo/
 *.aux
 *.bbl
 *.bbl-SAVE-ERROR
@@ -23,7 +23,6 @@ ppc/
 *.synctex.gz
 *.toc
 *.tdo
-/Main.pdf
 
 # Tudo em saida/ é gerado por `python -m ppcgen gerar/compilar/completo`
 # (um subdiretório por perfil, saida/<perfil_id>/) — inteiramente
@@ -32,10 +31,6 @@ ppc/
 # versionar produziria diff a cada execução mesmo sem mudança real (ver
 # docs/ARQUITETURA.md).
 /saida/
-
-# Fichas em processamento (não aprovadas) do gerador legado não deveriam
-# ser versionadas por padrão.
-/fichas/temporarias/*
 
 # Conveniência de desenvolvimento local — nunca usada em CI/testes/geração
 # oficial (ver docs/PERFIS.md).

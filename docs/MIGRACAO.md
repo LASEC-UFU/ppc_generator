@@ -13,6 +13,17 @@ corrigi-las silenciosamente (Seção 23/29 do pedido de reestruturação).
 > migração (aplicável a outro curso qualquer), veja
 > `docs/MIGRAR_PERFIL.md`; este documento é específico do que aconteceu
 > com os dados de Engenharia de Computação.
+>
+> **Nota sobre caminhos**: nas seções 1–6, os caminhos `py/gen_docs.py`,
+> `py/PPC_disciplinas_final.csv`, `include/`, `figure/`, `fichas/SEI/`
+> etc. referem-se a onde esses arquivos estavam **no momento do
+> levantamento** (na raiz do repositório). Depois da migração (Seção 7),
+> esse material foi consolidado em `legado/sistema_antigo/` para
+> comparação e, uma vez confirmada a equivalência de resultado, removido
+> do repositório de trabalho (continua no histórico do git — commit
+> anterior à tag/limpeza descrita no `CHANGELOG.md`). Este documento
+> preserva o relato de onde cada dado veio e o que foi decidido, mesmo
+> que os arquivos de origem não estejam mais no working tree.
 
 ## 1. Qual arquivo é a fonte real
 
@@ -40,13 +51,15 @@ As quatro variantes não utilizadas (`_3450`, `_3850`, `_NAO_APAGAR`, `_XXX`)
 são **idênticas entre si e ao arquivo real**, exceto pelas horas placeholder
 de 5 componentes (ACE1-4, OPT, AAC, ACC) — aparentemente rascunhos de
 diferentes hipóteses de carga horária total do curso (3450h vs 3850h) feitos
-em algum momento e nunca removidos. Foram movidas (não apagadas) para
-`legado/csv_historico/`, com a comparação completa documentada em
-`legado/README.md`.
+em algum momento e nunca removidos.
 
-**Nenhum dado foi perdido**: as 4 variantes continuam no repositório, apenas
-fora de `py/`, e `py/PPC_disciplinas_final.csv`/`py/gen_docs.py` não foram
-tocados — o pipeline antigo continua funcionando exatamente como antes.
+**Nenhum dado foi perdido silenciosamente**: até a migração para o perfil
+`engenharia_computacao_2026_1` estar completa e validada (Seção 7), as 4
+variantes e todo o pipeline antigo (`py/PPC_disciplinas_final.csv`,
+`py/gen_docs.py`) permaneceram intocados e funcionais no repositório —
+primeiro na raiz, depois arquivados em `legado/`. Só foram removidos do
+working tree depois de confirmada a equivalência de resultado; continuam
+recuperáveis pelo histórico do git (ver `CHANGELOG.md`).
 
 ## 2. Inconsistências encontradas em `py/PPC_disciplinas_final.csv`
 
@@ -139,13 +152,15 @@ formato de PDF (campos `COMPONENTE CURRICULAR:`, `CÓDIGO:`, `EMENTA`,
 
 ## 5. Comparação de saída (antes/depois)
 
-- `legado/main_pdf_baseline/Main_baseline_2026-07-29.pdf`: cópia do PDF do
-  curso de Engenharia de Computação compilado a partir do estado original
-  do repositório (99→102 páginas conforme a rodada; sem erros de
-  compilação), preservada como baseline.
-- Rodar `python py/gen_docs.py` (a partir da raiz, com `PYTHONUTF8=1` — ver
-  nota abaixo) e depois `latexmk -pdf Main.tex` continua reproduzindo
-  exatamente essa saída — o pipeline antigo não foi alterado.
+- Uma cópia do PDF do curso de Engenharia de Computação compilado a
+  partir do estado original do repositório (99→102 páginas conforme a
+  rodada; sem erros de compilação) foi preservada como baseline durante
+  toda a migração (arquivada em `legado/main_pdf_baseline/` até a
+  remoção final do gerador antigo do repositório — ver Seção 7.5).
+- Até essa remoção, rodar `python py/gen_docs.py` (a partir da raiz, com
+  `PYTHONUTF8=1` — ver nota abaixo) e depois `latexmk -pdf Main.tex`
+  continuou reproduzindo exatamente essa saída — o pipeline antigo não
+  foi alterado enquanto existiu no repositório.
 
 ### Bug de ambiente encontrado (não corrigido no script legado)
 
@@ -159,18 +174,36 @@ escrita de arquivo, e força stdout/stderr para UTF-8 na CLI
 (`ppcgen.cli._forcar_utf8_console`), eliminando a dependência de variáveis
 de ambiente.
 
-## 6. Inconsistências que exigem decisão acadêmica (não corrigidas)
+## 6. Inconsistências que exigiam decisão acadêmica
 
-Registradas aqui para quem assumir a manutenção do curso de Engenharia de
-Computação decidir, não corrigidas automaticamente:
+Levantadas aqui originalmente sem correção automática; os itens 1 e 2
+foram resolvidos posteriormente por decisão do mantenedor (ver nota
+abaixo) — mantidos registrados para quem assumir a manutenção do curso
+poder auditar a decisão, revertê-la ou submetê-la a validação acadêmica
+formal antes de qualquer submissão oficial do PPC.
 
-1. Qual disciplina deveria ficar com o código `FEELT!PP` e qual deveria
-   receber um código provisório diferente.
-2. Se a segunda ocorrência de `GBC212` (Mineração de Dados) é de fato uma
-   duplicata a remover ou se havia a intenção de representar duas ofertas
-   distintas.
-3. Os 47 códigos provisórios `FEELT!*` precisam do código oficial definitivo
-   antes de qualquer submissão formal do PPC.
+1. ~~Qual disciplina deveria ficar com o código `FEELT!PP`~~ — resolvido:
+   "Programação Procedimental" (2º período, ativa, obrigatória — todas as
+   relações de pré-requisito reais, como ser pré-requisito de Estrutura de
+   Dados/POO/Sistemas Operacionais e ter Programação Script como seu
+   próprio pré-requisito, se encaixam logicamente nela) manteve o código
+   `FEELT!PP`. "Arte da Programação II" (3º período, inativa) recebeu o
+   código provisório distinto `FEELT!APROG2`. O pré-requisito
+   autorreferenciado (`FEELT!PP` exigindo `FEELT!PP`) foi reatribuído como
+   `FEELT!APROG2` exigindo `FEELT!PP` — leitura plausível dado o padrão de
+   nome ("Parte II" dependendo da disciplina introdutória), mas é uma
+   **interpretação, não um fato confirmado pela coordenação do curso** —
+   revise antes de qualquer submissão formal.
+2. ~~Se a segunda ocorrência de `GBC212`~~ — resolvido como duplicata: as
+   duas linhas eram idênticas em todos os campos (nome, carga horária,
+   sem nenhuma diferenciação), sem nenhuma referência própria em
+   pré-requisitos/áreas/temas/competências — consistente com "linha
+   duplicada por engano" (não duas ofertas distintas). A segunda
+   ocorrência foi removida.
+3. Os 47 códigos provisórios `FEELT!*` (agora 48, incluindo o novo
+   `FEELT!APROG2`) ainda precisam do código oficial definitivo antes de
+   qualquer submissão formal do PPC — isso não foi resolvido, só a
+   colisão entre dois deles.
 
 ## 7. Migração final para `dados/perfis/engenharia_computacao_2026_1/`
 
@@ -182,12 +215,15 @@ curso.
 
 ### 7.1 Script de migração
 
-`scripts/migrar-perfil-legado.py` lê `py/PPC_disciplinas_final.csv` via
-`ppcgen.leitores.csv.carregar_csv_legado` e escreve a árvore completa do
-perfil: `matriz_curricular.xlsx` (160 componentes), `equivalencias.xlsx`
-(ver 7.4), `referenciais/{nucleos,areas_formacao,conteudos,legislacao,temas_transversais}.yaml`,
+Um script dedicado (`scripts/migrar-perfil-legado.py`, removido do
+repositório depois de a migração estar completa e confirmada — ver nota
+sobre caminhos no topo deste documento) leu
+`py/PPC_disciplinas_final.csv` via `ppcgen.leitores.csv.carregar_csv_legado`
+e escreveu a árvore completa do perfil: `matriz_curricular.xlsx` (160
+componentes), `equivalencias.xlsx` (ver 7.4),
+`referenciais/{nucleos,areas_formacao,conteudos,legislacao,temas_transversais}.yaml`,
 `figuras/ecp_logo.png`, `referencias/bibliografia.bib` (cópia integral de
-`include/backmatter/ppc2025.bib`) e classifica as 52 fichas de
+`include/backmatter/ppc2025.bib`) e classificou as 52 fichas de
 `fichas/SEI/` e `fichas/Fichas disciplinas 30h/` nas subpastas por tipo
 (`fichas/{obrigatorias,optativas,extensao,tcc,estagio,complementares}/`),
 usando o leitor real de fichas (`ppcgen.leitores.fichas.carregar_fichas`,
@@ -245,17 +281,17 @@ curso, não só este; corrigidos com testes cobrindo cada caso:
    separada) — `CODIGO_DUPLICADO` agora relata corretamente os dois casos
    reais da Seção 2 (`FEELT!PP` e `GBC212`).
 
-### 7.3 `interromper_em_erro: false` neste perfil
+### 7.3 `interromper_em_erro: false` — usado temporariamente, depois revertido
 
-`dados/perfis/engenharia_computacao_2026_1/perfil.yaml` declara
-`geracao.interromper_em_erro: false`, com o comentário explicando por quê:
-os 4 erros atuais (`FEELT!PP` duplicado e autorreferenciado como
-pré-requisito de si mesmo, formando um ciclo; `GBC212` duplicado) são
-defeitos **pré-existentes nos dados de origem** (Seção 2/6), não algo que
-a migração introduziu, e não impedem a geração de um PPC utilizável
-enquanto a decisão acadêmica (Seção 6) não é tomada. Isso é uma exceção
-documentada, não o padrão — todo outro perfil deste repositório mantém
-`interromper_em_erro: true`.
+Enquanto os 4 erros pré-existentes nos dados de origem (`FEELT!PP`
+duplicado e autorreferenciado como pré-requisito de si mesmo, formando um
+ciclo; `GBC212` duplicado — Seção 2/6) não tinham sido resolvidos,
+`dados/perfis/engenharia_computacao_2026_1/perfil.yaml` declarava
+`geracao.interromper_em_erro: false`, com comentário explicando que eram
+defeitos da fonte, não da migração, e não impediam a geração de um PPC
+utilizável. Depois que a Seção 6 foi resolvida (códigos desambiguados,
+duplicata removida), a matriz passou a validar com 0 erros e o campo foi
+revertido para `true` — o padrão de todo outro perfil deste repositório.
 
 ### 7.4 Disciplinas equivalentes
 
@@ -279,15 +315,15 @@ real, e agora está disponível para qualquer perfil.
 
 ### 7.5 Resultado
 
-- `python -m ppcgen validar --perfil engenharia_computacao_2026_1`: 4
-  erros (todos pré-existentes nos dados de origem, Seção 6), ~97 alertas
-  (a maioria: os 47 códigos provisórios `FEELT!*` e fichas não
-  reconhecidas/ausentes — esperado antes de uma revisão manual completa
-  das 26 fichas em `fichas/complementares/`).
+- `python -m ppcgen validar --perfil engenharia_computacao_2026_1`: 0
+  erros (os 4 pré-existentes nos dados de origem, Seção 6, foram
+  resolvidos), ~96 alertas (a maioria: os 48 códigos provisórios
+  `FEELT!*` e fichas não reconhecidas/ausentes — esperado antes de uma
+  revisão manual completa das 26 fichas em `fichas/complementares/`).
 - `python -m ppcgen completo --perfil engenharia_computacao_2026_1`:
-  gera com sucesso (`interromper_em_erro: false`), produzindo corpo em
-  ~95 páginas contra 102 do PDF de referência do gerador antigo
-  (`legado/main_pdf_baseline/`) — a diferença remanescente é conteúdo
+  gera com sucesso (`interromper_em_erro: true`, igual aos demais
+  perfis), produzindo corpo em ~95 páginas contra 102 do PDF de
+  referência do gerador antigo — a diferença remanescente é conteúdo
   bespoke não reproduzido, documentado em comentário no topo de
   `textos/estrutura_curricular.tex` deste perfil.
 

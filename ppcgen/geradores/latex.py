@@ -52,6 +52,10 @@ def gerar_frontmatter(perfil: Perfil) -> str:
     compartilhadas (``heranca.autoridades``), sem exigir que o perfil escreva
     LaTeX à mão para isso — ``frontmatter/folha_rosto.tex`` continua
     disponível para conteúdo adicional livre (ver templates/latex/Main.tex).
+
+    O layout replica o do template original (capa com faixa/logo
+    institucional em margens reduzidas, rodapé com a unidade acadêmica e
+    contato) — ver docs/MIGRACAO.md para o comparativo página a página.
     """
 
     pasta_front = perfil.arquivos.frontmatter
@@ -74,18 +78,45 @@ def gerar_frontmatter(perfil: Perfil) -> str:
         logo_tex = rf"""
 \begin{{figure}}[H]
 \centering
-\includegraphics[width=0.35\linewidth]{{{capa['logo_curso']}}}
+\vspace{{0.5cm}}
+\includegraphics[width=0.4\linewidth]{{{capa['logo_curso']}}}
 \end{{figure}}"""
 
     ano = capa.get("ano", "")
+    extra = perfil.instituicao.extra
+    orgao_superior = extra.get("orgao_superior", "")
+    unidade_sigla = extra.get("unidade_sigla", "")
+    unidade_site = extra.get("unidade_site", "")
+    uf = extra.get("uf") or perfil.curso.estado
+    municipio_uf = f"{perfil.curso.municipio}/{uf}" if perfil.curso.municipio and uf else perfil.curso.municipio
+    localizacao = f"Campus {perfil.curso.campus}, {municipio_uf}" if perfil.curso.campus else municipio_uf
+
+    linha_orgao = rf"\textsc{{\footnotesize {escapar(orgao_superior)}}}\\" if orgao_superior else ""
+
+    rodape_unidade = ""
+    if perfil.instituicao.unidade_academica:
+        titulo_unidade = escapar(perfil.instituicao.unidade_academica).upper()
+        if unidade_sigla:
+            titulo_unidade += f" ({escapar(unidade_sigla)})"
+        linha_site = rf"\href{{{unidade_site}}}{{{unidade_site}}}" if unidade_site else ""
+        rodape_unidade = rf"""
+\begin{{center}}
+\textcolor{{AzulEscuro}}{{\rule{{1.1\textwidth}}{{0.8pt}}}}\\[2mm]
+\textcolor{{AzulEscuro}}{{\small\textbf{{{titulo_unidade}}}}}\\
+\setlength{{\parskip}}{{1mm}}
+{{\small {escapar(localizacao)}, Brasil {ano} \\
+{linha_site}}}\vspace{{1.5cm}}
+\end{{center}}"""
 
     linhas_autoridades = "\\\\\n".join(
         rf"\textsc{{\tiny {escapar(a['cargo'])}}} \\ \hspace*{{5mm}} \textbf{{{escapar(a['nome'])}}}"
         for a in (*autoridades_compartilhadas, *autoridades_perfil)
     )
 
+    membros_comissao = comissao.get("membros", [])
     itens_comissao = "\n".join(
-        rf"    \item {escapar(m)};" for m in comissao.get("membros", [])
+        rf"    \item {escapar(m)}{';' if i < len(membros_comissao) - 1 else '.'}"
+        for i, m in enumerate(membros_comissao)
     )
     bloco_comissao = ""
     if itens_comissao:
@@ -93,30 +124,42 @@ def gerar_frontmatter(perfil: Perfil) -> str:
         bloco_comissao = rf"""
 \textbf{{{titulo_comissao}:}}
 \begin{{itemize}}
+\setlength\itemsep{{-0.5em}}
 {itens_comissao}
 \end{{itemize}}"""
 
     return rf"""\begin{{titlepage}}
+\newgeometry{{top=3cm, bottom=0.0cm, left=2.25cm, right=2.25cm}}
+\vtop{{
+\null\vspace{{-25mm}}
+\IfFileExists{{figuras/compartilhadas/header_pattern.jpg}}{{\centerline{{\includegraphics[width=1.18\textwidth,height=80pt]{{figuras/compartilhadas/header_pattern.jpg}}}}\vspace{{-2.3cm}}}}{{}}
+\IfFileExists{{figuras/compartilhadas/logo_ufu.png}}{{\hbox{{\hspace{{0mm}}\includegraphics[height=18mm]{{figuras/compartilhadas/logo_ufu.png}}}}}}{{}}
+\centerline{{\textcolor{{AzulEscuro}}{{\rule{{1.18\textwidth}}{{4pt}}}}}}
+}}
+\mbox{{}}
 \begin{{center}}
+{linha_orgao}
 \textsc{{\footnotesize \ppcinstituicao\\\ppcunidadeacademica\\Curso de Graduação em \ppccurso}}
 \end{{center}}
+\mbox{{}}
 \vfill
+\vspace{{1cm}}
 \begin{{center}}
 \textbf{{{{\Huge Projeto Pedagógico de Curso}}}}
 \end{{center}}
 {logo_tex}
-\vspace{{0.5cm}}
+\vspace{{0.25cm}}
 \begin{{center}}
-\textbf{{{{\LARGE \ppccurso}}}} \\[0.3cm]
+\textbf{{{{\LARGE Graduação em \ppccurso}}}} \\[0.5cm]
 Versão Curricular: \ppcversao
 \end{{center}}
 \vfill
-\begin{{center}}
-\ppccampus, \ppcinstituicao\ {ano}
-\end{{center}}
+{rodape_unidade}
+\restoregeometry
 \end{{titlepage}}
 
 \newpage
+\restoregeometry
 \thispagestyle{{plain}}
 \begin{{center}}
 \textsc{{Projeto Pedagógico do Curso de Graduação em\\\ppccurso}}
@@ -130,7 +173,7 @@ Versão Curricular: \ppcversao
 \vfill
 {bloco_comissao}
 \vfill
-\centerline{{\ppccampus, \ppcinstituicao\ {ano}}}
+\centerline{{{escapar(municipio_uf)}, Brasil {ano}}}
 """
 
 

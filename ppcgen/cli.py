@@ -369,9 +369,14 @@ def cmd_limpar(args: argparse.Namespace) -> int:
         pasta_saida_raiz = raiz / "saida"
         if pasta_saida_raiz.exists():
             for pasta_perfil in pasta_saida_raiz.iterdir():
-                if pasta_perfil.is_dir():
+                # Prefixo "00" reservado para material de referência mantido
+                # manualmente dentro de saida/ (ex.: saida/00old/) — nunca é
+                # saída de um perfil real (ppcgen.validadores.perfil rejeita
+                # ids de perfil que comecem com "00", PERFIL-000) e não deve
+                # ser apagado por este comando.
+                if pasta_perfil.is_dir() and not pasta_perfil.name.startswith("00"):
                     shutil.rmtree(pasta_perfil)
-        print("Saída de todos os perfis removida.")
+        print("Saída de todos os perfis removida (pastas com prefixo '00' preservadas).")
     else:
         perfil = _resolver_perfil(args)
         _limpar_perfil(perfil.info.id)

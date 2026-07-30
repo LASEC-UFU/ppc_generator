@@ -22,12 +22,3 @@ def raiz_projeto() -> Path:
             return candidato
     # Fallback: dois níveis acima de ppcgen/utilitarios/
     return Path(__file__).resolve().parents[2]
-
-
-def resolver(caminho: str | Path) -> Path:
-    """Resolve ``caminho`` relativo à raiz do projeto, se ainda não for absoluto."""
-
-    caminho = Path(caminho)
-    if caminho.is_absolute():
-        return caminho
-    return raiz_projeto() / caminho

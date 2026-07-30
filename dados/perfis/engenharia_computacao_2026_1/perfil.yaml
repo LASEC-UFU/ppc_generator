@@ -68,12 +68,11 @@ geracao:
   gerar_representacao_grafica: true
   gerar_relatorio_validacao: true
   compilar_pdf: true
-  # Dados legados têm lacunas estruturais conhecidas e documentadas (área de
-  # formação ausente para componentes sem marcação CC2020, complementada por
-  # um fallback derivado do núcleo — ver docs/MIGRACAO.md) que o novo
-  # validador reporta como ERRO. Mantido como aviso visível no relatório de
-  # validação em vez de bloquear a geração deste perfil de comparação.
-  interromper_em_erro: false
+  # Os erros pré-existentes nos dados de origem (códigos duplicados
+  # FEELT!PP/GBC212, ver docs/MIGRACAO.md Seção 6) foram corrigidos —
+  # a matriz agora valida com 0 erros, então este perfil segue o padrão
+  # dos demais.
+  interromper_em_erro: true
 
 saida:
   nome_base: "PPC_Engenharia_Computacao_2026_1"

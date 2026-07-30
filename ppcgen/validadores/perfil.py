@@ -44,6 +44,15 @@ def validar_perfil(perfil: Perfil) -> ResultadoValidacao:
                 "letras minúsculas, números e '_', sem espaços ou acentos.",
             )
         )
+    elif perfil.info.id.startswith("00"):
+        resultado.adicionar(
+            ErroValidacao(
+                "PERFIL-000",
+                f"identificador de perfil '{perfil.info.id}' inválido — o prefixo "
+                "'00' é reservado para material de referência mantido manualmente "
+                "em saida/ (ex.: saida/00old/, ignorado por `ppcgen limpar --todos`).",
+            )
+        )
 
     caminho_matriz = perfil.resolver_arquivo(perfil.arquivos.matriz)
     if caminho_matriz is None:

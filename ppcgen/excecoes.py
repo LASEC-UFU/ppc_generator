@@ -24,31 +24,5 @@ class FormatoInvalido(PPCGenError):
     """O conteúdo de um arquivo não está no formato esperado pelo leitor."""
 
 
-class ReferenciaInexistente(PPCGenError):
-    """Um identificador referenciado (código, núcleo, competência...) não existe."""
-
-
-class ValidacaoFalhou(PPCGenError):
-    """A validação curricular encontrou ao menos um erro crítico.
-
-    Carrega o :class:`~ppcgen.modelos.ResultadoValidacao` para que o chamador
-    (CLI ou outro módulo) possa inspecionar e reportar os erros específicos.
-    """
-
-    def __init__(self, resultado):
-        self.resultado = resultado
-        super().__init__(
-            f"Validação falhou com {len(resultado.erros)} erro(s) crítico(s)."
-        )
-
-
-class CicloDePrerequisitos(PPCGenError):
-    """Foi detectado um ciclo no grafo de pré-requisitos."""
-
-    def __init__(self, caminho: list[str]):
-        self.caminho = caminho
-        super().__init__("Ciclo de pré-requisitos: " + " → ".join(caminho))
-
-
 class CompilacaoLatexFalhou(PPCGenError):
     """A compilação do LaTeX (pdflatex/latexmk) retornou erro."""

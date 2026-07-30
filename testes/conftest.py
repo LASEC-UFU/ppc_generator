@@ -21,7 +21,6 @@ from ppcgen.modelos import (
     CargaHoraria,
     ComponenteCurricular,
     Correquisito,
-    Curriculo,
     PreRequisito,
     TipoComponente,
 )
@@ -90,17 +89,6 @@ def construir_perfil(tmp_path: Path | None = None, **overrides) -> Perfil:
 @pytest.fixture
 def config_basica() -> Perfil:
     return construir_perfil(curso=CursoConfig(numero_periodos=4))
-
-
-@pytest.fixture
-def curriculo_minimo() -> Curriculo:
-    return Curriculo(
-        versao="teste-1",
-        componentes=[
-            componente("A1", "Disciplina A1", periodo=1),
-            componente("A2", "Disciplina A2", periodo=2, pre_requisitos=[PreRequisito(codigo="A1")]),
-        ],
-    )
 
 
 @pytest.fixture
