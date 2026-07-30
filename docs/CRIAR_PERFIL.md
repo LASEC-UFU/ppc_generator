@@ -15,8 +15,8 @@ Minúsculas, dígitos e `_` apenas (`^[a-z0-9_]+$`). Convenção sugerida:
 python -m ppcgen perfil-criar --id engenharia_software_2027_1 --nome "Engenharia de Software"
 ```
 
-Isso cria `dados/perfis/engenharia_software_2027_1/` com toda a árvore de
-`docs/ESTRUTURA_DE_DIRETORIOS.md` já no lugar: `perfil.yaml` mínimo,
+Isso cria `dados/perfis/engenharia_software_2027_1/` com toda a árvore
+padrão de um perfil já no lugar: `perfil.yaml` mínimo,
 `matriz_curricular.xlsx` só com cabeçalhos, `equivalencias.xlsx` vazio,
 `referenciais/*.yaml` vazios, os 12 `textos/*.tex` com um `\chapter{}`
 placeholder cada, `frontmatter/*.yaml` vazios, `referencias/bibliografia.bib`
@@ -33,9 +33,9 @@ Ver `docs/PERFIS.md` para o significado de cada campo. No mínimo, decida:
   que `CARGA_TOTAL_DIVERGENTE` funciona).
 - Se este curso pertence à mesma instituição de um perfil existente,
   preencha `heranca:` apontando para `dados/compartilhados/` em vez de
-  copiar os dados institucionais (ver `docs/DADOS_COMPARTILHADOS.md`). Se a
-  instituição/legislação ainda não existe em `compartilhados/`, crie-a lá
-  primeiro — não duplique dentro do perfil.
+  copiar os dados institucionais. Se a instituição/legislação ainda não
+  existe em `compartilhados/`, crie-a lá primeiro — não duplique dentro
+  do perfil.
 
 ## 4. Preencher a matriz curricular
 
@@ -135,6 +135,6 @@ documentando por que ele é esperado.
 Se o layout genérico realmente não atender (ex.: uma tabela extra
 específica deste curso), use `overrides/latex/` e `overrides/estilos/` —
 arquivos ali sobrescrevem os equivalentes em `templates/latex/` só para
-este perfil, aplicados por último na montagem da árvore (ver
-`docs/HERANCA_DE_PERFIS.md`). Evite: a maioria das necessidades reais é
-resolvida com conteúdo em `textos/`, não com um override de template.
+este perfil, aplicados por último na montagem da árvore. Evite: a
+maioria das necessidades reais é resolvida com conteúdo em `textos/`,
+não com um override de template.

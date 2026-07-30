@@ -7,8 +7,9 @@ gerar uma versão específica de um PPC: um curso, uma versão curricular
 diferente do mesmo curso, ou uma proposta alternativa em avaliação. Cada
 perfil vive em `dados/perfis/<id>/` e não depende de nada fora da sua
 própria pasta, exceto o que ele referenciar explicitamente em `heranca:`
-(ver `docs/DADOS_COMPARTILHADOS.md`) ou em `extends:` (ver
-`docs/HERANCA_DE_PERFIS.md`).
+(dados institucionais compartilhados em `dados/compartilhados/`) ou em
+`extends:` (herda de outro perfil inteiro) — ver a seção `perfil.yaml`
+abaixo para os dois campos.
 
 O sistema **nunca** assume um perfil padrão. Todo comando que opera sobre
 um perfil exige `--perfil <id>` ou `--perfil-dir <caminho>` explicitamente
@@ -38,7 +39,7 @@ perfil:
   status: vigente          # rascunho | proposta | vigente | descontinuado
   versao: "2026-1"
   descricao: "..."
-  extends: null             # id de um perfil base (opcional — ver HERANCA_DE_PERFIS.md)
+  extends: null             # id de um perfil base do qual herdar tudo (opcional)
 
 curso:
   nome: ...
@@ -61,6 +62,18 @@ curriculo:
   percentual_minimo_extensao: 10      # pontos percentuais (0-100), não fração
   percentual_maximo_ead: 20
 
+oferta:                      # formato de oferta do curso — todos os campos
+                              # abaixo são opcionais, valores abaixo são o padrão
+  formato: presencial         # presencial | semipresencial | distancia —
+                               # decisão explícita, nunca inferida do percentual
+                               # de EaD; ver percentual_maximo_ead acima
+  possui_carga_ead: false
+  norma_federal: ""           # ex.: "Decreto nº 12.456/2025; Portaria MEC nº 378/2025"
+  norma_institucional: null   # ato da UFU (CONGRAD) que respalda a oferta parcial
+                               # de EaD deste curso especificamente — null enquanto
+                               # não houver ato publicado
+  status_validacao_institucional: pendente   # pendente | confirmado
+
 arquivos:                    # todos opcionais — valores abaixo são o padrão
   matriz: matriz_curricular.xlsx
   equivalencias: equivalencias.xlsx
@@ -77,13 +90,13 @@ geracao:
   anexar_fichas: true
   anexar_resolucoes: true
   compilar_pdf: true
-  interromper_em_erro: true  # false só com justificativa documentada — ver
-                              # docs/MIGRACAO.md para o caso de uso real
+  interromper_em_erro: true  # false só com justificativa documentada em
+                              # comentário no próprio perfil.yaml
 
 saida:
   nome_base: PPC
 
-heranca:                     # ver docs/DADOS_COMPARTILHADOS.md
+heranca:                     # referencia dados/compartilhados/ (opcional)
   instituicao: compartilhados/instituicao/ufu.yaml
   unidade: compartilhados/instituicao/feelt.yaml
   identidade_visual: compartilhados/identidade_visual/cores.yaml

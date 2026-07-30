@@ -1,0 +1,322 @@
+% Migrado de include/Estrutura.tex (docs/MIGRAR_PERFIL.md). Três tabelas
+% bespoke do gerador antigo não foram reproduzidas aqui — exigiriam um
+% gerador novo e dedicado, fora do escopo desta migração inicial: o quadro
+% de carga horária semanal por período (tab_carga_horaria_semanal_por_periodo),
+% a tabela de fluxo alternativa "conforme guia" (redundante com
+% gerado/tab_fluxo_curricular) e o quadro de mapeamento de conteúdo
+% específico de IA (tab_disciplinas_ref_ia, coberto de forma equivalente
+% pelas tabelas gerado/tab_conteudo_* desta seção).
+\chapter{Estrutura Curricular do Curso}
+
+O currículo do \ppccurso\ da UFU contempla as indicações e sugestões realizadas pela ACM (\textit{Association for Computing Machinery}) e pelo IEEE (\textit{Institute of Electrical and Electronics Engineer}) nos currículos de referência criados em conjunto por ambas~\cite{acm_cc2020}, pela SBC (Sociedade Brasileira de Computação) e, fundamentalmente, pela Resolução CNE/CES nº 5, de 16 de novembro de 2016, do MEC, que institui as Diretrizes Curriculares Nacionais específicas para os cursos da área de Computação~\cite{cne_ces_5_2016}, em particular para os cursos de Engenharia de Computação.
+
+O currículo do curso está organizado em \input{gerado/par_numero_componentes} componentes curriculares ativos, com carga horária total de \textbf{\input{gerado/par_carga_horaria_total}}, distribuídos nos núcleos de Formação Básica, Formação Humanística e de Extensão, Formação Tecnológica e Profissional, e Formação Optativa e Complementar. As disciplinas obrigatórias e optativas possuem atividades classificadas nas modalidades Teórica, Prática ou a Distância (EaD) — ou seja, algumas disciplinas terão característica semipresencial ou remota, respeitado o percentual máximo de EaD configurado para o curso.
+
+O estudante deve integralizar, no mínimo, \textbf{\input{gerado/par_carga_horaria_optativa}} em disciplinas optativas (ver relação completa na Seção~\ref{sec:optativas}), além de \textbf{\input{gerado/par_carga_horaria_aac}} de Atividades Acadêmicas Complementares. A carga horária de Extensão totaliza \textbf{\input{gerado/par_carga_horaria_extensao}} (\input{gerado/par_percentual_extensao} da carga total), integralizada por meio de participação em projetos de extensão universitária, e a carga em EaD corresponde a \input{gerado/par_percentual_ead} da carga total.
+
+A seguir são apresentados cada um dos núcleos de formação e suas respectivas composições, seguidos da síntese de distribuição de carga horária por núcleo, por área de formação e por modalidade.
+
+\section{Núcleo de Formação Básica}
+\input{gerado/tab_nucleo_basico}
+
+\section{Núcleo de Formação Humanística e de Extensão}
+\input{gerado/tab_nucleo_humanistico}
+
+\section{Núcleo de Formação Tecnológica e Profissional}
+\input{gerado/tab_nucleo_tecnologico}
+
+\section{Núcleo de Formação Optativa e Complementar}
+\input{gerado/tab_nucleo_complementar}
+
+\section{Carga Horária por Núcleo e por Área de Formação}
+\input{gerado/tab_carga_horaria_por_nucleo}
+\input{gerado/tab_carga_horaria_por_area}
+\input{gerado/tab_distribuicao_modalidades}
+
+\section{Regime e Tempo de Integralização}
+\label{sec:regime}
+
+O Curso de Graduação em \ppccurso é oferecido em \textbf{regime semestral}, com \textit{a maior parte de sua carga horária} concentrada no período vespertino, conforme definido pela legislação~\cite{mec_portaria_21_2017}. No entanto, o aluno deve estar ciente de que disciplinas regulares do currículo poderão ser ofertadas em seu contraturno (no período da manhã ou da noite), inclusive aos sábados pela manhã, para viabilizar sua integralização curricular. Dessa forma, o curso opera em um \textbf{regime de turno vespertino com oferta flexível}, exigindo disponibilidade do estudante em outros horários para a conclusão de componentes curriculares obrigatórios, atendimento docente ou outras atividades acadêmicas complementares. Além disso, espera-se do(a) estudante um comprometimento significativo com estudos autônomos, trabalhos em grupo e projetos, atividades essenciais para a consolidação da aprendizagem, ainda que essas horas não componham a carga horária formal do curso.
+
+O prazo para integralização curricular é de mínimo de \textbf{oito semestres} e máximo de \textbf{doze}. A distribuição da carga horária ao longo dos períodos, incluindo disciplinas obrigatórias, optativas, Atividades Curriculares de Extensão (ACE), Atividade de Conclusão do Curso (ACC) e Atividades Acadêmicas Complementares (AAC), é detalhada no Quadro do Fluxo Curricular (Seção~\ref{sec:fluxo}).
+
+\section{Fluxo Curricular}
+\label{sec:fluxo}
+
+O Quadro a seguir apresenta a sequência recomendada dos componentes curriculares por período, natureza (obrigatória/optativa), carga horária (teórica, prática, EaD e extensão), pré-requisitos, correquisitos e unidade acadêmica de oferta.
+
+\input{gerado/tab_fluxo_curricular}
+
+\newpage
+\section{Representação Gráfica do Fluxo Curricular}
+
+\begin{landscape}
+\input{gerado/representacao_grafica}
+\end{landscape}
+
+\newpage
+\section{Componentes Curriculares Obrigatórios}
+\input{gerado/tab_componentes_obrigatorios}
+
+\section{Atividades Curriculares de Extensão / ACE}
+
+A extensão universitária se destina a conectar a universidade à comunidade em que está inserida, compartilhando com o público externo o conhecimento obtido por meio do ensino e da pesquisa realizados internamente. Essa abordagem busca atuar na transformação da realidade social, intervindo para suprir deficiências identificadas, indo além da formação dos alunos regulares da instituição. Sobre extensão universitária, este projeto pedagógico atende às Diretrizes para a Extensão na Educação Superior Brasileira~\cite{cne_ces_7_2018} e, no âmbito institucional, à Resolução CONGRAD nº 177, de 20 de fevereiro de 2026~\cite{ufu_congrad_177_2026}, que regulamenta a inserção e a operacionalização das Atividades Curriculares de Extensão (ACEs) nos currículos de graduação da UFU e é, atualmente, a norma vigente sobre a matéria\footnote{A Resolução CONGRAD nº 177/2026 revogou os arts. 1º a 11 da Resolução CONGRAD nº 13/2019~\cite{ufu_congrad_13_2019}, que tratava do mesmo tema anteriormente.}.
+
+Nos termos do art.\ 4º da Resolução CONGRAD nº 177/2026, as ACEs correspondem a, no mínimo, 10\% da carga horária total do curso — piso historicamente associado à Meta 12.7 do PNE 2014--2024~\cite{mec_pne_2014}, hoje substituído pelo PNE 2026--2036~\cite{mec_pne_2026} — respeitado ainda o piso mínimo absoluto de 160 horas para cursos de Tecnologia quando a carga horária mínima não estiver definida em legislação superior (art.\ 4º, §3º, III). A carga de \textbf{\input{gerado/par_carga_horaria_extensao}} definida para este curso atende a ambos os critérios.
+
+Este projeto propõe o controle e registro das atividades de extensão universitária de cada discente junto à comunidade, em conformidade com a Resolução CONGRAD nº 177/2026, observando em particular que:
+
+\begin{itemize}
+    \item as ACEs devem ser distribuídas em, no mínimo, três componentes curriculares, ofertados em períodos distintos (art.\ 6º, §4º);
+    \item as ACEs devem ser realizadas de forma \textbf{presencial}, independentemente da modalidade de oferta do curso — a mediação por tecnologias digitais só é admitida de forma complementar e, em caráter excepcional, para bacharelados com objeto intrinsecamente digital (art.\ 5º, §7º), exceção que não se aplica a este curso, de grau Tecnológico;
+    \item estágio obrigatório, monitoria e tutoria não são considerados atividades de extensão para fins de aproveitamento curricular (art.\ 5º, §4º);
+    \item a mesma carga horária não pode ser contabilizada simultaneamente como ACE e como outra natureza de atividade (art.\ 4º, §4º).
+\end{itemize}
+
+\textit{A distribuição da carga horária de ACE em componentes específicos (quantidade, código, formato --- ação integradora ou disciplina, nos termos do art.\ 6º --- e carga horária de cada um) está pendente de definição na matriz curricular deste perfil, ainda não elaborada para este curso; cabe ao NDE e ao Colegiado do curso, nos termos do art.\ 5º da Resolução CONGRAD nº 177/2026.}
+
+A aprovação nesses componentes está condicionada à comprovação, por meio de certificados emitidos via plataforma SIEX, da carga horária mínima exigida de atividades de extensão (\input{gerado/par_carga_horaria_extensao}\unskip). O registro dos projetos de extensão no SIEX, necessário para a emissão dos certificados, é de responsabilidade dos respectivos coordenadores vinculados à UFU. Os(as) estudantes têm liberdade para participar de quantos projetos desejarem, desde que cumpram integralmente a carga horária mínima prevista pelas diretrizes curriculares, vedada a participação como ouvinte ou espectador(a) para fins de composição dessa carga horária (art.\ 4º, §6º).
+
+\section{Atividades de Conclusão de Curso / ACC}
+\label{sec:acc_conclusao}
+
+Baseado na legislação vigente~\cite{cne_ces_5_2016}, o presente projeto pedagógico permite ao estudante validar o componente curricular ``Atividade de Conclusão de Curso'' com a opção entre ``Estágio Supervisionado'' e ``Trabalho de Conclusão de Curso''.
+
+Ambas as opções possuem carga horária mínima a ser integralizada igual a \textbf{300 horas}\unskip, com pré-requisito de \textbf{1875 horas} de integralização do curso, o equivalente a estar começando o 6\unskipº Período.
+
+Ainda, o estudante tem a liberdade de defender um ``Trabalho de Conclusão de Curso'' nas modalidades ``projeto de pesquisa acadêmica'' ou ``empresa do tipo startup''.
+
+\subsection{Estágio Supervisionado}
+
+Regulamentado como ``Estágio Obrigatório'' pelas Normas Gerais de Estágio de Graduação da Universidade Federal de Uberlândia~\cite{ufu_congrad_93_2023}, o Estágio Supervisionado é uma das atividades possíveis necessárias para a conclusão do curso de \ppccurso quando da sua validação como Atividade de Conclusão de Curso. O estudante necessita, obrigatoriamente, cumprir uma carga horária mínima estipulada de \textbf{300 horas} de estágio na sua área de formação. São necessários o acompanhamento de um supervisor -- um profissional da mesma área de formação (ou área afim) que faça parte do quadro de empregados da parte cedente do estágio -- e a realização de horas supervisionadas por um professor do curso. Ao final do estágio, o estudante deve apresentar um relatório para o registro final das atividades realizadas.
+
+Para realizar essa atividade, o discente deve optar pela modalidade de ``estágio supervisionado'' como ``Atividade de Conclusão do Curso'' e ter, como pré-requisito, um mínimo de \textbf{1875 horas} integralizadas do currículo. Quando da conclusão do Estágio Supervisionado, a carga horária integralizada com essa atividade é de no máximo \textbf{300 horas}\unskip.
+
+Um certificado de conclusão de estágio deverá ser emitido pela Coordenação de Estágio do Curso. O detalhamento dos procedimentos relativos ao Estágio Supervisionado consta nas Normas Complementares de Estágio do Curso de Graduação em \ppccurso\footnote{\url{http://www.feelt.ufu.br/graduacao/engenharia-de-computacao/saiba-mais/estagio-supervisionado}}, aprovada nos âmbitos do Colegiado do Curso e da Unidade Acadêmica com anuência do NDE.
+
+\subsubsection{Estágio Não Obrigatório}
+
+Embora não seja uma modalidade aceita para a quitação da Atividade de Conclusão de Curso, de acordo com as Normas Gerais de Estágio de Graduação da Universidade Federal de Uberlândia~\cite{ufu_congrad_93_2023}, o estudante é autorizado a desenvolver um Estágio Não Obrigatório. Essa modalidade de estágio é desenvolvida como atividade opcional e complementar, acrescida à carga horária regular e obrigatória de acordo com as normas complementares de estágio e as normas de atividades complementares do curso. São necessários o acompanhamento de um supervisor -- um profissional da mesma área de formação (ou área afim) que faça parte do quadro de empregados da parte cedente do estágio -- e a realização de horas supervisionadas por um professor do curso.
+
+Para realizar essa atividade, o discente tem o pré-requisito mínimo de \textbf{720 horas} integralizadas do currículo com a necessidade de aprovação em todos os componentes curriculares dos 1º e 2º períodos do curso. Quando da conclusão do Estágio Não Obrigatório, a carga horária integralizada com essa atividade a partir das devidas comprovações está definida em Atividades Acadêmicas Complementares (ver \autoref{sec:AAC}).
+
+O detalhamento do Estágio Não Obrigatório consta nas Normas Complementares de Estágio do Curso de Graduação em \ppccurso\footnote{\url{http://www.feelt.ufu.br/graduacao/engenharia-de-computacao/saiba-mais/estagio-supervisionado}}, aprovada nos âmbitos do Colegiado do Curso e da Unidade Acadêmica com anuência do NDE.
+
+\subsection{Trabalho de Conclusão de Curso}
+
+O estudante do curso de \ppccurso poderá desenvolver um Trabalho de Conclusão de Curso (TCC), caso opte por essa modalidade como forma de cumprimento da Atividade de Conclusão de Curso. O TCC poderá assumir diferentes formatos, tais como um projeto de pesquisa acadêmica ou a especificação e desenvolvimento de uma proposta de empresa startup, desde que orientado por docente da UFU e avaliado por banca designada.
+
+Para realizar essa atividade, o discente deve optar pelo TCC como Atividade de Conclusão do Curso e ter, como pré-requisito mínimo, \textbf{1875 horas} integralizadas do currículo. Quando da conclusão do TCC em qualquer das modalidades, a carga horária integralizada com essa atividade é de no máximo \textbf{300 horas} em Atividade de Conclusão de Curso.
+
+O detalhamento dos procedimentos relativos ao TCC consta consta nas Normas Gerais para os Trabalhos de Conclusão de Curso (TCC) do Curso de Graduação em \ppccurso\footnote{\url{https://www.feelt.ufu.br/graduacao/engenharia-de-computacao/saiba-mais/tcc}}, aprovada nos âmbitos do Colegiado do Curso e da Unidade Acadêmica com anuência do NDE.
+
+\subsubsection{TCC: Projeto de Pesquisa Acadêmica}
+
+No caso da modalidade de projeto de pesquisa, o desenvolvimento de um Trabalho de Conclusão de Curso (TCC) consolida o processo formativo do estudante, integrando conhecimentos adquiridos ao longo do curso. Essa experiência estimula a prática investigativa, a capacidade de estabelecer conexões entre diferentes correntes teóricas, o aprimoramento da pesquisa bibliográfica e a análise crítica de dados obtidos por múltiplas fontes. Busca-se, com isso, fomentar a criatividade, a autonomia intelectual e a produção científica fundamentada. Nesta modalidade, a defesa do TCC ocorre por meio da apresentação formal de uma monografia científica que, embora possa dialogar com outras áreas do conhecimento, deve ter como eixo central a aplicação dos saberes desenvolvidos ao longo da formação em \ppccurso.
+
+\subsubsection{TCC: Empresa Tipo Startup}
+
+Uma empresa do tipo startup é, em geral, caracterizada por um grupo de pessoas — preferencialmente interdisciplinar — que atua em condições de incerteza e é impulsionado por ideias inovadoras, buscando modelos de negócio sustentáveis que gerem valor de forma escalável. Na modalidade de TCC voltada à criação de uma startup, objetiva-se estimular a criatividade do estudante por meio do enfrentamento de desafios reais e do desenvolvimento de soluções inovadoras que dialoguem com demandas concretas da sociedade. Busca-se, ainda, fomentar o pensamento empreendedor e a capacidade de estruturar produtos e serviços com potencial de impacto. Nesta modalidade, a defesa do TCC ocorre por meio da apresentação formal de um \textit{pitch}, acompanhada da construção de um Produto Mínimo Viável (PMV) e da elaboração de um estudo de viabilidade utilizando ferramentas como o \textit{Business Model Canvas}.
+
+\section{Atividades Acadêmicas Complementares / AAC}
+\label{sec:AAC}
+
+De acordo com o Parecer do CNE/CES nº 136/2012~\cite{cne_ces_parecer_136_2012}, as atividades complementares são componentes curriculares que têm como objetivo principal enriquecer e expandir o perfil do egresso com atividades que privilegiem aspectos diversos da sua formação, incluindo atividades desenvolvidas fora do ambiente acadêmico. Tais atividades constituem instrumental importante para o desenvolvimento pleno do aluno, servindo de estímulo a uma formação prática independente e interdisciplinar, sobretudo nas relações com o mundo do trabalho.
+
+Ainda, as atividades podem ser cumpridas em diversos ambientes, como a instituição a que o estudante está vinculado, outras instituições e variados ambientes sociais, técnico-científicos ou profissionais, em modalidades tais como: formação profissional (cursos de formação profissional, experiências de trabalho ou estágios não obrigatórios), de pesquisa e publicação (iniciação científica e participação em eventos técnico-científicos, publicações científicas), de ensino (programas de monitoria e tutoria), de gestão e política (representação discente em comissões e comitês), de empreendedorismo e inovação (participação em incubadoras, \textit{startups} ou outros mecanismos), de qualificação e experiência internacional, entre outras. Essas atividades devem ser permanentemente incentivadas no cotidiano acadêmico, permitindo a diversificação das atividades complementares desenvolvidas pelos estudantes.
+
+No Quadro~\ref{tab:aac}, temos a relação de Atividades Acadêmicas Complementares (AAC) propostas neste projeto, com carga horária máxima a ser integralizada por tipo de atividade. A carga horária mínima a ser integralizada com essas atividades é de \input{gerado/par_carga_horaria_aac} São consideradas atividades válidas para a quitação desse componente as que \textbf{foram realizadas durante o período de vínculo do estudante ao curso}.
+
+% \renewcommand{\familydefault}{\sfdefault} \normalfont
+\begin{longtblr}[
+    theme = ppc,
+    caption = {Carga Horária Máxima das AAC},
+    label = {tab:aac},
+]{
+  colspec = {Q[c,m,wd=17mm]Q[l,m,wd=105mm]Q[c,m,wd=14mm]},
+  rowhead = 1,
+  rowsep = 1pt,
+  row{odd} = {bg=CinzaClaro},
+  row{1} = {bg=AzulEscuro, fg=white},
+  row{2} = {bg=AzulClaro, fg=white},
+  row{8} = {bg=AzulClaro, fg=white},
+  row{18} = {bg=AzulClaro, fg=white},
+  row{26} = {bg=AzulClaro, fg=white},
+  row{31} = {bg=AzulClaro, fg=white},
+  row{35} = {bg=AzulClaro, fg=white},
+  row{39} = {bg=AzulClaro, fg=white},
+  cells  = {font = \fontsize{10pt}{12pt}\selectfont},
+} 
+    \textbf{Código} & \textbf{Descrição} & \textbf{CH Máx.} \\
+    & \textit{Formação Profissional} \\
+   ATCO1181 & Realização e conclusão de Curso Online Aberto e Massivo (MOOC) aprovado pelo Colegiado do Curso & 90 \\
+   ATCO1135 & Participação em oficinas, cursos ou mini-cursos relacionados ao aprendizado de técnicas úteis à profissão & 45 \\
+   ATCO1182 & Obtenção de certificações técnicas na área de Computação & 60 \\
+   ATCO0725 & Participação em visitas técnicas orientadas & 10 \\
+   ATCO0254 & Estágio não obrigatório & 36 \\
+    & \textit{Pesquisa} \\
+   ATCO1104 & Participação em Iniciação Científica com bolsa (PIBIC ou PIBITI) & 90 \\
+   ATCO1105 & Participação em Iniciação Científica sem bolsa (PIVIC) & 90\\
+   ATCO0044 & Apresentação de trabalhos em eventos científicos na forma oral ou pôster & 45 \\
+   ATCO0964 & Publicação de trabalhos científicos - resumo e/ou pôster  & 20 \\
+   ATCO0965 & Publicação de Trabalhos completos em anais de eventos & 45 \\
+   ATCO0993 & Publicações em periódicos especializados (revistas indexadas da área) & 90\\
+   ATCO0994 & Publicações em periódicos não especializados (revistas de outras áreas, jornais e revistas não indexadas) & 15\\
+   ATCO1184 & Publicação de livro ou capítulo de livro especializado com código ISBN e corpo editorial técnico-científico & 90\\
+   ATCO1185 & Publicação de livro ou capítulo de livro, especializado ou não, sem código ISBN ou corpo editorial técnico-científico & 15\\
+    & \textit{Ensino} \\
+    ATCO0354 & Monitoria em disciplina ministrada na UFU, fora do escopo do curso & 15\\
+    ATCO1919 & Monitoria em disciplina de graduação relativas aos 1º e 2º semestres do curso & 30\\
+    ATCO2020 & Monitoria em disciplina de graduação relativas ao 3º semestre em diante do curso & 45\\
+    ATCO0753 & Participação no Programa de Educação Tutorial -- PET & 60\\
+    ATCO0599 & Participação em grupo de estudos de temas específicos registrado e certificado pela Instituição & 30\\
+    ATCO1186 & Participação orientada por docente no desenvolvimento de material informacional ou didático para uso interno à UFU & 30 \\
+    ATCO1187 & Ministrante de palestras, minicursos, seminários e oficinas para comunidade interna da UFU & 30\\
+    & \textit{Gestão e Representação Estudantil} \\
+    ATCO0319 & Membro de Diretório Acadêmico & 30\\
+    ATCO0327 & Membro do Diretório Central dos Estudantes & 30\\
+    ATCO1019 & Representante Discente no Conselho de Unidade ou Colegiado de Curso & 45\\
+    ATCO0315 & Membro de Conselho Superior da UFU & 45\\
+    & \textit{Empreendorismo e Inovação} \\
+    ATCO1188 & Participação ou desenvolvimento de projetos junto a incubadoras de empresas & 45\\
+    ATCO1189 & Fundador ou membro de empresa do tipo \textit{startup} de tecnologia & 90\\
+    ATCO2121 & Patente ou Registro de Software & 90\\
+    & \textit{Qualificação e Experiência Internacional}  \\
+    ATCO1099 & Curso de língua estrangeira ou aprovação em exame de proficiência em língua estrangeira & 30\\
+    ATCO0344 & Mobilidade Internacional oficializada pela DRII/UFU & 60\\
+    ATCO1190 & Realização de intercâmbio internacional para estágio ou pesquisa na área de formação & 60\\
+    & \textit{Outras}  \\
+    ATCO0750 & Participação no Exame Nacional do Desempenho de Estudante (ENADE) & 15\\
+    ATCO0345 & Mobilidade Nacional & 45\\
+    ATCO0285 & Frequência e aprovação em disciplinas facultativas (outras Unidades Acadêmicas da UFU ou outra IES) & 45\\
+    ATCO0706 & Participação em projetos institucionais (PIBEG, PGB, PIBID, PROGRAD), sem registro no SIEX & 30\\
+    ATCO0492 & Participação em Competições Técnicas & 90\\
+    ATCO0491 & Participação em Competições Culturais, Artísticas, ou Esportivas & 35\\
+    ATCO1191 & Participação como ouvinte em eventos técnicos e/ou científicos (congressos, simpósios, seminários, mesa-redonda, workshops) & 30\\
+    ATCO1192 & Organização ou participação na organização de eventos institucionais, técnicos ou científicos para comunidade interna da UFU & 30\\
+\end{longtblr}
+% \renewcommand{\familydefault}{\rmdefault} \normalfont
+
+A requisição para a quitação desse componente curricular é de responsabilidade do estudante que deverá apresentar requerimento com esse objetivo. O detalhamento das Atividades Acadêmicas Complementares  consta em normas específicas\footnote{\url{https://www.feelt.ufu.br/graduacao/engenharia-de-computacao/saiba-mais/atividades-complementares}} aprovadas nos âmbitos do Colegiado do Curso com anuência do NDE e da Unidade Acadêmica. Os casos omissos deverão ser tratados pelo Colegiado do Curso.
+
+\section{Disciplinas Optativas Pré-Aprovadas}
+\label{sec:optativas}
+
+No Quadro~\ref{tab:disciplinas_optativas}, apresenta-se a relação de disciplinas optativas pré-aprovadas para o curso de \ppccurso. Essas disciplinas são ofertadas de forma periódica, conforme a demanda, a disponibilidade de docentes ou a oferta por outros cursos e Unidades Acadêmicas. Como cada disciplina pode ou não possuir pré-requisitos, o(a) estudante deve verificar se já concluiu os componentes necessários ou se tem conhecimento suficiente para poder cursá-la. A carga horária mínima que o estudante deve integralizar por meio de disciplinas optativas é de \input{gerado/par_carga_horaria_optativa}\unskip.
+
+\input{gerado/tab_disciplinas_optativas}
+
+Qualquer outra disciplina cursada em qualquer unidade acadêmica da UFU poderá ser incorporada a essa relação\footnote{\url{https://www.feelt.ufu.br/graduacao/engenharia-de-computacao/saiba-mais/optativas-aprovadas}}, mediante requerimento do interessado. Após a anuência do Núcleo Docente Estruturante (NDE) e a aprovação do Colegiado do Curso, a solicitação seguirá os trâmites institucionais necessários para efetivação da incorporação.
+
+\section{Relação de Disciplinas Equivalentes}
+\label{sec:equivalentes}
+
+No Quadro~\ref{tab:disciplinas_equivalentes}, apresenta-se a relação de disciplinas equivalentes pré-aprovadas para o curso de \ppccurso. Essas disciplinas também são ofertadas de forma periódica, conforme a demanda, a disponibilidade de docentes ou a oferta por outros cursos e Unidades Acadêmicas.
+
+Entende-se por disciplinas equivalentes aquelas que compartilham conteúdos programáticos similares ou que, embora adotem abordagens distintas, promovem impactos formativos equivalentes na trajetória do estudante. A adoção de equivalências visa respeitar a dinamicidade do cenário tecnológico, reconhecendo que determinados conhecimentos podem ser transmitidos por diferentes caminhos pedagógicos, desde que se preservem os objetivos educacionais essenciais do curso. Essa abordagem confere flexibilidade curricular responsável, sem comprometer a coerência e a qualidade da formação em \ppccurso.
+
+\IfFileExists{gerado/tab_disciplinas_equivalentes.tex}{\input{gerado/tab_disciplinas_equivalentes}}{}
+
+Outras disciplinas poderão ser incorporadas a essa relação\footnote{\url{https://www.feelt.ufu.br/graduacao/engenharia-de-computacao/saiba-mais/equivalencias-aprovadas}}, mediante requerimento do interessado. Após a anuência do Núcleo Docente Estruturante (NDE) e a aprovação do Colegiado do Curso, a solicitação seguirá os trâmites institucionais necessários para efetivação da incorporação.
+
+\section{Pré-requisitos e Correquisitos}
+\input{gerado/tab_prerequisitos}
+
+\section{Conteúdos de Destaque e/ou Transversais}
+
+O curso de \ppccurso da Universidade Federal de Uberlândia contempla, ao longo de sua estrutura curricular, diversos conteúdos de destaque e natureza transversal, alinhados às Diretrizes Curriculares Nacionais e às demandas contemporâneas da formação profissional. Esses conteúdos são abordados de maneira integrada, transversal ou interdisciplinar, permeando múltiplas unidades curriculares e projetos formativos. Dentre os principais, destacam-se:
+
+\begin{itemize}
+\item \textbf{Ética e Responsabilidade Profissional}: Discussões sobre responsabilidade técnica, segurança, privacidade, uso ético de dados e impactos sociais da computação e automação estão presentes em componentes como Introdução à Engenharia de Computação, Projeto de Sistemas Computacionais e nas Atividades Curriculares de Extensão.
+
+\item \textbf{Sustentabilidade e Impacto Socioambiental}: O curso promove a reflexão crítica sobre os impactos ambientais e sociais das tecnologias desenvolvidas, com ênfase em soluções energeticamente eficientes, reaproveitamento de materiais e uso consciente de recursos computacionais.
+
+\item \textbf{Inovação, Empreendedorismo e Propriedade Intelectual}: Tais temas são tratados em disciplinas como Empreendedorismo e Inovação Tecnológica, Projeto Integrador e Trabalho de Conclusão de Curso, além de serem estimulados em atividades extensionistas e nos projetos com empresas juniores e incubadoras.
+
+\item \textbf{Diversidade, Inclusão e Direitos Humanos}: A formação propicia espaços para o debate e valorização da diversidade cultural, de gênero, étnico-racial e de acessibilidade, tanto em conteúdos da formação geral quanto em contextos de aplicação tecnológica.
+
+\item \textbf{Extensão Universitária}: A curricularização da extensão assegura que os(as) estudantes interajam com demandas reais da sociedade, contribuindo para a formação cidadã e o fortalecimento da função social da universidade.
+
+\item \textbf{Trabalho Colaborativo, Comunicação e Liderança}: Estimulados por metodologias ativas (PBL, projetos integradores) e práticas em equipe, esses conteúdos desenvolvem competências interpessoais fundamentais para o exercício da engenharia em ambientes multidisciplinares.
+
+\item \textbf{Interdisciplinaridade e Integração Ciência-Tecnologia-Sociedade (CTS)}: Presente em atividades práticas, integradoras e de pesquisa, esse eixo fortalece a capacidade crítica e a atuação ética e técnica diante de problemas complexos e contextos sociotécnicos.
+
+\end{itemize}
+
+\section{Conhecimentos e Temas Transversais}
+
+Com base nas resoluções e decretos configurados em \texttt{referenciais/legislacao.yaml}, apresentam-se a seguir os quadros que identificam os componentes curriculares que contemplam os temas transversais obrigatórios.
+
+\IfFileExists{gerado/tab_tema_relacoes_etnico_raciais.tex}{\input{gerado/tab_tema_relacoes_etnico_raciais}}{}
+\IfFileExists{gerado/tab_tema_libras.tex}{\input{gerado/tab_tema_libras}}{}
+\IfFileExists{gerado/tab_tema_direitos_humanos.tex}{\input{gerado/tab_tema_direitos_humanos}}{}
+\IfFileExists{gerado/tab_tema_educacao_ambiental.tex}{\input{gerado/tab_tema_educacao_ambiental}}{}
+\IfFileExists{gerado/tab_tema_prevencao_desastres.tex}{\input{gerado/tab_tema_prevencao_desastres}}{}
+
+\section{Conteúdos Curriculares (Diretrizes Curriculares Nacionais)}
+
+Com base na Resolução CNE/CES nº 5/2016 (Diretrizes Curriculares Nacionais para os cursos de Computação) e no \textit{Computing Curricula 2020}~\cite{acm_cc2020}, apresentam-se a seguir os quadros que relacionam cada conteúdo curricular obrigatório, definido em \texttt{referenciais/conteudos.yaml}, aos componentes curriculares que o desenvolvem.
+
+\IfFileExists{gerado/tab_conteudo_dcn_base_00.tex}{\input{gerado/tab_conteudo_dcn_base_00}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_base_01.tex}{\input{gerado/tab_conteudo_dcn_base_01}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_base_02.tex}{\input{gerado/tab_conteudo_dcn_base_02}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_base_03.tex}{\input{gerado/tab_conteudo_dcn_base_03}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_base_04.tex}{\input{gerado/tab_conteudo_dcn_base_04}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_base_05.tex}{\input{gerado/tab_conteudo_dcn_base_05}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_base_06.tex}{\input{gerado/tab_conteudo_dcn_base_06}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_base_07.tex}{\input{gerado/tab_conteudo_dcn_base_07}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_base_08.tex}{\input{gerado/tab_conteudo_dcn_base_08}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_base_09.tex}{\input{gerado/tab_conteudo_dcn_base_09}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_base_10.tex}{\input{gerado/tab_conteudo_dcn_base_10}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_base_11.tex}{\input{gerado/tab_conteudo_dcn_base_11}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_base_12.tex}{\input{gerado/tab_conteudo_dcn_base_12}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_base_13.tex}{\input{gerado/tab_conteudo_dcn_base_13}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_base_14.tex}{\input{gerado/tab_conteudo_dcn_base_14}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_base_15.tex}{\input{gerado/tab_conteudo_dcn_base_15}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_base_16.tex}{\input{gerado/tab_conteudo_dcn_base_16}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_base_17.tex}{\input{gerado/tab_conteudo_dcn_base_17}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_base_18.tex}{\input{gerado/tab_conteudo_dcn_base_18}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_base_19.tex}{\input{gerado/tab_conteudo_dcn_base_19}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_base_20.tex}{\input{gerado/tab_conteudo_dcn_base_20}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_base_21.tex}{\input{gerado/tab_conteudo_dcn_base_21}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_base_22.tex}{\input{gerado/tab_conteudo_dcn_base_22}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_base_23.tex}{\input{gerado/tab_conteudo_dcn_base_23}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_base_24.tex}{\input{gerado/tab_conteudo_dcn_base_24}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_base_25.tex}{\input{gerado/tab_conteudo_dcn_base_25}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_base_26.tex}{\input{gerado/tab_conteudo_dcn_base_26}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_base_27.tex}{\input{gerado/tab_conteudo_dcn_base_27}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_base_28.tex}{\input{gerado/tab_conteudo_dcn_base_28}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_base_29.tex}{\input{gerado/tab_conteudo_dcn_base_29}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_base_30.tex}{\input{gerado/tab_conteudo_dcn_base_30}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_base_31.tex}{\input{gerado/tab_conteudo_dcn_base_31}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_base_32.tex}{\input{gerado/tab_conteudo_dcn_base_32}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_base_33.tex}{\input{gerado/tab_conteudo_dcn_base_33}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_base_34.tex}{\input{gerado/tab_conteudo_dcn_base_34}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_base_35.tex}{\input{gerado/tab_conteudo_dcn_base_35}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_base_36.tex}{\input{gerado/tab_conteudo_dcn_base_36}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_base_37.tex}{\input{gerado/tab_conteudo_dcn_base_37}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_base_38.tex}{\input{gerado/tab_conteudo_dcn_base_38}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_base_39.tex}{\input{gerado/tab_conteudo_dcn_base_39}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_base_40.tex}{\input{gerado/tab_conteudo_dcn_base_40}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_base_41.tex}{\input{gerado/tab_conteudo_dcn_base_41}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_base_42.tex}{\input{gerado/tab_conteudo_dcn_base_42}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_base_43.tex}{\input{gerado/tab_conteudo_dcn_base_43}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_base_44.tex}{\input{gerado/tab_conteudo_dcn_base_44}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_base_45.tex}{\input{gerado/tab_conteudo_dcn_base_45}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_base_46.tex}{\input{gerado/tab_conteudo_dcn_base_46}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_base_47.tex}{\input{gerado/tab_conteudo_dcn_base_47}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_tec_00.tex}{\input{gerado/tab_conteudo_dcn_tec_00}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_tec_01.tex}{\input{gerado/tab_conteudo_dcn_tec_01}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_tec_02.tex}{\input{gerado/tab_conteudo_dcn_tec_02}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_tec_03.tex}{\input{gerado/tab_conteudo_dcn_tec_03}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_tec_04.tex}{\input{gerado/tab_conteudo_dcn_tec_04}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_tec_05.tex}{\input{gerado/tab_conteudo_dcn_tec_05}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_tec_06.tex}{\input{gerado/tab_conteudo_dcn_tec_06}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_tec_07.tex}{\input{gerado/tab_conteudo_dcn_tec_07}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_tec_08.tex}{\input{gerado/tab_conteudo_dcn_tec_08}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_tec_09.tex}{\input{gerado/tab_conteudo_dcn_tec_09}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_tec_10.tex}{\input{gerado/tab_conteudo_dcn_tec_10}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_tec_11.tex}{\input{gerado/tab_conteudo_dcn_tec_11}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_tec_12.tex}{\input{gerado/tab_conteudo_dcn_tec_12}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_tec_13.tex}{\input{gerado/tab_conteudo_dcn_tec_13}}{}
+\IfFileExists{gerado/tab_conteudo_dcn_tec_14.tex}{\input{gerado/tab_conteudo_dcn_tec_14}}{}

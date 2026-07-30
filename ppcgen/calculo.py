@@ -17,9 +17,9 @@ pode legitimamente ter ``obrigatorio=False`` na fonte de dados (ele não é
 "uma disciplina obrigatória") e, ainda assim, ser de cumprimento mandatório
 para todo estudante, contando no total do curso (Seção 5: o comportamento
 depende do tipo do componente, não de convenções paralelas). Foi exatamente
-essa distinção que a migração do curso de Engenharia de Computação
-(``docs/MIGRACAO.md``) expôs: os componentes de extensão do CSV legado têm
-``OBR=False``, mas somam no total histórico de 3450h.
+essa distinção que a migração do curso de Engenharia de Computação expôs:
+os componentes de extensão do CSV legado têm ``OBR=False``, mas somam no
+total histórico de 3450h.
 
 ``Curriculo.carga_horaria_total()`` (em :mod:`ppcgen.modelos`) continua
 disponível para quando a soma bruta de tudo o que está *ativo* é realmente o

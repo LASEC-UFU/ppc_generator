@@ -1,0 +1,103 @@
+perfil:
+  id: tecnologo_automacao_2027_1
+  nome: "Curso Superior de Tecnologia em Automação Industrial — Currículo 2027-1"
+  status: proposta
+  versao: "2027-1"
+  descricao: >
+    Curso Superior de Tecnologia em Automação Industrial (denominação
+    regulatória conforme CNCST/MEC), com ênfase curricular em Robótica,
+    Sistemas Inteligentes e Inteligência Artificial Aplicada à Automação.
+    Divulgado institucionalmente como "Automação, Robótica e Inteligência
+    Artificial", forma tecnólogos aptos a projetar, implementar e gerenciar
+    sistemas automatizados industriais frente aos desafios da Indústria 4.0.
+
+curso:
+  nome: "Curso Superior de Tecnologia em Automação Industrial"
+  nome_curto: "Tecnologia em Automação Industrial"
+  sigla: "CSTAI"
+  grau: "Tecnólogo"
+  modalidade: "Presencial"
+  turno: "Noturno"
+  regime_academico: "Semestral"
+  numero_periodos: 6
+  campus: "Santa Mônica"
+  municipio: "Uberlândia"
+  estado: "Minas Gerais"
+
+instituicao:
+  nome: "Universidade Federal de Uberlândia"
+  sigla: "UFU"
+  unidade_academica: "Faculdade de Engenharia Elétrica"
+
+curriculo:
+  carga_horaria_total: 2400
+  carga_obrigatoria: 1800
+  carga_optativa_minima: 60
+  carga_extensao: 240
+  carga_aac: 60
+  carga_estagio: 120
+  carga_tcc: null
+  percentual_minimo_extensao: 10
+  percentual_maximo_ead: 30
+  carga_horaria_maxima_periodo: null
+  periodo_minimo_tcc: null
+  periodo_minimo_estagio: null
+
+oferta:
+  formato: presencial
+  possui_carga_ead: true
+  # curriculo.percentual_maximo_ead acima (30%) É o teto legal exato para
+  # oferta.formato=presencial — não uma folga arbitrária (ver
+  # ppcgen.validadores.ead.TETO_EAD_POR_FORMATO).
+  norma_federal: "Decreto nº 12.456/2025; Portaria MEC nº 378/2025"
+  norma_institucional: null
+  # PENDENTE: a UFU ainda não publicou a resolução do CONGRAD sobre oferta
+  # de componentes EaD em cursos presenciais (processo SEI
+  # 23117.070903/2023-41, altera a Resolução CONGRAD nº 35/2011) — estava
+  # pautada para a 7ª reunião/2026 do CONGRAD (24/07/2026) sem publicação
+  # localizada até a data desta auditoria (2026-07-30). Ver
+  # docs/RELATORIO_AUDITORIA_NORMATIVA.md, Seção 2.
+  status_validacao_institucional: pendente
+
+arquivos:
+  matriz: "matriz_curricular.xlsx"
+  equivalencias: "equivalencias.xlsx"
+  bibliografia: "referencias/bibliografia.bib"
+  textos: "textos"
+  referenciais: "referenciais"
+  fichas: "fichas"
+  figuras: "figuras"
+  anexos: "anexos"
+  frontmatter: "frontmatter"
+  overrides: "overrides"
+
+geracao:
+  template: "padrao"
+  anexar_fichas: true
+  anexar_resolucoes: true
+  gerar_fluxo_curricular: true
+  gerar_representacao_grafica: true
+  gerar_relatorio_validacao: true
+  compilar_pdf: true
+  interromper_em_erro: true
+
+saida:
+  nome_base: "PPC_Tecnologo_Automacao_2027_1"
+  gerar_corpo: true
+  gerar_completo: true
+
+heranca:
+  instituicao: "compartilhados/instituicao/ufu.yaml"
+  unidade: "compartilhados/instituicao/feelt.yaml"
+  identidade_visual: "compartilhados/identidade_visual/cores.yaml"
+  autoridades: "compartilhados/instituicao/autoridades.yaml"
+  referencias:
+    - "compartilhados/referencias/referencias_institucionais.bib"
+  legislacao:
+    - "compartilhados/legislacao/extensao.yaml"
+    - "compartilhados/legislacao/organizacao_academica.yaml"
+    - "compartilhados/legislacao/educacao_ambiental.yaml"
+    - "compartilhados/legislacao/direitos_humanos.yaml"
+    - "compartilhados/legislacao/libras.yaml"
+    - "compartilhados/legislacao/relacoes_etnico_raciais.yaml"
+    - "compartilhados/legislacao/prevencao_desastres.yaml"

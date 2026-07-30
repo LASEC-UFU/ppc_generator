@@ -14,6 +14,7 @@ from ppcgen.config import (
     HerancaConfig,
     InfoPerfil,
     InstituicaoConfig,
+    OfertaConfig,
     Perfil,
     SaidaConfig,
 )
@@ -75,6 +76,7 @@ def construir_perfil(tmp_path: Path | None = None, **overrides) -> Perfil:
         "curso": CursoConfig(numero_periodos=4),
         "instituicao": InstituicaoConfig(),
         "curriculo": CurriculoConfig(),
+        "oferta": OfertaConfig(),
         "arquivos": ArquivosConfig(),
         "geracao": GeracaoConfig(),
         "saida": SaidaConfig(),

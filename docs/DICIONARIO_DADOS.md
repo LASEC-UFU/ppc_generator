@@ -170,8 +170,8 @@ referenciar o tema.
 | `ano` | inteiro ou vazio | não | `2018` |
 | `observacoes` | texto | não | — |
 
-Pode ser complementado (nunca sobrescrito) por `heranca.legislacao` — ver
-`docs/DADOS_COMPARTILHADOS.md`.
+Pode ser complementado (nunca sobrescrito) por `heranca.legislacao`, campo
+de `perfil.yaml` (ver `docs/PERFIS.md`).
 
 ## `referenciais/conteudos.yaml`
 

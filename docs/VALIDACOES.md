@@ -66,14 +66,24 @@ da matriz, só a presença/coerência dos arquivos declarados.
 |---|---|---|
 | `EXTENSAO_ABAIXO_DO_MINIMO` | ERRO | carga de componentes `tipo=extensao` / carga oficial < `curriculo.percentual_minimo_extensao` |
 
-## EaD (`ppcgen.validadores.ead`)
+## EaD e formato de oferta (`ppcgen.validadores.ead`)
 
 | Código | Severidade | Condição |
 |---|---|---|
 | `EAD_ACIMA_DO_MAXIMO` | ERRO | carga em EaD dos componentes obrigatórios / carga oficial > `curriculo.percentual_maximo_ead` |
+| `OFERTA_FORMATO_DESCONHECIDO` | ERRO | `oferta.formato` não é `presencial`, `semipresencial` ou `distancia` |
+| `EAD_ACIMA_DO_TETO_LEGAL_FORMATO` | ERRO | `curriculo.percentual_maximo_ead` configurado excede o teto legal do `oferta.formato` declarado — Decreto nº 12.456/2025: presencial ≤30%, semipresencial ≤70%, distância ≤90% (`ppcgen.validadores.ead.TETO_EAD_POR_FORMATO`) |
+| `OFERTA_SEM_NORMA_INSTITUCIONAL_CONFIRMADA` | ALERTA | `oferta.possui_carga_ead: true` mas `oferta.status_validacao_institucional` ainda é `pendente` |
 
-Ambos os módulos só executam se o respectivo percentual estiver configurado
-(`None` = regra desativada, nunca assumida).
+`EAD_ACIMA_DO_MAXIMO` só executa se `curriculo.percentual_maximo_ead`
+estiver configurado (`None` = regra desativada, nunca assumida); o mesmo
+vale para `EXTENSAO_ABAIXO_DO_MINIMO` acima. `EAD_ACIMA_DO_TETO_LEGAL_FORMATO`
+e `OFERTA_FORMATO_DESCONHECIDO` não dependem da matriz — comparam
+`perfil.yaml` diretamente contra a lei, então rodam mesmo sem nenhum
+componente cadastrado. O Decreto nº 12.456/2025 também define pisos de
+atividade síncrona mediada por componente que este projeto ainda não
+modela (não há campo de carga síncrona/assíncrona na matriz) — só o teto
+presencial/EaD agregado é verificado.
 
 ## Pré-requisitos e correquisitos (`ppcgen.validadores.prerequisitos`)
 

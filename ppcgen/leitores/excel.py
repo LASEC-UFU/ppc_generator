@@ -16,9 +16,7 @@ Esquema de abas adotado (documentado em ``docs/DICIONARIO_DADOS.md``):
 
 Núcleo é uma coluna direta em ``Componentes`` (cardinalidade 1) e optativas
 pré-aprovadas são apenas componentes com ``tipo=carga_optativa`` — evitando
-abas redundantes com a mesma informação em formatos diferentes (ver
-``docs/ARQUITETURA.md`` para a justificativa desta simplificação em relação
-à sugestão inicial de 11 abas).
+abas redundantes com a mesma informação em formatos diferentes.
 """
 
 from __future__ import annotations

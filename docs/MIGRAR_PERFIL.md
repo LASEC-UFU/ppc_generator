@@ -4,12 +4,10 @@ Guia para trazer um PPC que já existe em outro formato (planilha solta,
 CSV, um gerador LaTeX monolítico anterior...) para dentro da estrutura de
 perfis deste repositório. Usa como exemplo real a migração do curso de
 Engenharia de Computação (de um gerador LaTeX monolítico com CSV próprio)
-para `dados/perfis/engenharia_computacao_2026_1/` — ver `docs/MIGRACAO.md`
-para o relato completo dessa migração específica (decisões tomadas, bugs
-encontrados, comparação de resultado). O sistema antigo em si e o script
-que fez essa migração já cumpriram seu papel e não fazem mais parte deste
-repositório (só do histórico do git) — o que segue é o *processo*
-genérico, para migrar qualquer outro curso.
+para `dados/perfis/engenharia_computacao_2026_1/`. O sistema antigo em si
+e o script que fez essa migração já cumpriram seu papel e não fazem mais
+parte deste repositório (só do histórico do git) — o que segue é o
+*processo* genérico, para migrar qualquer outro curso.
 
 ## Princípio geral: nunca perder dado silenciosamente
 
@@ -60,11 +58,10 @@ Um script de migração deve:
   primeira migração).
 
 O script usado para migrar Engenharia de Computação seguiu exatamente
-esse padrão (ver `docs/MIGRACAO.md`, Seção 7.1, para o que ele fazia) —
-depois de a migração estar completa e confirmada, ele deixou de ter
-utilidade (não há mais fonte antiga para ler) e foi removido junto do
-gerador antigo. Continua disponível no histórico do git de quem quiser
-usá-lo como ponto de partida.
+esse padrão — depois de a migração estar completa e confirmada, ele
+deixou de ter utilidade (não há mais fonte antiga para ler) e foi
+removido junto do gerador antigo. Continua disponível no histórico do
+git de quem quiser usá-lo como ponto de partida.
 
 ### 3. Decisões de migração são decisões, não bugs
 
@@ -148,8 +145,8 @@ Depois que o perfil novo compila:
 
 Nesta migração específica, o resultado final ficou em ~95 páginas (corpo)
 contra 102 do PDF de referência do gerador antigo (comparação feita antes
-do gerador antigo ser removido do repositório — ver `docs/MIGRACAO.md`,
-Seção 7.5). A diferença remanescente vem de conteúdo bespoke do capítulo
+do gerador antigo ser removido do repositório). A diferença remanescente
+vem de conteúdo bespoke do capítulo
 de estrutura curricular que o gerador antigo produzia via tabelas fixas em
 LaTeX (quadro de carga horária semanal por período, uma tabela alternativa
 de fluxo "conforme guia", e um quadro de mapeamento de conteúdo específico

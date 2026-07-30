@@ -1,0 +1,14 @@
+# Comissão de elaboração deste PPC — migrada de
+# include/frontmatter/Titlepage.tex.
+comissao:
+  titulo: "Equipe de elaboração deste Projeto Pedagógico"
+  membros:
+    - "Prof. Dr. Igor Sousa Peretta -- presidente da Comissão"
+    - "Prof. Dr. Marcelo Rodrigues de Sousa"
+    - "Prof. Dr. Marcelo Barros de Almeida"
+    - "Prof. Dr. Márcio José da Cunha"
+    - "Prof. Dr. Felipe Alves da Louza"
+    - "Prof. Dr. Kil Jin Brandini Park"
+    - "Prof. Dr. Keiji Yamanaka"
+    - "Assessoria Didático-Pedagógica"
+    - "Divisão de Projetos Pedagógicos -- DIPED/PROGRAD/UFU"

@@ -1,0 +1,11 @@
+# Autoridade específica deste curso (coordenador). Autoridades institucionais
+# (reitor, pró-reitores, diretor da FEELT) vêm de
+# dados/compartilhados/instituicao/autoridades.yaml via `heranca.autoridades`.
+#
+# PENDENTE: o cargo/nome abaixo eram os da coordenação de Engenharia de
+# Computação, herdados por engano na criação do esqueleto deste perfil —
+# substituir pelo(a) coordenador(a) real do Tecnólogo em Automação
+# Industrial antes de gerar uma versão oficial deste PPC.
+autoridades:
+  - cargo: "Coordenador(a) do Curso de Tecnologia em Automação Industrial"
+    nome: "[nome do(a) coordenador(a) a confirmar]"

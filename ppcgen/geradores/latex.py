@@ -55,7 +55,7 @@ def gerar_frontmatter(perfil: Perfil) -> str:
 
     O layout replica o do template original (capa com faixa/logo
     institucional em margens reduzidas, rodapé com a unidade acadêmica e
-    contato) — ver docs/MIGRACAO.md para o comparativo página a página.
+    contato).
     """
 
     pasta_front = perfil.arquivos.frontmatter

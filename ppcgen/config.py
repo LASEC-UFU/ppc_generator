@@ -83,6 +83,25 @@ class CurriculoConfig:
 
 
 @dataclass
+class OfertaConfig:
+    """Formato de oferta do curso (Decreto nº 12.456/2025) — decisão
+    explícita do perfil, nunca inferida automaticamente do percentual de
+    EaD (``curriculo.percentual_maximo_ead``, que continua sendo a única
+    fonte da carga horária em si)."""
+
+    formato: str = "presencial"
+    """``presencial`` | ``semipresencial`` | ``distancia`` — nunca termos
+    como "híbrido"/"remoto"/"flexível" (esses cabem só como descrição
+    pedagógica em prosa, não aqui)."""
+    possui_carga_ead: bool = False
+    norma_federal: str = ""
+    norma_institucional: str | None = None
+    status_validacao_institucional: str = "pendente"
+    """``pendente`` | ``confirmado`` — ``pendente`` enquanto
+    ``norma_institucional`` não estiver preenchida com um ato publicado."""
+
+
+@dataclass
 class ArquivosConfig:
     matriz: str = "matriz_curricular.xlsx"
     equivalencias: str = "equivalencias.xlsx"
@@ -131,6 +150,7 @@ class Perfil:
     curso: CursoConfig
     instituicao: InstituicaoConfig
     curriculo: CurriculoConfig
+    oferta: OfertaConfig
     arquivos: ArquivosConfig
     geracao: GeracaoConfig
     saida: SaidaConfig
@@ -289,6 +309,7 @@ def carregar_perfil(
             extra=instituicao_extra,
         ),
         curriculo=_construir(CurriculoConfig, efetivo.get("curriculo") or {}),
+        oferta=_construir(OfertaConfig, efetivo.get("oferta") or {}),
         arquivos=_construir(ArquivosConfig, efetivo.get("arquivos") or {}),
         geracao=_construir(GeracaoConfig, efetivo.get("geracao") or {}),
         saida=_construir(SaidaConfig, efetivo.get("saida") or {}),

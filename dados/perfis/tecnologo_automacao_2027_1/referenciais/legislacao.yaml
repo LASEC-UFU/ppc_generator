@@ -1,0 +1,74 @@
+# Referenciais legais ESPECÍFICOS deste perfil (Tecnólogo em Automação
+# Industrial). Referenciais compartilháveis (extensão, educação ambiental,
+# direitos humanos, libras, relações étnico-raciais, prevenção de
+# desastres) vêm de dados/compartilhados/legislacao/ via
+# `heranca.legislacao` em perfil.yaml.
+#
+# As quatro entradas anteriores deste arquivo (DCN de Computação, ACM CC2020,
+# título de Engenheiro de Computação) pertenciam ao perfil de Engenharia de
+# Computação do qual este perfil foi criado por cópia, e foram removidas por
+# não se aplicarem a um Curso Superior de Tecnologia.
+referenciais:
+  - id: CNCST_2024_AUTOMACAO_INDUSTRIAL
+    nome: >
+      Catálogo Nacional de Cursos Superiores de Tecnologia (4ª edição) —
+      Curso Superior de Tecnologia em Automação Industrial, eixo
+      tecnológico Controle e Processos Industriais, área tecnológica
+      Eletrônica e Automação (código CINE Brasil 0714A01)
+    tipo: catalogo_nacional
+    documento: Portaria MEC nº 514, de 4 de junho de 2024
+    ano: 2024
+    observacoes: >
+      Base da denominação regulatória do curso (textos/identificacao.tex)
+      e da carga horária mínima de 2.400h (curriculo.carga_horaria_total
+      em perfil.yaml). A estrutura de eixos/áreas tecnológicas do CNCST
+      é definida pela Resolução CNE/CP nº 2, de 4 de abril de 2024. Ficha
+      catalográfica completa (ocupações CBO, infraestrutura mínima,
+      requisitos de ingresso) em
+      referenciais/cncst_automacao_industrial.yaml.
+
+  - id: CNE_CP_1_2021
+    nome: Diretrizes Curriculares Nacionais Gerais para a Educação Profissional e Tecnológica
+    tipo: resolucao
+    documento: Resolução CNE/CP nº 1, de 5 de janeiro de 2021
+    ano: 2021
+    observacoes: >
+      Fundamento das diretrizes curriculares gerais deste CST — distinto
+      e mais específico que a Resolução CNE/CP nº 2/2024, que trata só da
+      estrutura de eixos/áreas do CNCST/CNCT.
+
+  - id: CONFEA_313_1986
+    nome: >
+      Exercício profissional dos Tecnólogos das áreas submetidas à
+      regulamentação e fiscalização do Sistema Confea/Crea
+    tipo: resolucao
+    documento: Resolução CONFEA nº 313, de 26 de setembro de 1986
+    ano: 1986
+    observacoes: >
+      Base legal profissional mais específica para atribuições do
+      Tecnólogo (com base na Lei nº 5.194/1966) do que a Resolução CONFEA
+      nº 1.073/2016, abaixo — usar as duas em conjunto.
+
+  - id: CONFEA_1073_2016
+    nome: >
+      Regulamenta a atribuição de títulos, atividades, competências e
+      campos de atuação profissionais no âmbito do Sistema Confea/Crea
+    tipo: resolucao
+    documento: Resolução CONFEA nº 1.073, de 19 de abril de 2016
+    ano: 2016
+    observacoes: >
+      Base legal profissional para a titulação de Tecnólogo em Automação
+      Industrial. Ocupações CBO associadas (2021-15 Tecnólogo em
+      Mecatrônica; 2021-20 Tecnólogo em Automação) em
+      referenciais/cncst_automacao_industrial.yaml.
+
+  - id: INEP_CINE_BRASIL_622_2025
+    nome: Política de aplicação da Classificação Internacional Normalizada da Educação adaptada (CINE Brasil)
+    tipo: portaria
+    documento: Portaria Inep nº 622, de 8 de setembro de 2025
+    ano: 2025
+    observacoes: >
+      Norma vigente do enquadramento CINE Brasil deste curso (código
+      0714A01, "Automação Industrial", eixo 0714 "Eletrônica e
+      Automação"). Substitui, para fins deste projeto, qualquer política
+      de CINE Brasil anterior eventualmente citada.

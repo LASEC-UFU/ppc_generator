@@ -148,7 +148,7 @@ def montar_workbook() -> openpyxl.Workbook:
     curso.append(["versao_curricular", "2026-1-exemplo"])
     curso.append(["data_geracao", "2026-07-29"])
     curso.append(
-        ["observacoes", "Matriz inicial/exemplo do CST em Controle e Automação — ver docs/MIGRACAO.md."]
+        ["observacoes", "Matriz inicial/exemplo do CST em Controle e Automação."]
     )
 
     componentes = wb.create_sheet("Componentes")

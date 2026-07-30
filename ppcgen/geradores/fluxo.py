@@ -8,7 +8,7 @@ fixo: TCC/Estágio, Atividades Complementares e Optativas).
 
 A tabela gerada usa uma linha por componente (sem mesclagem de células por
 ``rowspan``) — uma simplificação deliberada em relação ao layout do script
-legado, documentada em ``docs/ARQUITETURA.md``.
+legado.
 """
 
 from __future__ import annotations

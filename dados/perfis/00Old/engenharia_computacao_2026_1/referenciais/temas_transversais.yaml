@@ -1,0 +1,25 @@
+# Temas transversais deste curso. Os identificadores coincidem com os
+# usados no perfil de Controle e Automação (mesma base normativa nacional),
+# mas cada perfil declara seu próprio arquivo — Seção 24 (não compartilhar
+# implicitamente decisões de um curso com outro).
+temas:
+  - id: RELACOES_ETNICO_RACIAIS
+    nome: Educação das Relações Étnico-Raciais
+    fonte_normativa: Resolução CNE/CP nº 1/2004
+    status: obrigatorio
+  - id: LIBRAS
+    nome: Ensino de Libras
+    fonte_normativa: Decreto nº 5.626/2005
+    status: obrigatorio
+  - id: DIREITOS_HUMANOS
+    nome: Educação em Direitos Humanos
+    fonte_normativa: Resolução CNE nº 1/2012
+    status: obrigatorio
+  - id: EDUCACAO_AMBIENTAL
+    nome: Educação Ambiental
+    fonte_normativa: Resolução CNE nº 2/2012
+    status: obrigatorio
+  - id: PREVENCAO_DESASTRES
+    nome: Educação para Prevenção e Redução de Desastres
+    fonte_normativa: Lei nº 13.425/2017
+    status: obrigatorio

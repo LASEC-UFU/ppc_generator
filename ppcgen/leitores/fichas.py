@@ -5,8 +5,7 @@ Cada formato tem seu próprio adaptador (Seção 15) em vez de uma bateria de
 expressões regulares genéricas tentando cobrir todos os casos. OCR **não** é
 usado como estratégia principal: um PDF sem camada de texto extraível é
 marcado como não reconhecido, com confiança zero, para revisão manual — esta
-versão não embute um motor de OCR (ver ``docs/MIGRACAO.md`` para a
-justificativa e limitação registrada).
+versão não embute um motor de OCR.
 """
 
 from __future__ import annotations

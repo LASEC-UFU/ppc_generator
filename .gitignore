@@ -28,8 +28,7 @@ ppc/
 # (um subdiretório por perfil, saida/<perfil_id>/) — inteiramente
 # recriável a partir de dados/perfis/<id>/, nunca a fonte de nada. Cada
 # saida/<id>/latex/gerado/*.tex carrega um timestamp no cabeçalho, então
-# versionar produziria diff a cada execução mesmo sem mudança real (ver
-# docs/ARQUITETURA.md).
+# versionar produziria diff a cada execução mesmo sem mudança real.
 /saida/
 
 # Conveniência de desenvolvimento local — nunca usada em CI/testes/geração

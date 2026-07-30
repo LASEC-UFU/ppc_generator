@@ -28,8 +28,8 @@ produzia o PPC de Engenharia de Computação antes desta reestruturação,
 foi mantido funcional e intocado durante toda a migração — só removido
 do repositório depois de confirmada a equivalência de resultado com o
 perfil novo. Continua recuperável pelo histórico do git. Ver
-`docs/MIGRACAO.md`/`docs/MIGRAR_PERFIL.md` para o relato completo e
-`CHANGELOG.md` para a referência de commit.
+`docs/MIGRAR_PERFIL.md` para o processo de migração e `CHANGELOG.md`
+para a referência de commit.
 
 ## 2. Arquitetura
 
@@ -39,9 +39,6 @@ dados/perfis/<id>/perfil.yaml + matriz_curricular.xlsx + referenciais/*.yaml
      → ppcgen.leitores → ppcgen.validadores → ppcgen.geradores
      → ppcgen.compiladores → PDF em saida/<id>/
 ```
-
-Detalhes e decisões de design em `docs/ARQUITETURA.md`. Mapa completo de
-diretórios em `docs/ESTRUTURA_DE_DIRETORIOS.md`.
 
 ```
 ppcgen/             pacote Python genérico (leitores, validadores,
@@ -151,11 +148,11 @@ python -m ppcgen limpar --todos
 ## 12. Isolamento entre perfis
 
 Cada perfil só lê/grava dentro da própria pasta (`dados/perfis/<id>/`),
-exceto o que declarar explicitamente em `heranca:`
-(`docs/DADOS_COMPARTILHADOS.md`) ou `extends:` (`docs/HERANCA_DE_PERFIS.md`).
-Saída de um perfil nunca é escrita dentro de outro, nem dentro da própria
-pasta de dados do perfil — sempre em `saida/<id>/`. Um caminho que tente
-escapar da pasta do perfil (`../outro_perfil/...`) é rejeitado com erro.
+exceto o que declarar explicitamente em `heranca:` ou `extends:` (ver
+`docs/PERFIS.md`). Saída de um perfil nunca é escrita dentro de outro,
+nem dentro da própria pasta de dados do perfil — sempre em
+`saida/<id>/`. Um caminho que tente escapar da pasta do perfil
+(`../outro_perfil/...`) é rejeitado com erro.
 
 ## 13. Solução de erros frequentes
 
@@ -220,13 +217,6 @@ exatamente o que cada alvo do Makefile faz.
 - `docs/PERFIS.md` — o que é um perfil, schema de `perfil.yaml`, comandos.
 - `docs/CRIAR_PERFIL.md` — passo a passo para criar um perfil novo.
 - `docs/MIGRAR_PERFIL.md` — passo a passo para migrar um curso existente.
-- `docs/DADOS_COMPARTILHADOS.md` — dados institucionais comuns a vários perfis.
-- `docs/HERANCA_DE_PERFIS.md` — `extends` (perfil base) e `heranca`
-  (dados compartilhados): mecanismos, prioridade, detecção de ciclo.
-- `docs/ESTRUTURA_DE_DIRETORIOS.md` — mapa completo do repositório.
-- `docs/ARQUITETURA.md` — decisões de design e limitações conhecidas.
 - `docs/DICIONARIO_DADOS.md` — todos os campos de todas as fontes de dados.
 - `docs/VALIDACOES.md` — toda regra de validação, severidade e condição.
-- `docs/MIGRACAO.md` — o que foi migrado do sistema anterior para o perfil
-  `engenharia_computacao_2026_1` e o que exige decisão acadêmica.
 - `CHANGELOG.md` — histórico desta reestruturação.
