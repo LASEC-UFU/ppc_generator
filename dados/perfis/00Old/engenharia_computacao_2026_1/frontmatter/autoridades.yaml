@@ -1,7 +1,0 @@
-# Autoridade específica deste curso (coordenador) — migrado de
-# include/frontmatter/Titlepage.tex. Autoridades institucionais (reitor,
-# pró-reitores, diretor da FEELT) vêm de
-# dados/compartilhados/instituicao/autoridades.yaml via `heranca.autoridades`.
-autoridades:
-  - cargo: "Coordenador do Curso de Engenharia de Computação"
-    nome: "Prof. Dr. Kil Jin Brandini Park"
