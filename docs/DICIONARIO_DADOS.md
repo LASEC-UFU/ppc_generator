@@ -7,12 +7,14 @@ caminho é `dados/perfis/<id>/matriz_curricular.xlsx` (configurável via
 **Fontes únicas, sem sobreposição**: cada dado deste projeto vive em
 exatamente um lugar. A versão curricular é `perfil.info.versao` (não há
 mais aba `Curso` na matriz). Núcleos, áreas de formação, temas
-transversais e conteúdos curriculares são catálogos de registro em abas
-próprias da matriz (`Nucleos`/`Areas`/`Temas`/`Conteudos`). Legislação e
-competências são listas em `perfil.yaml` (não há mais pasta
-`referenciais/`). Pré-requisitos, correquisitos e os vínculos
-componente→área/tema/conteúdo/competência são colunas da própria aba
-`Componentes` — não abas de junção separadas.
+transversais, conteúdos curriculares e competências são catálogos de
+registro em abas próprias da matriz (`Nucleos`/`Areas`/`Temas`/
+`Conteudos`/`Competencias`) — cada uma vincula os componentes que cobre
+via sua própria coluna `componentes` (ver "Padrão `componentes`" abaixo);
+a aba `Componentes` não tem colunas equivalentes, a direção é
+catálogo → componente, não o contrário. Legislação é lista em
+`perfil.yaml` (não há mais pasta `referenciais/`). Pré-requisitos e
+correquisitos são colunas da própria aba `Componentes`.
 
 ## `matriz_curricular.xlsx`
 
@@ -34,14 +36,14 @@ integrador, estágio, TCC, atividade complementar, optativa...).
 | `chd` | inteiro ou vazio | não | ≥ 0 | `0` | idem; soma entra no percentual de EaD |
 | `che` | inteiro ou vazio | não | ≥ 0 | `0` | idem; soma entra no percentual de extensão |
 | `tot` | inteiro ou vazio | sim (recomendado) | ≥ 0 | `60` | deve ser igual a `cht+chp+chd+che` quando todas informadas |
-| `nucleo_id` | texto | sim para componente ativo | id existente na aba `Nucleos` | `TECNOLOGICO` | `COMPONENTE_SEM_NUCLEO`, `NUCLEO_INEXISTENTE` |
 | `observacoes` | texto | não | — | — | usado como "justificativa" para downgrade de `CLASSIFICACAO_CONTRADITORIA` |
 | `pre_requisitos` | texto (lista) | não | ver sintaxe abaixo | `CTR401, CTR203 (opcional), >=1200h` | `PREREQUISITO_INEXISTENTE`, `PREREQUISITO_AUTORREFERENCIA`, `PREREQUISITO_PERIODO_INVALIDO`, `CICLO_PREREQUISITOS` |
 | `correquisitos` | texto (lista) | não | ver sintaxe abaixo | `CTR305, CTR306 (opcional)` | `CORREQUISITO_INEXISTENTE`, `CORREQUISITO_AUTORREFERENCIA`, `CORREQUISITO_PERIODO_DIVERGENTE` |
-| `areas` | texto (lista, ids separados por vírgula) | sim para componente ativo (0+, mas ao menos 1) | ids existentes na aba `Areas` | `CONTROLE, AUTOMACAO` | `COMPONENTE_SEM_AREA`, `AREA_INEXISTENTE` |
-| `temas` | texto (lista, ids separados por vírgula) | não | ids existentes na aba `Temas` | `LIBRAS` | `TEMA_TRANSVERSAL_INEXISTENTE` |
-| `conteudos` | texto (lista, ids separados por vírgula) | não | ids existentes na aba `Conteudos` | `DCN_BASE_00, DCN_BASE_03` | `CONTEUDO_INEXISTENTE` |
-| `competencias` | texto (lista, ids separados por vírgula) | não | ids existentes em `perfil.competencias` | `PROJETAR_SISTEMAS_CONTROLE` | `COMPETENCIA_INEXISTENTE` |
+
+Não há colunas `nucleo_id`/`areas`/`temas`/`conteudos`/`competencias`
+aqui — um componente ativo sem núcleo/área vinculado por nenhuma aba de
+catálogo gera `COMPONENTE_SEM_NUCLEO`/`COMPONENTE_SEM_AREA` (ver "Padrão
+`componentes`" abaixo).
 
 #### Campos derivados de `codigo` (não são colunas da planilha)
 
@@ -91,6 +93,32 @@ via `gerado/tab_disciplinas_equivalentes.tex` (só escrito se houver ao
 menos uma equivalência). Não existe mais um arquivo `equivalencias.xlsx`
 separado — tudo fica nesta aba.
 
+### Padrão `componentes` (comum a `Nucleos`/`Areas`/`Temas`/`Conteudos`/`Competencias`)
+
+As cinco abas de catálogo abaixo têm, todas, uma coluna `componentes`:
+texto com os códigos dos componentes vinculados àquele item, separados
+por `|` (ex.: `FAMAT31011|FEELT31204`) — nunca por vírgula, para não
+colidir com o separador usado em `pre_requisitos`/`correquisitos`. É essa
+coluna, não uma coluna na aba `Componentes`, que define o vínculo — a
+direção é catálogo → componente.
+
+No carregamento (`ppcgen.leitores.excel._aplicar_vinculos_catalogo`), cada
+código listado em `componentes` é usado para preencher o campo
+correspondente do componente (`nucleo`/`areas`/`temas_transversais`/
+`conteudos`/`competencias`, em `ppcgen.modelos.ComponenteCurricular`) — o
+resultado final tem exatamente a mesma forma de antes, só muda de onde
+vem. `nucleo` é cardinalidade 1: se o mesmo código aparecer em
+`componentes` de mais de uma linha da aba `Nucleos`, o primeiro vence e o
+validador emite `NUCLEO_MULTIPLO_PARA_COMPONENTE` (erro); os demais
+campos aceitam qualquer número de vínculos.
+
+Um código em `componentes` que não existe na aba `Componentes` não é
+descartado silenciosamente — o leitor preserva a lista bruta em
+`<Catalogo>.componentes` e `ppcgen.validadores.referenciais` reporta um
+erro por catálogo: `NUCLEO_COMPONENTE_INEXISTENTE`,
+`AREA_COMPONENTE_INEXISTENTE`, `TEMA_TRANSVERSAL_COMPONENTE_INEXISTENTE`,
+`CONTEUDO_COMPONENTE_INEXISTENTE`, `COMPETENCIA_COMPONENTE_INEXISTENTE`.
+
 ### Aba `Nucleos`
 
 Catálogo dos núcleos curriculares do curso — substitui o antigo
@@ -101,12 +129,13 @@ Catálogo dos núcleos curriculares do curso — substitui o antigo
 | `id` | texto | sim | `TECNOLOGICO` |
 | `nome` | texto | sim | `Formação Tecnológica e Profissional` |
 | `descricao` | texto | não | — |
+| `componentes` | texto (lista, códigos separados por `\|`) | não | `FEELT31301\|FEELT31401` |
 
 ### Aba `Areas`
 
 Catálogo das áreas de formação — substitui o antigo
 `referenciais/areas_formacao.yaml`. Mesmos campos de `Nucleos` (`id`,
-`nome`, `descricao`).
+`nome`, `descricao`, `componentes`).
 
 ### Aba `Temas`
 
@@ -120,10 +149,11 @@ Catálogo dos temas transversais — substitui o antigo
 | `descricao` | texto | não | — | — |
 | `fonte_normativa` | texto | não | — | `Decreto nº 5.626/2005` |
 | `status` | texto | não (padrão `ativo`) | `obrigatorio`, `sugerido`, `ativo` | `obrigatorio` |
+| `componentes` | texto (lista, códigos separados por `\|`) | não | `LIBRAS01\|LIBRAS02` |
 
 `status: obrigatorio` faz o validador emitir
-`TEMA_TRANSVERSAL_OBRIGATORIO_SEM_COBERTURA` se nenhum componente ativo
-referenciar o tema (coluna `temas` da aba `Componentes`).
+`TEMA_TRANSVERSAL_OBRIGATORIO_SEM_COBERTURA` se `componentes` estiver
+vazio ou só tiver códigos inativos.
 
 ### Aba `Conteudos`
 
@@ -138,10 +168,29 @@ horária/competência. Substitui o antigo `referenciais/conteudos.yaml`.
 | `descricao` | texto | sim | `Algoritmos e estruturas de dados` |
 | `obrigatorio` | booleano | não (padrão `FALSE`) | `TRUE` |
 | `fonte` | texto | não | `Resolução CNE/CES nº 5/2016, Art. 5º` |
+| `componentes` | texto (lista, códigos separados por `\|`) | não | `FACOM31201\|FACOM31303` |
 
 `obrigatorio: TRUE` faz o validador emitir
-`CONTEUDO_OBRIGATORIO_SEM_COBERTURA` (alerta) se nenhum componente ativo
-referenciar o conteúdo na coluna `conteudos` da aba `Componentes`.
+`CONTEUDO_OBRIGATORIO_SEM_COBERTURA` (alerta) se `componentes` estiver
+vazio ou só tiver códigos inativos.
+
+### Aba `Competencias`
+
+Catálogo de competências do curso — substitui o antigo
+`referenciais/competencias.yaml`; não vive mais em `perfil.yaml` (só
+`legislacao:` continua lá).
+
+| Campo | Tipo | Obrigatório | Exemplo |
+|---|---|---|---|
+| `id` | texto | sim | `PROJETAR_SISTEMAS_CONTROLE` |
+| `descricao` | texto | sim | `Projetar, especificar e sintonizar sistemas de controle...` |
+| `obrigatoria` | booleano | não (padrão `FALSE`) | `TRUE` |
+| `fonte` | texto | não | id de um item em `perfil.legislacao`, ex. `MEC_CATALOGO_CST` |
+| `componentes` | texto (lista, códigos separados por `\|`) | não | `FEELT!SCON` |
+
+`obrigatoria: TRUE` faz o validador emitir
+`COMPETENCIA_OBRIGATORIA_SEM_COBERTURA` (alerta) se `componentes` estiver
+vazio ou só tiver códigos inativos.
 
 ### Aba `Certificacoes` (opcional)
 
@@ -183,17 +232,5 @@ arquivo externo para editar em separado.
 
 Se `perfil.extends` aponta para um perfil base, as listas de `legislacao`
 de ambos são mescladas por `id` (o perfil atual sobrescreve o base em caso
-de colisão) — ver Seção 9 de `docs/PERFIS.md`.
-
-### `competencias:` (lista, top-level em `perfil.yaml`)
-
-Catálogo de competências deste perfil — substitui o antigo
-`referenciais/competencias.yaml`. Mesma semântica de herança por `id` que
-`legislacao:`, acima.
-
-| Campo | Tipo | Obrigatório | Exemplo |
-|---|---|---|---|
-| `id` | texto | sim | `PROJETAR_SISTEMAS_CONTROLE` |
-| `descricao` | texto | sim | `Projetar, especificar e sintonizar sistemas de controle...` |
-| `obrigatoria` | booleano | não (padrão `FALSE`) | `TRUE` |
-| `fonte` | texto | não | id de um item em `legislacao:`, ex. `MEC_CATALOGO_CST` |
+de colisão) — ver Seção 9 de `docs/PERFIS.md`. Competências não têm mais
+seção equivalente aqui — ver "Aba `Competencias`" acima.

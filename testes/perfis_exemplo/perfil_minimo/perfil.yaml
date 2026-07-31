@@ -56,8 +56,3 @@ saida:
   gerar_corpo: true
   gerar_completo: true
 legislacao: []
-competencias:
-  - id: C1
-    descricao: Competência de teste
-    obrigatoria: true
-    fonte: ''

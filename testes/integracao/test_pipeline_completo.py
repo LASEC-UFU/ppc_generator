@@ -29,15 +29,14 @@ def perfil_minimo():
 
 def _carregar_curriculo_e_referenciais(perfil):
     """Mesma composição de ``ppcgen.cli._carregar_contexto``, sem depender
-    da CLI: matriz fornece núcleos/áreas/temas/conteúdos,
-    ``perfil.legislacao``/``perfil.competencias`` fornecem o resto."""
+    da CLI: matriz fornece núcleos/áreas/temas/conteúdos/competências,
+    ``perfil.legislacao`` fornece o resto."""
 
     curriculo, referenciais, avisos = carregar_matriz(
         perfil.resolver_arquivo(perfil.arquivos.matriz)
     )
     curriculo.versao = perfil.info.versao
     referenciais.legislacao = list(perfil.legislacao)
-    referenciais.competencias = list(perfil.competencias)
     return curriculo, referenciais, avisos
 
 

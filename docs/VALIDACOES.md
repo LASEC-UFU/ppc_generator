@@ -106,24 +106,25 @@ Lidos da coluna `pre_requisitos`/`correquisitos` da aba `Componentes`
 
 ## Referenciais (`ppcgen.validadores.referenciais`)
 
-Confere as colunas `nucleo_id`/`areas`/`temas`/`competencias`/`conteudos`
-da aba `Componentes` contra os catálogos correspondentes — os quatro
-primeiros são as abas de registro da própria matriz
-(`Nucleos`/`Areas`/`Temas`/`Conteudos`); competências vêm de
-`perfil.competencias` (`perfil.yaml`). Ver `docs/DICIONARIO_DADOS.md`.
+Núcleos, áreas, temas, conteúdos e competências vivem nas abas de registro
+da própria matriz (`Nucleos`/`Areas`/`Temas`/`Conteudos`/`Competencias`),
+cada uma vinculando os componentes que cobre via sua coluna `componentes`
+(códigos separados por `|`) — a direção é catálogo → componente, não o
+contrário. Ver "Padrão `componentes`" em `docs/DICIONARIO_DADOS.md`.
 
 | Código | Severidade | Condição |
 |---|---|---|
-| `COMPONENTE_SEM_NUCLEO` | ERRO | componente ativo sem `nucleo_id` |
-| `NUCLEO_INEXISTENTE` | ERRO | `nucleo_id` não existe na aba `Nucleos` da matriz |
-| `COMPONENTE_SEM_AREA` | ERRO | componente ativo sem nenhum id na coluna `areas` |
-| `AREA_INEXISTENTE` | ERRO | id da coluna `areas` não existe na aba `Areas` da matriz |
-| `TEMA_TRANSVERSAL_INEXISTENTE` | ERRO | id da coluna `temas` não existe na aba `Temas` da matriz |
-| `COMPETENCIA_INEXISTENTE` | ERRO | id da coluna `competencias` não existe em `perfil.competencias` |
-| `COMPETENCIA_OBRIGATORIA_SEM_COBERTURA` | ALERTA | competência com `obrigatoria: true` sem nenhum componente ativo que a referencie |
+| `COMPONENTE_SEM_NUCLEO` | ERRO | componente ativo não aparece em `componentes` de nenhuma linha da aba `Nucleos` |
+| `COMPONENTE_SEM_AREA` | ERRO | componente ativo não aparece em `componentes` de nenhuma linha da aba `Areas` |
+| `NUCLEO_COMPONENTE_INEXISTENTE` | ERRO | código em `componentes` de uma linha de `Nucleos` não existe na aba `Componentes` |
+| `AREA_COMPONENTE_INEXISTENTE` | ERRO | código em `componentes` de uma linha de `Areas` não existe na aba `Componentes` |
+| `TEMA_TRANSVERSAL_COMPONENTE_INEXISTENTE` | ERRO | código em `componentes` de uma linha de `Temas` não existe na aba `Componentes` |
+| `CONTEUDO_COMPONENTE_INEXISTENTE` | ERRO | código em `componentes` de uma linha de `Conteudos` não existe na aba `Componentes` |
+| `COMPETENCIA_COMPONENTE_INEXISTENTE` | ERRO | código em `componentes` de uma linha de `Competencias` não existe na aba `Componentes` |
+| `NUCLEO_MULTIPLO_PARA_COMPONENTE` | ERRO | mesmo código aparece em `componentes` de mais de uma linha da aba `Nucleos` — núcleo é cardinalidade 1 |
+| `COMPETENCIA_OBRIGATORIA_SEM_COBERTURA` | ALERTA | competência com `obrigatoria: true` sem nenhum componente ativo em `componentes` |
 | `TEMA_TRANSVERSAL_OBRIGATORIO_SEM_COBERTURA` | ALERTA | tema com `status: obrigatorio` sem cobertura |
-| `CONTEUDO_INEXISTENTE` | ERRO | id da coluna `conteudos` não existe na aba `Conteudos` da matriz |
-| `CONTEUDO_OBRIGATORIO_SEM_COBERTURA` | ALERTA | conteúdo com `obrigatorio: true` sem nenhum componente ativo que o referencie |
+| `CONTEUDO_OBRIGATORIO_SEM_COBERTURA` | ALERTA | conteúdo com `obrigatorio: true` sem nenhum componente ativo em `componentes` |
 
 ## Equivalências (`ppcgen.validadores.prerequisitos.validar_equivalencias`)
 

@@ -23,7 +23,7 @@ from pathlib import Path
 import yaml
 
 from ppcgen.excecoes import ConfiguracaoInvalida
-from ppcgen.modelos import Competencia, ReferencialCurricular
+from ppcgen.modelos import ReferencialCurricular
 from ppcgen.utilitarios.caminhos import raiz_projeto
 
 
@@ -160,9 +160,6 @@ class Perfil:
     ``referenciais/legislacao.yaml`` (e o ``heranca.legislacao`` que
     apontava para arquivos compartilhados): tudo fica direto em
     ``perfil.yaml`` agora, sem arquivo externo para editar em separado."""
-    competencias: list[Competencia] = field(default_factory=list)
-    """Catálogo de competências deste perfil — substitui o antigo
-    ``referenciais/competencias.yaml``."""
     perfil_base: "Perfil | None" = None
     _bruto_efetivo: dict = field(default_factory=dict, repr=False)
 
@@ -323,10 +320,6 @@ def carregar_perfil(
         _construir_lista(ReferencialCurricular, base_efetivo.get("legislacao") or []),
         _construir_lista(ReferencialCurricular, bruto.get("legislacao") or []),
     )
-    competencias = _mesclar_por_id(
-        _construir_lista(Competencia, base_efetivo.get("competencias") or []),
-        _construir_lista(Competencia, bruto.get("competencias") or []),
-    )
 
     perfil = Perfil(
         info=_construir(InfoPerfil, info_bruta),
@@ -346,7 +339,6 @@ def carregar_perfil(
         diretorio=perfil_dir,
         raiz_dados=raiz_dados,
         legislacao=legislacao,
-        competencias=competencias,
         perfil_base=perfil_base,
         _bruto_efetivo=efetivo,
     )

@@ -4,29 +4,44 @@ Esquema de abas adotado (documentado em ``docs/DICIONARIO_DADOS.md``):
 
 1. ``Componentes``   — todos os componentes do curso (obrigatórios,
    optativos pré-aprovados, extensão, estágio, TCC, AAC...), diferenciados
-   pelo campo ``tipo`` — não por prefixo/sufixo de código. Pré-requisitos,
-   correquisitos, áreas, temas transversais, conteúdos e competências de
-   cada componente são colunas desta própria aba (listas separadas por
-   vírgula), não abas de junção separadas — ver ``_lista_ids``/
-   ``_parse_prerequisitos``/``_parse_correquisitos`` abaixo para a sintaxe
-   exata.
+   pelo campo ``tipo`` — não por prefixo/sufixo de código. Pré-requisitos e
+   correquisitos são colunas desta própria aba (listas separadas por
+   vírgula) — ver ``_lista_ids``/``_parse_prerequisitos``/
+   ``_parse_correquisitos`` abaixo. Núcleo, áreas, temas transversais,
+   conteúdos e competências de cada componente **não** são colunas daqui —
+   são derivados na direção inversa, a partir da coluna ``componentes`` de
+   cada aba de catálogo (item 3-7 abaixo).
 2. ``Equivalencias`` — codigo_origem -> codigo_destino.
-3. ``Nucleos``       — catálogo de núcleos curriculares (id, nome, descrição).
-4. ``Areas``         — catálogo de áreas de formação (id, nome, descrição).
+3. ``Nucleos``       — catálogo de núcleos curriculares (id, nome, descrição,
+   componentes).
+4. ``Areas``         — catálogo de áreas de formação (id, nome, descrição,
+   componentes).
 5. ``Temas``         — catálogo de temas transversais (id, nome, descrição,
-   fonte normativa, status).
+   fonte normativa, status, componentes).
 6. ``Conteudos``     — catálogo de conteúdos curriculares exigidos por
-   alguma DCN (id, descrição, obrigatório, fonte).
-7. ``Certificacoes`` — opcional: certificacao_id -> codigo_componente (0+).
+   alguma DCN (id, descrição, obrigatório, fonte, componentes).
+7. ``Competencias``  — catálogo de competências do curso (id, descrição,
+   obrigatória, fonte, componentes).
+8. ``Certificacoes`` — opcional: certificacao_id -> codigo_componente (0+).
 
-Núcleo é uma coluna direta em ``Componentes`` (cardinalidade 1). Os
-catálogos de legislação e competências não vivem na matriz — são
-``perfil.legislacao``/``perfil.competencias``, direto em ``perfil.yaml``
-(``ppcgen.config``), porque não são dados curriculares por componente. Não
-há mais aba ``Curso``: a versão curricular é ``perfil.info.versao`` (Seção
-sobre fontes únicas em ``docs/DICIONARIO_DADOS.md``) — outras abas que a
-planilha tenha (ex.: um fluxograma visual próprio de cada curso) não fazem
-parte deste esquema e não são lidas por este módulo.
+Em cada aba de catálogo (3-7), ``componentes`` é uma célula com códigos de
+componente separados por ``|`` — os componentes vinculados àquele item. O
+leitor monta o índice invertido no momento da carga: para cada código
+listado, acrescenta o id do item de catálogo ao campo correspondente do
+``ComponenteCurricular`` (``nucleo`` é cardinalidade 1 — primeiro núcleo a
+reivindicar o componente vence; ``ppcgen.validadores.referenciais`` reporta
+tanto códigos inexistentes quanto núcleos conflitantes). Um código listado
+em ``componentes`` que não existe na aba ``Componentes`` não é erro do
+leitor (Seção 29 — nunca perder dado silenciosamente): fica preservado em
+``<Catalogo>.componentes`` (bruto) para o validador reportar.
+
+O catálogo de legislação não vive na matriz — é ``perfil.legislacao``,
+direto em ``perfil.yaml`` (``ppcgen.config``), porque não é um dado
+curricular por componente. Não há mais aba ``Curso``: a versão curricular é
+``perfil.info.versao`` (Seção sobre fontes únicas em
+``docs/DICIONARIO_DADOS.md``) — outras abas que a planilha tenha (ex.: um
+fluxograma visual próprio de cada curso) não fazem parte deste esquema e
+não são lidas por este módulo.
 """
 
 from __future__ import annotations
@@ -39,6 +54,7 @@ from ppcgen.excecoes import ArquivoNaoEncontrado, FormatoInvalido
 from ppcgen.modelos import (
     AreaFormacao,
     CargaHoraria,
+    Competencia,
     ComponenteCurricular,
     Conteudo,
     Correquisito,
@@ -58,6 +74,7 @@ ABAS_OPCIONAIS = (
     "Areas",
     "Temas",
     "Conteudos",
+    "Competencias",
     "Certificacoes",
 )
 
@@ -109,14 +126,25 @@ def _tipo_componente(valor) -> TipoComponente:
 
 
 def _lista_ids(valor) -> list[str]:
-    """Split de uma célula com IDs separados por vírgula (usada para áreas,
-    temas, conteúdos e competências) — células vazias viram lista vazia,
+    """Split de uma célula com IDs separados por vírgula (usada para
+    pré-requisitos/correquisitos) — células vazias viram lista vazia,
     nunca ``[""]``."""
 
     texto = _str_ou_vazio(valor)
     if not texto:
         return []
     return [item.strip() for item in texto.split(",") if item.strip()]
+
+
+def _lista_ids_pipe(valor) -> list[str]:
+    """Split de uma célula com códigos de componente separados por ``|``
+    (coluna ``componentes`` das abas de catálogo) — células vazias viram
+    lista vazia, nunca ``[""]``."""
+
+    texto = _str_ou_vazio(valor)
+    if not texto:
+        return []
+    return [item.strip() for item in texto.split("|") if item.strip()]
 
 
 def _extrair_opcional(item: str) -> tuple[str, bool]:
@@ -159,11 +187,14 @@ def _parse_prerequisitos(valor) -> list[PreRequisito]:
 
 
 def carregar_registros_referenciais(wb) -> ReferenciaisCurso:
-    """Lê os catálogos de núcleos/áreas/temas/conteúdos das abas de registro
-    da própria matriz (``Nucleos``/``Areas``/``Temas``/``Conteudos``) —
-    substitui os antigos ``referenciais/*.yaml``. Retorna um
-    :class:`ReferenciaisCurso` só com esses quatro campos preenchidos;
-    ``legislacao``/``competencias`` vêm de ``perfil.yaml``, não daqui."""
+    """Lê os catálogos de núcleos/áreas/temas/conteúdos/competências das
+    abas de registro da própria matriz (``Nucleos``/``Areas``/``Temas``/
+    ``Conteudos``/``Competencias``) — substitui os antigos
+    ``referenciais/*.yaml``. Retorna um :class:`ReferenciaisCurso` só com
+    esses cinco campos preenchidos; ``legislacao`` vem de ``perfil.yaml``,
+    não daqui. Não vincula aos componentes ainda — isso é
+    ``_aplicar_vinculos_catalogo``, chamada por ``carregar_matriz`` depois
+    que a aba ``Componentes`` também estiver carregada."""
 
     referenciais = ReferenciaisCurso()
 
@@ -176,6 +207,7 @@ def carregar_registros_referenciais(wb) -> ReferenciaisCurso:
                         id=id_,
                         nome=_str_ou_vazio(row.get("nome")),
                         descricao=_str_ou_vazio(row.get("descricao")),
+                        componentes=_lista_ids_pipe(row.get("componentes")),
                     )
                 )
 
@@ -188,6 +220,7 @@ def carregar_registros_referenciais(wb) -> ReferenciaisCurso:
                         id=id_,
                         nome=_str_ou_vazio(row.get("nome")),
                         descricao=_str_ou_vazio(row.get("descricao")),
+                        componentes=_lista_ids_pipe(row.get("componentes")),
                     )
                 )
 
@@ -202,6 +235,7 @@ def carregar_registros_referenciais(wb) -> ReferenciaisCurso:
                         descricao=_str_ou_vazio(row.get("descricao")),
                         fonte_normativa=_str_ou_vazio(row.get("fonte_normativa")),
                         status=_str_ou_vazio(row.get("status")) or "ativo",
+                        componentes=_lista_ids_pipe(row.get("componentes")),
                     )
                 )
 
@@ -215,10 +249,84 @@ def carregar_registros_referenciais(wb) -> ReferenciaisCurso:
                         descricao=_str_ou_vazio(row.get("descricao")),
                         obrigatorio=_bool(row.get("obrigatorio")),
                         fonte=_str_ou_vazio(row.get("fonte")),
+                        componentes=_lista_ids_pipe(row.get("componentes")),
+                    )
+                )
+
+    if "Competencias" in wb.sheetnames:
+        for row in _linhas(wb["Competencias"]):
+            id_ = _str_ou_vazio(row.get("id"))
+            if id_:
+                referenciais.competencias.append(
+                    Competencia(
+                        id=id_,
+                        descricao=_str_ou_vazio(row.get("descricao")),
+                        obrigatoria=_bool(row.get("obrigatoria")),
+                        fonte=_str_ou_vazio(row.get("fonte")),
+                        componentes=_lista_ids_pipe(row.get("componentes")),
                     )
                 )
 
     return referenciais
+
+
+def _aplicar_vinculos_catalogo(
+    componentes_por_codigo: dict[str, ComponenteCurricular], referenciais: ReferenciaisCurso
+) -> list[str]:
+    """Monta o índice invertido: para cada item de catálogo, para cada
+    código em ``item.componentes``, preenche o campo correspondente do
+    ``ComponenteCurricular``. Código que não existe na aba ``Componentes``
+    não é alterado aqui (fica só em ``item.componentes``, bruto, para
+    ``ppcgen.validadores.referenciais`` reportar) — este leitor nunca
+    lança exceção nem descarta dado por uma referência quebrada (Seção 29).
+
+    Núcleo é cardinalidade 1: o primeiro núcleo (na ordem da aba
+    ``Nucleos``) a reivindicar um código vence; reivindicações
+    conflitantes viram aviso aqui e ``NUCLEO_MULTIPLO_PARA_COMPONENTE``
+    (erro) no validador, que varre ``referenciais.nucleos`` diretamente.
+    """
+
+    avisos: list[str] = []
+
+    for nucleo in referenciais.nucleos:
+        for codigo in nucleo.componentes:
+            componente = componentes_por_codigo.get(codigo)
+            if componente is None:
+                continue
+            if componente.nucleo is None:
+                componente.nucleo = nucleo.id
+            elif componente.nucleo != nucleo.id:
+                avisos.append(
+                    f"{codigo}: aparece em 'componentes' de mais de um núcleo "
+                    f"('{componente.nucleo}' e '{nucleo.id}') — mantido "
+                    f"'{componente.nucleo}'."
+                )
+
+    for area in referenciais.areas:
+        for codigo in area.componentes:
+            componente = componentes_por_codigo.get(codigo)
+            if componente is not None:
+                componente.areas.append(area.id)
+
+    for tema in referenciais.temas_transversais:
+        for codigo in tema.componentes:
+            componente = componentes_por_codigo.get(codigo)
+            if componente is not None:
+                componente.temas_transversais.append(tema.id)
+
+    for conteudo in referenciais.conteudos:
+        for codigo in conteudo.componentes:
+            componente = componentes_por_codigo.get(codigo)
+            if componente is not None:
+                componente.conteudos.append(conteudo.id)
+
+    for competencia in referenciais.competencias:
+        for codigo in competencia.componentes:
+            componente = componentes_por_codigo.get(codigo)
+            if componente is not None:
+                componente.competencias.append(competencia.id)
+
+    return avisos
 
 
 def carregar_matriz(caminho: str | Path) -> tuple[Curriculo, ReferenciaisCurso, list[str]]:
@@ -230,9 +338,10 @@ def carregar_matriz(caminho: str | Path) -> tuple[Curriculo, ReferenciaisCurso, 
     dado numa aba ``Curso`` separada). Quem chama com um ``Perfil`` em mãos
     deve fazer ``curriculo.versao = perfil.info.versao`` depois de carregar.
 
-    ``referenciais`` traz só núcleos/áreas/temas/conteúdos (das abas de
-    registro da própria matriz) — quem chama ainda precisa preencher
-    ``legislacao``/``competencias`` a partir de ``perfil.yaml``.
+    ``referenciais`` traz núcleos/áreas/temas/conteúdos/competências (das
+    abas de registro da própria matriz, já vinculados aos componentes) —
+    quem chama ainda precisa preencher ``legislacao`` a partir de
+    ``perfil.yaml``.
 
     ``avisos_leitura`` registra situações que o leitor não deve "corrigir"
     silenciosamente (ex.: célula de status ativo/inativo em branco) — cabe ao
@@ -280,11 +389,6 @@ def carregar_matriz(caminho: str | Path) -> tuple[Curriculo, ReferenciaisCurso, 
             periodo=_int_ou_none(row.get("periodo")),
             ativo=_bool(row.get("ativo"), padrao=True),
             obrigatorio=_bool(row.get("obrigatorio")),
-            nucleo=_str_ou_vazio(row.get("nucleo_id")) or None,
-            areas=_lista_ids(row.get("areas")),
-            competencias=_lista_ids(row.get("competencias")),
-            conteudos=_lista_ids(row.get("conteudos")),
-            temas_transversais=_lista_ids(row.get("temas")),
             pre_requisitos=_parse_prerequisitos(row.get("pre_requisitos")),
             correquisitos=_parse_correquisitos(row.get("correquisitos")),
             observacoes=_str_ou_vazio(row.get("observacoes")),
@@ -306,6 +410,13 @@ def carregar_matriz(caminho: str | Path) -> tuple[Curriculo, ReferenciaisCurso, 
                 )
 
     referenciais = carregar_registros_referenciais(wb)
+
+    # Códigos duplicados resolvem para a última ocorrência (mesmo critério
+    # de ``Curriculo.por_codigo()``) — degenerado por definição, mas
+    # ``CODIGO_DUPLICADO`` (``ppcgen.validadores.codigos``) já cobre esse
+    # caso separadamente.
+    componentes_por_codigo = {c.codigo: c for c in componentes}
+    avisos.extend(_aplicar_vinculos_catalogo(componentes_por_codigo, referenciais))
 
     curriculo = Curriculo(
         versao="",

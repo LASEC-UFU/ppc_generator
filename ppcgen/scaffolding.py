@@ -40,17 +40,17 @@ def _criar_matriz_vazia(caminho: Path) -> None:
     componentes.append(
         [
             "codigo", "nome", "tipo", "periodo", "ativo", "obrigatorio",
-            "cht", "chp", "chd", "che", "tot",
-            "nucleo_id", "observacoes",
-            "pre_requisitos", "correquisitos", "areas", "temas", "conteudos", "competencias",
+            "cht", "chp", "chd", "che", "tot", "observacoes",
+            "pre_requisitos", "correquisitos",
         ]
     )
     for aba, cabecalho in (
         ("Equivalencias", ["codigo_origem", "codigo_destino", "observacao"]),
-        ("Nucleos", ["id", "nome", "descricao"]),
-        ("Areas", ["id", "nome", "descricao"]),
-        ("Temas", ["id", "nome", "descricao", "fonte_normativa", "status"]),
-        ("Conteudos", ["id", "descricao", "obrigatorio", "fonte"]),
+        ("Nucleos", ["id", "nome", "descricao", "componentes"]),
+        ("Areas", ["id", "nome", "descricao", "componentes"]),
+        ("Temas", ["id", "nome", "descricao", "fonte_normativa", "status", "componentes"]),
+        ("Conteudos", ["id", "descricao", "obrigatorio", "fonte", "componentes"]),
+        ("Competencias", ["id", "descricao", "obrigatoria", "fonte", "componentes"]),
     ):
         ws = wb.create_sheet(aba)
         ws.append(cabecalho)
@@ -141,7 +141,6 @@ def criar_perfil(pasta_perfis: Path, perfil_id: str, nome: str) -> Path:
             "gerar_completo": True,
         },
         "legislacao": [],
-        "competencias": [],
     }
     (destino / "perfil.yaml").write_text(
         yaml.safe_dump(perfil_yaml, allow_unicode=True, sort_keys=False), encoding="utf-8"
@@ -167,10 +166,11 @@ def criar_perfil(pasta_perfis: Path, perfil_id: str, nome: str) -> Path:
 
     (destino / "README.md").write_text(
         f"# Perfil: {perfil_id}\n\n{nome}\n\nStatus: rascunho — gerado por "
-        "`python -m ppcgen perfil-criar`. Preencha `perfil.yaml` (incluindo as "
-        "seções `legislacao:`/`competencias:`), `matriz_curricular.xlsx` "
-        "(componentes e as abas Nucleos/Areas/Temas/Conteudos) e `textos/` "
-        "antes de validar.\n",
+        "`python -m ppcgen perfil-criar`. Preencha `perfil.yaml` (incluindo a "
+        "seção `legislacao:`), `matriz_curricular.xlsx` (componentes e as "
+        "abas Nucleos/Areas/Temas/Conteudos/Competencias, cada uma com sua "
+        "coluna `componentes` listando os códigos vinculados, separados por "
+        "`|`) e `textos/` antes de validar.\n",
         encoding="utf-8",
     )
 

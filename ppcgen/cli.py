@@ -124,11 +124,11 @@ def _carregar_contexto(perfil: Perfil) -> tuple[Curriculo, ReferenciaisCurso, li
             _curriculo_base, referenciais_base, _avisos_base = carregar_matriz(caminho_matriz_base)
             referenciais = _mesclar_referenciais(referenciais_base, referenciais)
 
-    # legislação/competências vêm direto de perfil.yaml (já mescladas com o
-    # perfil base, se houver, em ``ppcgen.config.carregar_perfil``) — não de
-    # nenhum arquivo separado.
+    # legislação vem direto de perfil.yaml (já mesclada com o perfil base,
+    # se houver, em ``ppcgen.config.carregar_perfil``) — não de nenhum
+    # arquivo separado. Competências vêm da matriz, igual a
+    # núcleos/áreas/temas/conteúdos (``carregar_matriz`` acima).
     referenciais.legislacao = list(perfil.legislacao)
-    referenciais.competencias = list(perfil.competencias)
 
     return curriculo, referenciais, avisos
 

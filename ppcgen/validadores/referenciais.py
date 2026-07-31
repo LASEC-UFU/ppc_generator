@@ -1,12 +1,20 @@
 """Validações contra os referenciais configuráveis (Seção 8): núcleos, áreas,
-temas transversais e conteúdos devem existir nas abas de registro da matriz
-(``Nucleos``/``Areas``/``Temas``/``Conteudos``); competências devem existir
-em ``perfil.competencias`` (``perfil.yaml``) — nenhum identificador é
-aceito "de graça". Também reporta competências/conteúdos marcados como
+temas transversais, conteúdos e competências vivem nas abas de registro da
+matriz (``Nucleos``/``Areas``/``Temas``/``Conteudos``/``Competencias``), cada
+uma vinculando os componentes que cobre via a coluna ``componentes`` (códigos
+separados por ``|``) — a direção é catálogo → componente, não o contrário
+(``ppcgen.leitores.excel._aplicar_vinculos_catalogo`` monta o índice
+invertido no momento da carga). Este módulo confere as duas pontas dessa
+relação: que todo componente ativo tenha núcleo/área definidos, que todo
+código listado em ``componentes`` de um item de catálogo exista de fato na
+aba ``Componentes``, e que nenhum componente seja reivindicado por mais de um
+núcleo. Também reporta competências/conteúdos/temas marcados como
 obrigatórios que não têm nenhum componente ativo cobrindo-os.
 """
 
 from __future__ import annotations
+
+from collections import Counter
 
 from ppcgen.modelos import AlertaValidacao, Curriculo, ErroValidacao, ReferenciaisCurso, ResultadoValidacao
 
@@ -14,27 +22,12 @@ from ppcgen.modelos import AlertaValidacao, Curriculo, ErroValidacao, Referencia
 def validar_referenciais(curriculo: Curriculo, referenciais: ReferenciaisCurso) -> ResultadoValidacao:
     resultado = ResultadoValidacao()
 
-    ids_nucleos = referenciais.ids_nucleos()
-    ids_areas = referenciais.ids_areas()
-    ids_temas = referenciais.ids_temas()
-    ids_competencias = referenciais.ids_competencias()
-    ids_conteudos = referenciais.ids_conteudos()
-
     for c in curriculo.ativos():
         if c.nucleo is None:
             resultado.adicionar(
                 ErroValidacao(
                     "COMPONENTE_SEM_NUCLEO",
                     f"componente ativo '{c.codigo}' não possui núcleo curricular definido.",
-                    componente=c.codigo,
-                )
-            )
-        elif ids_nucleos and c.nucleo not in ids_nucleos:
-            resultado.adicionar(
-                ErroValidacao(
-                    "NUCLEO_INEXISTENTE",
-                    f"núcleo '{c.nucleo}' de '{c.codigo}' não está definido na "
-                    "aba Nucleos da matriz curricular.",
                     componente=c.codigo,
                 )
             )
@@ -47,53 +40,44 @@ def validar_referenciais(curriculo: Curriculo, referenciais: ReferenciaisCurso) 
                     componente=c.codigo,
                 )
             )
-        elif ids_areas:
-            for area in c.areas:
-                if area not in ids_areas:
+
+    por_codigo = curriculo.por_codigo()
+
+    def _checar_componentes_do_catalogo(itens, tipo: str, codigo_regra: str) -> None:
+        for item in itens:
+            for codigo in item.componentes:
+                if codigo not in por_codigo:
                     resultado.adicionar(
                         ErroValidacao(
-                            "AREA_INEXISTENTE",
-                            f"área '{area}' de '{c.codigo}' não está definida na "
-                            "aba Areas da matriz curricular.",
-                            componente=c.codigo,
+                            codigo_regra,
+                            f"código '{codigo}' listado em 'componentes' de {tipo} "
+                            f"'{item.id}' não existe na aba Componentes da matriz curricular.",
+                            componente=codigo,
                         )
                     )
 
-        if ids_temas:
-            for tema in c.temas_transversais:
-                if tema not in ids_temas:
-                    resultado.adicionar(
-                        ErroValidacao(
-                            "TEMA_TRANSVERSAL_INEXISTENTE",
-                            f"tema transversal '{tema}' de '{c.codigo}' não está definido "
-                            "na aba Temas da matriz curricular.",
-                            componente=c.codigo,
-                        )
-                    )
+    _checar_componentes_do_catalogo(referenciais.nucleos, "núcleo", "NUCLEO_COMPONENTE_INEXISTENTE")
+    _checar_componentes_do_catalogo(referenciais.areas, "área", "AREA_COMPONENTE_INEXISTENTE")
+    _checar_componentes_do_catalogo(
+        referenciais.temas_transversais, "tema transversal", "TEMA_TRANSVERSAL_COMPONENTE_INEXISTENTE"
+    )
+    _checar_componentes_do_catalogo(referenciais.conteudos, "conteúdo", "CONTEUDO_COMPONENTE_INEXISTENTE")
+    _checar_componentes_do_catalogo(referenciais.competencias, "competência", "COMPETENCIA_COMPONENTE_INEXISTENTE")
 
-        if ids_competencias:
-            for competencia in c.competencias:
-                if competencia not in ids_competencias:
-                    resultado.adicionar(
-                        ErroValidacao(
-                            "COMPETENCIA_INEXISTENTE",
-                            f"competência '{competencia}' de '{c.codigo}' não está definida "
-                            "em perfil.competencias (perfil.yaml).",
-                            componente=c.codigo,
-                        )
-                    )
-
-        if ids_conteudos:
-            for conteudo in c.conteudos:
-                if conteudo not in ids_conteudos:
-                    resultado.adicionar(
-                        ErroValidacao(
-                            "CONTEUDO_INEXISTENTE",
-                            f"conteúdo '{conteudo}' de '{c.codigo}' não está definido "
-                            "na aba Conteudos da matriz curricular.",
-                            componente=c.codigo,
-                        )
-                    )
+    contagem_nucleos = Counter(
+        codigo for nucleo in referenciais.nucleos for codigo in nucleo.componentes
+    )
+    for codigo, qtd in contagem_nucleos.items():
+        if qtd > 1:
+            nucleos_reivindicantes = [n.id for n in referenciais.nucleos if codigo in n.componentes]
+            resultado.adicionar(
+                ErroValidacao(
+                    "NUCLEO_MULTIPLO_PARA_COMPONENTE",
+                    f"componente '{codigo}' aparece em 'componentes' de mais de um núcleo "
+                    f"({', '.join(nucleos_reivindicantes)}) — cada componente pertence a um só núcleo.",
+                    componente=codigo,
+                )
+            )
 
     competencias_cobertas = {
         competencia_id

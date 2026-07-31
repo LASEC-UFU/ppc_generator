@@ -17,8 +17,8 @@ python -m ppcgen perfil-criar --id engenharia_software_2027_1 --nome "Engenharia
 
 Isso cria `dados/perfis/engenharia_software_2027_1/` com toda a árvore
 padrão de um perfil já no lugar: `perfil.yaml` mínimo (já com `legislacao:
-[]` e `competencias: []`), `matriz_curricular.xlsx` só com cabeçalhos
-(incluindo as abas de registro `Nucleos`/`Areas`/`Temas`/`Conteudos`, todas
+[]`), `matriz_curricular.xlsx` só com cabeçalhos (incluindo as abas de
+registro `Nucleos`/`Areas`/`Temas`/`Conteudos`/`Competencias`, todas
 vazias), os 12 `textos/*.tex` com um `\chapter{}` placeholder cada,
 `frontmatter/*.yaml` vazios, `referencias/bibliografia.bib` vazio, e as
 subpastas de `fichas/`/`anexos/`/`overrides/`. O perfil já é
@@ -36,27 +36,29 @@ Ver `docs/PERFIS.md` para o significado de cada campo. No mínimo, decida:
   preencha `heranca:` apontando para `dados/compartilhados/` em vez de
   copiar os dados institucionais. Se a instituição ainda não existe em
   `compartilhados/`, crie-a lá primeiro — não duplique dentro do perfil.
-- Preencha `legislacao:` (lista de referenciais legais deste curso) e
-  `competencias:` (pode ficar `[]` se o curso não rastreia competências
-  individualmente) — não há mais arquivo externo para isso, é tudo aqui
-  (ver `docs/DICIONARIO_DADOS.md` para os campos de cada entrada).
+- Preencha `legislacao:` (lista de referenciais legais deste curso) — não
+  há mais arquivo externo para isso, é tudo aqui (ver
+  `docs/DICIONARIO_DADOS.md` para os campos de cada entrada). Competências
+  não ficam em `perfil.yaml` — são a aba `Competencias` da matriz (próximo
+  passo), pode ficar vazia se o curso não rastreia competências
+  individualmente.
 
 ## 4. Preencher a matriz curricular
 
 Edite `matriz_curricular.xlsx`. Aba obrigatória: `Componentes`. Opcionais:
-`Equivalencias`, `Nucleos`, `Areas`, `Temas`, `Conteudos`, `Certificacoes`
-— schema completo em `docs/DICIONARIO_DADOS.md`. Pontos que costumam pegar
-quem preenche pela primeira vez:
+`Equivalencias`, `Nucleos`, `Areas`, `Temas`, `Conteudos`, `Competencias`,
+`Certificacoes` — schema completo em `docs/DICIONARIO_DADOS.md`. Pontos
+que costumam pegar quem preenche pela primeira vez:
 
-- **Núcleo é uma coluna em `Componentes`** (`nucleo_id`), com o catálogo
-  de núcleos válidos na aba `Nucleos` — não é uma aba de junção.
-- **Pré-requisitos, correquisitos, áreas, temas, conteúdos e
-  competências de um componente são colunas da própria aba
-  `Componentes`** (listas separadas por vírgula — ex.:
-  `CTR401, CTR203 (opcional), >=1200h` na coluna `pre_requisitos`), não
-  abas de junção separadas. `Nucleos`/`Areas`/`Temas`/`Conteudos` são só
-  os *catálogos* (`id`, `nome`/`descricao`, ...) contra os quais essas
-  colunas são conferidas.
+- **Núcleo, áreas, temas, conteúdos e competências de um componente NÃO
+  são colunas de `Componentes`** — são a coluna `componentes` (códigos
+  separados por `|`) de cada linha das abas `Nucleos`/`Areas`/`Temas`/
+  `Conteudos`/`Competencias`. A direção é catálogo → componente: você
+  edita o item de catálogo e lista nele os componentes que o cobrem, não
+  o contrário.
+- **Pré-requisitos e correquisitos de um componente são colunas da
+  própria aba `Componentes`** (listas separadas por vírgula — ex.:
+  `CTR401, CTR203 (opcional), >=1200h` na coluna `pre_requisitos`).
 - **Optativa não é uma aba** — é um componente com `tipo=carga_optativa`
   na aba `Componentes`.
 - **`tipo`, não `obrigatorio`, decide o que conta no total oficial do
@@ -65,10 +67,10 @@ quem preenche pela primeira vez:
   serve só para a tabela "Componentes Curriculares Obrigatórios".
 - Deixe `ativo` **explícito** (`TRUE`/`FALSE`) em vez de em branco — célula
   vazia gera um aviso (`LEITURA_DADO_OMITIDO`) mesmo assumindo `TRUE`.
-- Todo `nucleo_id`/id de `areas`/`temas`/`conteudos` usado em
-  `Componentes` precisa existir na aba de registro correspondente, ou o
-  validador acusa `*_INEXISTENTE`; todo id de `competencias` precisa
-  existir em `perfil.competencias`.
+- Todo código listado em `componentes` de `Nucleos`/`Areas`/`Temas`/
+  `Conteudos`/`Competencias` precisa existir na aba `Componentes`, ou o
+  validador acusa `*_COMPONENTE_INEXISTENTE`; um mesmo componente em mais
+  de uma linha de `Nucleos` acusa `NUCLEO_MULTIPLO_PARA_COMPONENTE`.
 
 ## 6. Escrever os 12 capítulos em `textos/`
 

@@ -1,0 +1,2741 @@
+﻿Option Explicit
+
+' =============================================================================
+' SINCRONIZAÇÃO: FLUXOGRAMA -> COMPONENTES — VERSÃO 15
+'
+' Formato do título de cada bloco:
+'       ID
+'       CODIGO
+'       NOME
+'
+'   A macro aceita:
+'     1. as três informações na mesma célula, separadas por quebra de linha;
+'     2. as três informações em três linhas/células consecutivas do bloco;
+'     3. como contingência, ID, CODIGO e NOME no mesmo texto, separados por espaços.
+'
+' Estrutura considerada na versão atual do Fluxograma:
+'   - macrobloco superior:
+'       colunas-base C, J, Q, X, AE, AL, AS, AZ, BG e BN
+'       linhas 9, 14, 19, 24, 29, 34, 39 e 44
+'   - macrobloco inferior:
+'       colunas-base C, J, Q, X, AE, AL, AS, AZ, BG e BN
+'       linhas 53 e 58
+'   - cada bloco possui cinco colunas de dados;
+'   - as cargas horárias ficam três linhas abaixo do título;
+'   - da esquerda para a direita: cht, chd, chp, che e tot;
+'   - os conectores de pré-requisito e correquisito ficam imediatamente
+'     à ESQUERDA do bloco ao qual pertencem;
+'   - linha simples = pré-requisito;
+'   - linha dupla = correquisito;
+'   - cada requisito pode ser um ID de disciplina ou uma exigência em horas;
+'   - exigências como "100 horas" são preservadas literalmente na saída.
+'
+' Campos sincronizados:
+'   codigo, nome, periodo, cht, chd, chp, che, tot, tipo, obrigatorio,
+'   ativo, pre_requisitos e correquisitos.
+'
+' Todo componente encontrado no Fluxograma recebe ativo = VERDADEIRO.
+' No campo obrigatorio, todo componente encontrado recebe explicitamente:
+'   - VERDADEIRO para o macrobloco superior;
+'   - FALSO para o macrobloco inferior de optativas.
+' Componentes existentes apenas na aba Componentes mantêm os valores atuais
+' de ativo e obrigatorio, pois não são processados pela sincronização.
+' Para componentes presentes no Fluxograma, obrigatorio é gravado e validado
+' como valor lógico real, inclusive quando muda de VERDADEIRO para FALSO.
+'
+' O ID do bloco é usado somente internamente para interpretar as relações
+' desenhadas no Fluxograma. Ele não é gravado nem exigido na aba Componentes.
+'
+' Regras de preservação:
+'   - o código é a chave única na aba Componentes;
+'   - uma linha existente nunca é recriada;
+'   - somente os campos acima podem ser alterados;
+'   - id, nucleo_id, areas, temas e competencias não são lidos nem modificados;
+'   - colunas não sincronizadas, fórmulas, estilos e validações são preservados;
+'   - componentes existentes apenas na aba Componentes não são alterados;
+'   - componentes novos recebem uma nova linha sem apagar dados de outras linhas;
+'   - a macro não cria nem modifica botão.
+'
+' Para executar por um botão criado manualmente:
+'   Texto sugerido do botão: Atualizar Componentes
+'   Macro a atribuir:         AtualizarComponentes
+' =============================================================================
+
+Private Const ABA_FLUXOGRAMA As String = "Fluxograma"
+Private Const ABA_COMPONENTES As String = "Componentes"
+
+Private Const LINHA_CABECALHO_COMPONENTES As Long = 1
+Private Const DESLOCAMENTO_LINHA_CARGAS As Long = 3
+Private Const ALTURA_GRUPO As Long = 5
+Private Const LARGURA_BLOCO As Long = 5
+Private Const MAX_LINHAS_CABECALHO_PERIODO As Long = 8
+
+' Geometria horizontal do fluxograma:
+'   C:G   = primeiro bloco; B = coluna de requisitos do primeiro bloco
+'   J:N   = segundo bloco; I = coluna de requisitos do segundo bloco
+'   Q:U   = terceiro bloco; P = coluna de requisitos do terceiro bloco
+' Entre os blocos existem duas colunas de separação.
+' Cada novo bloco começa sete colunas após o anterior.
+' Tanto o macrobloco superior quanto o inferior percorrem dez posições:
+' C, J, Q, X, AE, AL, AS, AZ, BG e BN.
+Private Const PRIMEIRA_COLUNA_BLOCO As Long = 3       ' C
+Private Const PASSO_COLUNAS_BLOCO As Long = 7
+Private Const QUANTIDADE_BLOCOS_SUPERIOR As Long = 10
+Private Const QUANTIDADE_BLOCOS_INFERIOR As Long = 10
+
+' -----------------------------------------------------------------------------
+' GEOMETRIA DOS BLOCOS
+' -----------------------------------------------------------------------------
+Private Function CriarSequenciaColunas( _
+    ByVal primeiraColuna As Long, _
+    ByVal quantidade As Long) As Variant
+
+    Dim colunas() As Long
+    Dim indice As Long
+
+    If primeiraColuna < 1 Then
+        Err.Raise vbObjectError + 1090, _
+                  "CriarSequenciaColunas", _
+                  "A primeira coluna dos blocos deve ser maior que zero."
+    End If
+
+    If quantidade < 1 Then
+        Err.Raise vbObjectError + 1091, _
+                  "CriarSequenciaColunas", _
+                  "A quantidade de blocos deve ser maior que zero."
+    End If
+
+    ReDim colunas(0 To quantidade - 1)
+
+    For indice = 0 To quantidade - 1
+        colunas(indice) = _
+            primeiraColuna + (indice * PASSO_COLUNAS_BLOCO)
+    Next indice
+
+    CriarSequenciaColunas = colunas
+
+End Function
+
+' -----------------------------------------------------------------------------
+' MACRO PRINCIPAL
+' -----------------------------------------------------------------------------
+Public Sub AtualizarComponentes()
+
+    Dim wsFlux As Worksheet
+    Dim wsComp As Worksheet
+
+    Dim estadoCalculo As XlCalculation
+    Dim estadoTela As Boolean
+    Dim estadoEventos As Boolean
+    Dim estadoAlertas As Boolean
+
+    Dim ocorreuErro As Boolean
+    Dim mensagemErro As String
+    Dim resumo As String
+
+    Dim cabecalhos As Object
+    Dim offsetsCarga As Object
+    Dim linhasComponentes As Object
+    Dim componentesAntes As Object
+    Dim componentesFluxo As Object
+    Dim codigosFluxo As Object
+    Dim enderecosFluxo As Object
+
+    Dim mapaPre As Object
+    Dim mapaCor As Object
+    Dim codigosNovos As Object
+    Dim codigosAlterados As Object
+
+    Dim colunasBlocoSuperior As Variant
+    Dim linhasBlocoSuperior As Variant
+    Dim colunasBlocoInferior As Variant
+    Dim linhasBlocoInferior As Variant
+
+    Dim ultimaLinhaComp As Long
+    Dim ultimaColunaComp As Long
+
+    Dim id As Variant
+    Dim codigo As String
+    Dim dados As Object
+    Dim linhaDestino As Long
+    Dim novoComponente As Boolean
+    Dim alteracoesLocais As Long
+    Dim totalCelulasAlteradas As Long
+
+    Dim totalPre As Long
+    Dim totalCor As Long
+    Dim totalMantidosForaFluxo As Long
+    Dim totalInalterados As Long
+
+    On Error GoTo TratarErro
+
+    estadoCalculo = Application.Calculation
+    estadoTela = Application.ScreenUpdating
+    estadoEventos = Application.EnableEvents
+    estadoAlertas = Application.DisplayAlerts
+
+    Set wsFlux = ObterPlanilhaObrigatoria(ThisWorkbook, ABA_FLUXOGRAMA)
+    Set wsComp = ObterPlanilhaObrigatoria(ThisWorkbook, ABA_COMPONENTES)
+
+    Application.ScreenUpdating = False
+    Application.EnableEvents = False
+    Application.DisplayAlerts = False
+    Application.Calculation = xlCalculationManual
+    Application.StatusBar = "Validando a estrutura da planilha..."
+
+    ' Os blocos começam em C, J, Q, X, AE, AL...
+    ' A coluna imediatamente anterior ao bloco contém seus
+    ' conectores de pré-requisito e correquisito.
+    colunasBlocoSuperior = CriarSequenciaColunas( _
+        PRIMEIRA_COLUNA_BLOCO, _
+        QUANTIDADE_BLOCOS_SUPERIOR)
+
+    linhasBlocoSuperior = Array(9, 14, 19, 24, 29, 34, 39, 44)
+
+    colunasBlocoInferior = CriarSequenciaColunas( _
+        PRIMEIRA_COLUNA_BLOCO, _
+        QUANTIDADE_BLOCOS_INFERIOR)
+
+    linhasBlocoInferior = Array(53, 58)
+
+    Set cabecalhos = MapearCabecalhos( _
+        wsComp, _
+        LINHA_CABECALHO_COMPONENTES)
+
+    ValidarCabecalhosObrigatorios cabecalhos
+
+    ultimaColunaComp = UltimaColunaUtilizada(wsComp)
+    ultimaLinhaComp = UltimaLinhaPorColuna(wsComp, cabecalhos("codigo"))
+
+    Set linhasComponentes = CarregarLinhasComponentes( _
+        wsComp, _
+        cabecalhos("codigo"), _
+        ultimaLinhaComp)
+
+    Set componentesAntes = CreateObject("Scripting.Dictionary")
+    componentesAntes.CompareMode = vbTextCompare
+
+    For Each id In linhasComponentes.Keys
+        componentesAntes.Add CStr(id), CLng(linhasComponentes.Item(id))
+    Next id
+
+    Set offsetsCarga = MapearOffsetsCarga( _
+        wsFlux, _
+        colunasBlocoSuperior, _
+        linhasBlocoSuperior, _
+        colunasBlocoInferior, _
+        linhasBlocoInferior)
+
+    Set componentesFluxo = CreateObject("Scripting.Dictionary")
+    componentesFluxo.CompareMode = vbTextCompare
+
+    Set codigosFluxo = CreateObject("Scripting.Dictionary")
+    codigosFluxo.CompareMode = vbTextCompare
+
+    Set enderecosFluxo = CreateObject("Scripting.Dictionary")
+    enderecosFluxo.CompareMode = vbTextCompare
+
+    Application.StatusBar = "Lendo os componentes do Fluxograma..."
+
+    LerBlocosDoFluxograma _
+        wsFlux, _
+        colunasBlocoSuperior, _
+        linhasBlocoSuperior, _
+        True, _
+        offsetsCarga, _
+        componentesFluxo, _
+        codigosFluxo, _
+        enderecosFluxo
+
+    LerBlocosDoFluxograma _
+        wsFlux, _
+        colunasBlocoInferior, _
+        linhasBlocoInferior, _
+        False, _
+        offsetsCarga, _
+        componentesFluxo, _
+        codigosFluxo, _
+        enderecosFluxo
+
+    If componentesFluxo.Count = 0 Then
+        Err.Raise vbObjectError + 1000, _
+                  "AtualizarComponentes", _
+                  "Nenhum componente curricular foi identificado na aba Fluxograma."
+    End If
+
+    Set mapaPre = CreateObject("Scripting.Dictionary")
+    mapaPre.CompareMode = vbTextCompare
+
+    Set mapaCor = CreateObject("Scripting.Dictionary")
+    mapaCor.CompareMode = vbTextCompare
+
+    Application.StatusBar = "Lendo pré-requisitos e correquisitos..."
+
+    LerRelacoesDosBlocos _
+        wsFlux, _
+        colunasBlocoSuperior, _
+        linhasBlocoSuperior, _
+        componentesFluxo, _
+        mapaPre, _
+        mapaCor
+
+    LerRelacoesDosBlocos _
+        wsFlux, _
+        colunasBlocoInferior, _
+        linhasBlocoInferior, _
+        componentesFluxo, _
+        mapaPre, _
+        mapaCor
+
+    ValidarReferenciasDeRequisitos _
+        componentesFluxo, _
+        mapaPre, _
+        mapaCor
+
+    Set codigosNovos = CreateObject("Scripting.Dictionary")
+    codigosNovos.CompareMode = vbTextCompare
+
+    Set codigosAlterados = CreateObject("Scripting.Dictionary")
+    codigosAlterados.CompareMode = vbTextCompare
+
+    Application.StatusBar = "Sincronizando os componentes..."
+
+    For Each id In componentesFluxo.Keys
+
+        Set dados = componentesFluxo.Item(id)
+        codigo = NormalizarCodigo(dados.Item("codigo"))
+
+        novoComponente = False
+        alteracoesLocais = 0
+
+        If linhasComponentes.Exists(codigo) Then
+
+            linhaDestino = CLng(linhasComponentes.Item(codigo))
+
+        Else
+
+            linhaDestino = AdicionarNovaLinhaComponente( _
+                wsComp, _
+                ultimaLinhaComp, _
+                ultimaColunaComp)
+
+            linhasComponentes.Add codigo, linhaDestino
+            codigosNovos.Add codigo, True
+            novoComponente = True
+
+        End If
+
+        alteracoesLocais = SincronizarCamposDoComponente( _
+            wsComp, _
+            linhaDestino, _
+            cabecalhos, _
+            dados)
+
+        totalCelulasAlteradas = _
+            totalCelulasAlteradas + alteracoesLocais
+
+        If alteracoesLocais > 0 And Not novoComponente Then
+            AdicionarChaveSeAusente codigosAlterados, codigo
+        End If
+
+    Next id
+
+    Application.StatusBar = "Atualizando pré-requisitos e correquisitos..."
+
+    For Each id In componentesFluxo.Keys
+
+        Set dados = componentesFluxo.Item(id)
+        codigo = NormalizarCodigo(dados.Item("codigo"))
+        linhaDestino = CLng(linhasComponentes.Item(codigo))
+        alteracoesLocais = 0
+
+        alteracoesLocais = alteracoesLocais + _
+            AtualizarCelulaSeDiferente( _
+                wsComp.Cells( _
+                    linhaDestino, _
+                    cabecalhos("pre_requisitos")), _
+                ObterListaCodigosOrdenada( _
+                    mapaPre, _
+                    CStr(id), _
+                    componentesFluxo))
+
+        alteracoesLocais = alteracoesLocais + _
+            AtualizarCelulaSeDiferente( _
+                wsComp.Cells( _
+                    linhaDestino, _
+                    cabecalhos("correquisitos")), _
+                ObterListaCodigosOrdenada( _
+                    mapaCor, _
+                    CStr(id), _
+                    componentesFluxo))
+
+        totalCelulasAlteradas = _
+            totalCelulasAlteradas + alteracoesLocais
+
+        If alteracoesLocais > 0 _
+           And Not codigosNovos.Exists(codigo) Then
+
+            AdicionarChaveSeAusente codigosAlterados, codigo
+
+        End If
+
+    Next id
+
+    totalPre = ContarRelacoes(mapaPre)
+    totalCor = ContarRelacoes(mapaCor)
+
+    For Each id In componentesAntes.Keys
+
+        If Not codigosFluxo.Exists(CStr(id)) Then
+            totalMantidosForaFluxo = totalMantidosForaFluxo + 1
+        End If
+
+    Next id
+
+    totalInalterados = _
+        componentesFluxo.Count - codigosNovos.Count - codigosAlterados.Count
+
+    If totalInalterados < 0 Then
+        totalInalterados = 0
+    End If
+
+    Application.StatusBar = "Ordenando a aba Componentes pelo código..."
+
+    ultimaLinhaComp = UltimaLinhaPorColuna(wsComp, cabecalhos("codigo"))
+    ultimaColunaComp = UltimaColunaUtilizada(wsComp)
+
+    OrdenarComponentesPorCodigo _
+        wsComp, _
+        LINHA_CABECALHO_COMPONENTES, _
+        ultimaLinhaComp, _
+        ultimaColunaComp, _
+        cabecalhos("codigo")
+
+    resumo = _
+        "Atualização concluída com sucesso." & vbNewLine & vbNewLine & _
+        "Componentes encontrados no Fluxograma: " & _
+            componentesFluxo.Count & vbNewLine & _
+        "Componentes marcados como ativos: " & _
+            componentesFluxo.Count & vbNewLine & _
+        "Componentes novos adicionados (por código): " & _
+            codigosNovos.Count & vbNewLine & _
+        "Componentes existentes atualizados (por código): " & _
+            codigosAlterados.Count & vbNewLine & _
+        "Componentes sem alterações: " & _
+            totalInalterados & vbNewLine & _
+        "Componentes mantidos apenas em Componentes: " & _
+            totalMantidosForaFluxo & vbNewLine & _
+        "Pré-requisitos identificados: " & _
+            totalPre & vbNewLine & _
+        "Correquisitos identificados: " & _
+            totalCor & vbNewLine & _
+        "Células alteradas: " & _
+            totalCelulasAlteradas
+
+
+SaidaSegura:
+
+    Application.Calculation = estadoCalculo
+    Application.ScreenUpdating = estadoTela
+    Application.EnableEvents = estadoEventos
+    Application.DisplayAlerts = estadoAlertas
+    Application.StatusBar = False
+
+    If ocorreuErro Then
+
+        MsgBox _
+            mensagemErro, _
+            vbCritical, _
+            "Erro ao atualizar Componentes"
+
+    Else
+
+        MsgBox _
+            resumo, _
+            vbInformation, _
+            "Atualizar Componentes"
+
+    End If
+
+    Exit Sub
+
+TratarErro:
+
+    ocorreuErro = True
+
+    mensagemErro = _
+        "A sincronização foi interrompida." & vbNewLine & vbNewLine & _
+        "Erro " & Err.Number & ": " & Err.Description
+
+    Resume SaidaSegura
+
+End Sub
+
+' -----------------------------------------------------------------------------
+' LEITURA DOS BLOCOS DO FLUXOGRAMA
+' -----------------------------------------------------------------------------
+Private Sub LerBlocosDoFluxograma( _
+    ByVal ws As Worksheet, _
+    ByVal colunasBase As Variant, _
+    ByVal linhasNome As Variant, _
+    ByVal obrigatorio As Boolean, _
+    ByVal offsetsCarga As Object, _
+    ByVal componentesFluxo As Object, _
+    ByVal codigosFluxo As Object, _
+    ByVal enderecosFluxo As Object)
+
+    Dim indiceColuna As Long
+    Dim indiceLinha As Long
+
+    Dim colunaBase As Long
+    Dim linhaNome As Long
+    Dim linhaCarga As Long
+
+    Dim textoBloco As String
+    Dim id As String
+    Dim codigo As String
+    Dim nome As String
+    Dim endereco As String
+    Dim periodo As Variant
+    Dim periodoColuna As Variant
+
+    Dim dados As Object
+    Dim campo As Variant
+    Dim offsetColuna As Long
+
+    For indiceColuna = LBound(colunasBase) To UBound(colunasBase)
+
+        ' colunaBase aponta para a primeira célula do bloco (C, J, Q, X...).
+        ' A célula imediatamente anterior ao próximo bloco é o conector.
+        colunaBase = CLng(colunasBase(indiceColuna))
+
+        periodoColuna = ObterPeriodoDaColuna( _
+            ws, _
+            colunaBase, _
+            CLng(linhasNome(LBound(linhasNome))))
+
+        For indiceLinha = LBound(linhasNome) To UBound(linhasNome)
+
+            linhaNome = CLng(linhasNome(indiceLinha))
+            linhaCarga = linhaNome + DESLOCAMENTO_LINHA_CARGAS
+
+            LerTituloDoBlocoNaPlanilha _
+                ws, _
+                linhaNome, _
+                colunaBase, _
+                id, _
+                codigo, _
+                nome, _
+                textoBloco
+
+            If Trim$(textoBloco) <> vbNullString Then
+
+                endereco = _
+                    ws.Name & "!" & _
+                    ws.Cells( _
+                        linhaNome, _
+                        colunaBase).Address(False, False)
+
+                If id = vbNullString Then
+
+                    Err.Raise vbObjectError + 1010, _
+                              "LerBlocosDoFluxograma", _
+                              "Bloco sem ID válido em " & endereco & "." & _
+                              vbNewLine & _
+                              "Use ID, CODIGO e NOME em três linhas do bloco."
+
+                End If
+
+                If codigo = vbNullString Then
+
+                    Err.Raise vbObjectError + 1011, _
+                              "LerBlocosDoFluxograma", _
+                              "Bloco sem código válido em " & endereco & "." & _
+                              vbNewLine & _
+                              "Use ID, CODIGO e NOME em três linhas do bloco."
+
+                End If
+
+                If nome = vbNullString Then
+
+                    Err.Raise vbObjectError + 1012, _
+                              "LerBlocosDoFluxograma", _
+                              "Bloco sem nome válido em " & endereco & "." & _
+                              vbNewLine & _
+                              "Use ID, CODIGO e NOME em três linhas do bloco."
+
+                End If
+
+                If componentesFluxo.Exists(id) Then
+
+                    Err.Raise vbObjectError + 1013, _
+                              "LerBlocosDoFluxograma", _
+                              "ID duplicado no Fluxograma: """ & id & """." & _
+                              vbNewLine & _
+                              "Primeira ocorrência: " & _
+                                  enderecosFluxo.Item(id) & vbNewLine & _
+                              "Nova ocorrência: " & endereco
+
+                End If
+
+                If codigosFluxo.Exists(codigo) Then
+
+                    Err.Raise vbObjectError + 1014, _
+                              "LerBlocosDoFluxograma", _
+                              "Código duplicado no Fluxograma: """ & codigo & """." & _
+                              vbNewLine & _
+                              "Primeiro bloco: " & _
+                                  enderecosFluxo.Item( _
+                                      codigosFluxo.Item(codigo)) & _
+                                  vbNewLine & _
+                              "Novo bloco: " & endereco
+
+                End If
+
+                periodo = periodoColuna
+
+                Set dados = CreateObject("Scripting.Dictionary")
+                dados.CompareMode = vbTextCompare
+
+                dados.Add "id", id
+                dados.Add "codigo", codigo
+                dados.Add "nome", nome
+                dados.Add "periodo", periodo
+                dados.Add "tipo", DeterminarTipo(nome)
+                dados.Add "obrigatorio", CBool(obrigatorio)
+                dados.Add "ativo", True
+                dados.Add "linha_nome", linhaNome
+                dados.Add "coluna_base", colunaBase
+                dados.Add "endereco", endereco
+
+                For Each campo In offsetsCarga.Keys
+
+                    offsetColuna = CLng(offsetsCarga.Item(campo))
+
+                    dados.Add _
+                        CStr(campo), _
+                        LerCarga( _
+                            ws.Cells( _
+                                linhaCarga, _
+                                colunaBase + offsetColuna), _
+                            CStr(campo))
+
+                Next campo
+
+                componentesFluxo.Add id, dados
+                codigosFluxo.Add codigo, id
+                enderecosFluxo.Add id, endereco
+
+            End If
+
+        Next indiceLinha
+
+    Next indiceColuna
+
+End Sub
+
+Private Sub LerTituloDoBlocoNaPlanilha( _
+    ByVal ws As Worksheet, _
+    ByVal linhaInicial As Long, _
+    ByVal colunaBase As Long, _
+    ByRef id As String, _
+    ByRef codigo As String, _
+    ByRef nome As String, _
+    ByRef textoLido As String)
+
+    Dim linha As Long
+    Dim celula As Range
+    Dim valor As String
+    Dim textoComposto As String
+    Dim chaveArea As String
+    Dim areasLidas As Object
+
+    id = vbNullString
+    codigo = vbNullString
+    nome = vbNullString
+    textoLido = vbNullString
+
+    ' Primeiro tenta interpretar diretamente o conteúdo da célula/área mesclada.
+    valor = CStr( _
+        ValorDaCelulaMesclada( _
+            ws.Cells(linhaInicial, colunaBase)))
+
+    textoLido = valor
+
+    If Trim$(valor) <> vbNullString Then
+
+        InterpretarTituloDoBloco _
+            valor, _
+            id, _
+            codigo, _
+            nome
+
+        If id <> vbNullString _
+           And codigo <> vbNullString _
+           And nome <> vbNullString Then
+            Exit Sub
+        End If
+
+    End If
+
+    ' Na planilha real, o ID, o código e o nome também podem estar em três
+    ' linhas/células consecutivas. Áreas mescladas repetidas são lidas uma vez.
+    Set areasLidas = CreateObject("Scripting.Dictionary")
+    areasLidas.CompareMode = vbTextCompare
+
+    For linha = linhaInicial To linhaInicial + 2
+
+        Set celula = ws.Cells(linha, colunaBase)
+
+        If celula.MergeCells Then
+            chaveArea = celula.MergeArea.Address(False, False)
+        Else
+            chaveArea = celula.Address(False, False)
+        End If
+
+        If Not areasLidas.Exists(chaveArea) Then
+
+            areasLidas.Add chaveArea, True
+            valor = CStr(ValorDaCelulaMesclada(celula))
+            valor = Trim$(valor)
+
+            If valor <> vbNullString Then
+
+                If textoComposto <> vbNullString Then
+                    textoComposto = textoComposto & vbLf
+                End If
+
+                textoComposto = textoComposto & valor
+
+            End If
+
+        End If
+
+    Next linha
+
+    If textoComposto <> vbNullString Then
+
+        textoLido = textoComposto
+
+        InterpretarTituloDoBloco _
+            textoComposto, _
+            id, _
+            codigo, _
+            nome
+
+    End If
+
+End Sub
+
+Private Sub InterpretarTituloDoBloco( _
+    ByVal texto As String, _
+    ByRef id As String, _
+    ByRef codigo As String, _
+    ByRef nome As String)
+
+    Dim textoNormalizado As String
+    Dim linhas As Variant
+    Dim partes As Collection
+    Dim indice As Long
+    Dim linha As String
+    Dim primeiraLinha As String
+    Dim segundaLinha As String
+
+    id = vbNullString
+    codigo = vbNullString
+    nome = vbNullString
+
+    ' No Excel, Alt+Enter normalmente gera Chr(10). Também são aceitos
+    ' CRLF, CR e tabulações para manter compatibilidade com textos colados.
+    textoNormalizado = texto
+    textoNormalizado = Replace(textoNormalizado, vbCrLf, vbLf)
+    textoNormalizado = Replace(textoNormalizado, vbCr, vbLf)
+    textoNormalizado = Replace(textoNormalizado, ChrW(160), " ")
+    textoNormalizado = Replace(textoNormalizado, vbTab, " ")
+
+    linhas = Split(textoNormalizado, vbLf)
+    Set partes = New Collection
+
+    For indice = LBound(linhas) To UBound(linhas)
+
+        linha = LimparEspacosInternos(CStr(linhas(indice)))
+
+        If linha <> vbNullString Then
+            partes.Add linha
+        End If
+
+    Next indice
+
+    If partes.Count >= 3 Then
+
+        id = NormalizarId(partes.Item(1))
+        codigo = NormalizarCodigo(partes.Item(2))
+        nome = CStr(partes.Item(3))
+
+        For indice = 4 To partes.Count
+            nome = nome & " " & CStr(partes.Item(indice))
+        Next indice
+
+        nome = LimparEspacosInternos(nome)
+        Exit Sub
+
+    End If
+
+    ' Compatibilidade: ID em uma linha e CODIGO + NOME na linha seguinte.
+    If partes.Count = 2 Then
+
+        primeiraLinha = CStr(partes.Item(1))
+        segundaLinha = CStr(partes.Item(2))
+
+        If TentarSepararIdCodigoNome( _
+            primeiraLinha & " " & segundaLinha, _
+            id, _
+            codigo, _
+            nome) Then
+            Exit Sub
+        End If
+
+    End If
+
+    ' Compatibilidade: os três campos no mesmo texto, separados por espaços.
+    If partes.Count = 1 Then
+
+        Call TentarSepararIdCodigoNome( _
+            CStr(partes.Item(1)), _
+            id, _
+            codigo, _
+            nome)
+
+    End If
+
+End Sub
+
+Private Function TentarSepararIdCodigoNome( _
+    ByVal texto As String, _
+    ByRef id As String, _
+    ByRef codigo As String, _
+    ByRef nome As String) As Boolean
+
+    Dim textoLimpo As String
+    Dim tokens As Variant
+    Dim indice As Long
+
+    textoLimpo = LimparEspacosInternos(texto)
+
+    If textoLimpo = vbNullString Then Exit Function
+
+    tokens = Split(textoLimpo, " ")
+
+    If UBound(tokens) - LBound(tokens) + 1 < 3 Then
+        Exit Function
+    End If
+
+    id = NormalizarId(tokens(LBound(tokens)))
+    codigo = NormalizarCodigo(tokens(LBound(tokens) + 1))
+    nome = vbNullString
+
+    For indice = LBound(tokens) + 2 To UBound(tokens)
+
+        If nome <> vbNullString Then
+            nome = nome & " "
+        End If
+
+        nome = nome & CStr(tokens(indice))
+
+    Next indice
+
+    nome = LimparEspacosInternos(nome)
+
+    TentarSepararIdCodigoNome = _
+        (id <> vbNullString _
+         And codigo <> vbNullString _
+         And nome <> vbNullString)
+
+End Function
+
+Private Function LimparEspacosInternos( _
+    ByVal texto As String) As String
+
+    Dim resultado As String
+
+    resultado = Replace(texto, ChrW(160), " ")
+    resultado = Replace(resultado, vbTab, " ")
+    resultado = Trim$(resultado)
+
+    Do While InStr(1, resultado, "  ", vbBinaryCompare) > 0
+        resultado = Replace(resultado, "  ", " ")
+    Loop
+
+    LimparEspacosInternos = resultado
+
+End Function
+
+Private Function ObterPeriodoDaColuna( _
+    ByVal ws As Worksheet, _
+    ByVal colunaBase As Long, _
+    ByVal linhaNome As Long) As Variant
+
+    Dim linha As Long
+    Dim linhaLimite As Long
+    Dim valor As String
+    Dim valorNormalizado As String
+
+    linhaLimite = linhaNome - MAX_LINHAS_CABECALHO_PERIODO
+
+    If linhaLimite < 1 Then
+        linhaLimite = 1
+    End If
+
+    For linha = linhaNome - 1 To linhaLimite Step -1
+
+        valor = Trim$(CStr( _
+            ValorDaCelulaMesclada( _
+                ws.Cells(linha, colunaBase))))
+
+        If valor <> vbNullString Then
+
+            valorNormalizado = NormalizarTextoComparacao(valor)
+
+            If InStr(1, valorNormalizado, "periodo", vbTextCompare) > 0 Then
+                ObterPeriodoDaColuna = valor
+                Exit Function
+            End If
+
+        End If
+
+    Next linha
+
+    ObterPeriodoDaColuna = Empty
+
+End Function
+
+Private Function DeterminarTipo(ByVal nome As String) As String
+
+    Dim nomeNormalizado As String
+
+    nomeNormalizado = NormalizarTextoComparacao(nome)
+
+    If ComecaCom( _
+        nomeNormalizado, _
+        "atividades curriculares de extensao") Then
+
+        DeterminarTipo = "extensao"
+
+    ElseIf ComecaCom( _
+        nomeNormalizado, _
+        "atividades complementares") Then
+
+        DeterminarTipo = "atividade_complementar"
+
+    ElseIf ComecaCom( _
+        nomeNormalizado, _
+        "estagio") Then
+
+        DeterminarTipo = "estagio"
+
+    ElseIf ComecaCom( _
+        nomeNormalizado, _
+        "projeto final de curso") Then
+
+        DeterminarTipo = "projeto"
+
+    Else
+
+        DeterminarTipo = "disciplina"
+
+    End If
+
+End Function
+
+Private Function ComecaCom( _
+    ByVal texto As String, _
+    ByVal prefixo As String) As Boolean
+
+    If Len(texto) < Len(prefixo) Then
+        ComecaCom = False
+    Else
+        ComecaCom = _
+            (StrComp( _
+                Left$(texto, Len(prefixo)), _
+                prefixo, _
+                vbTextCompare) = 0)
+    End If
+
+End Function
+
+' -----------------------------------------------------------------------------
+' MAPEAMENTO DAS CARGAS HORÁRIAS
+' -----------------------------------------------------------------------------
+Private Function MapearOffsetsCarga( _
+    ByVal ws As Worksheet, _
+    ByVal colunasSuperiores As Variant, _
+    ByVal linhasSuperiores As Variant, _
+    ByVal colunasInferiores As Variant, _
+    ByVal linhasInferiores As Variant) As Object
+
+    Dim mapa As Object
+
+    ' A posição das cargas horárias é fixa em todos os blocos.
+    ' Da esquerda para a direita, nas cinco colunas inferiores do bloco:
+    '   deslocamento 0 = cht
+    '   deslocamento 1 = chd
+    '   deslocamento 2 = chp
+    '   deslocamento 3 = che
+    '   deslocamento 4 = tot
+    '
+    ' Os parâmetros da função são mantidos somente para preservar a interface
+    ' usada pela macro principal. Não é feita leitura de anotações, comentários,
+    ' cabeçalhos ou do bloco ID = 1.
+
+    Set mapa = CreateObject("Scripting.Dictionary")
+    mapa.CompareMode = vbTextCompare
+
+    mapa.Add "cht", 0
+    mapa.Add "chd", 1
+    mapa.Add "chp", 2
+    mapa.Add "che", 3
+    mapa.Add "tot", 4
+
+    Set MapearOffsetsCarga = mapa
+
+End Function
+
+Private Function LocalizarBlocoPorId( _
+    ByVal ws As Worksheet, _
+    ByVal idProcurado As String, _
+    ByVal colunasBase As Variant, _
+    ByVal linhasNome As Variant, _
+    ByRef colunaBaseEncontrada As Long, _
+    ByRef linhaNomeEncontrada As Long) As Boolean
+
+    Dim indiceColuna As Long
+    Dim indiceLinha As Long
+    Dim texto As String
+    Dim id As String
+    Dim codigo As String
+    Dim nome As String
+
+    For indiceColuna = LBound(colunasBase) To UBound(colunasBase)
+
+        For indiceLinha = LBound(linhasNome) To UBound(linhasNome)
+
+            LerTituloDoBlocoNaPlanilha _
+                ws, _
+                CLng(linhasNome(indiceLinha)), _
+                CLng(colunasBase(indiceColuna)), _
+                id, _
+                codigo, _
+                nome, _
+                texto
+
+            If Trim$(texto) <> vbNullString Then
+
+                If StrComp( _
+                    id, _
+                    idProcurado, _
+                    vbTextCompare) = 0 Then
+
+                    colunaBaseEncontrada = _
+                        CLng(colunasBase(indiceColuna))
+
+                    linhaNomeEncontrada = _
+                        CLng(linhasNome(indiceLinha))
+
+                    LocalizarBlocoPorId = True
+                    Exit Function
+
+                End If
+
+            End If
+
+        Next indiceLinha
+
+    Next indiceColuna
+
+    LocalizarBlocoPorId = False
+
+End Function
+
+Private Function TextoDaCelulaEAnotacao( _
+    ByVal celula As Range) As String
+
+    Dim resultado As String
+    Dim textoComentario As String
+
+    resultado = CStr(ValorDaCelulaMesclada(celula))
+
+    On Error Resume Next
+
+    If Not celula.Comment Is Nothing Then
+        textoComentario = celula.Comment.Text
+    End If
+
+    On Error GoTo 0
+
+    If textoComentario <> vbNullString Then
+
+        If resultado <> vbNullString Then
+            resultado = resultado & " "
+        End If
+
+        resultado = resultado & textoComentario
+
+    End If
+
+    TextoDaCelulaEAnotacao = resultado
+
+End Function
+
+Private Function IdentificarCampoCargaNoTexto( _
+    ByVal texto As String) As String
+
+    Dim normalizado As String
+
+    normalizado = " " & NormalizarTextoParaTokens(texto) & " "
+
+    If InStr(1, normalizado, " chp ", vbTextCompare) > 0 Then
+
+        IdentificarCampoCargaNoTexto = "chp"
+
+    ElseIf InStr(1, normalizado, " chd ", vbTextCompare) > 0 Then
+
+        IdentificarCampoCargaNoTexto = "chd"
+
+    ElseIf InStr(1, normalizado, " che ", vbTextCompare) > 0 Then
+
+        IdentificarCampoCargaNoTexto = "che"
+
+    ElseIf InStr(1, normalizado, " cht ", vbTextCompare) > 0 Then
+
+        IdentificarCampoCargaNoTexto = "cht"
+
+    ElseIf InStr(1, normalizado, " total ", vbTextCompare) > 0 _
+        Or InStr(1, normalizado, " tot ", vbTextCompare) > 0 Then
+
+        IdentificarCampoCargaNoTexto = "tot"
+
+    Else
+
+        IdentificarCampoCargaNoTexto = vbNullString
+
+    End If
+
+End Function
+
+' -----------------------------------------------------------------------------
+' LEITURA DOS REQUISITOS À ESQUERDA DOS BLOCOS
+' -----------------------------------------------------------------------------
+Private Sub LerRelacoesDosBlocos( _
+    ByVal ws As Worksheet, _
+    ByVal colunasBase As Variant, _
+    ByVal linhasNome As Variant, _
+    ByVal componentesFluxo As Object, _
+    ByVal mapaPre As Object, _
+    ByVal mapaCor As Object)
+
+    Dim indiceColuna As Long
+    Dim indiceLinha As Long
+
+    Dim colunaBase As Long
+    Dim colunaConector As Long
+    Dim linhaNome As Long
+    Dim linhaConector As Long
+
+    Dim textoDono As String
+    Dim idDono As String
+    Dim codigoDono As String
+    Dim nomeDono As String
+    Dim textoConector As String
+    Dim estilo As Variant
+
+    Dim requisitosEncontrados As Collection
+    Dim requisito As Variant
+    Dim requisitoTexto As String
+    Dim idRequisito As String
+
+    For indiceColuna = LBound(colunasBase) To UBound(colunasBase)
+
+        colunaBase = CLng(colunasBase(indiceColuna))
+        ' O ID, o código e o nome começam na coluna-base do bloco.
+        ' Os IDs de pré-requisito e correquisito ficam na coluna
+        ' imediatamente anterior. Exemplo: J:N usa a coluna I.
+        colunaConector = colunaBase - 1
+
+        If colunaConector < 1 Then
+            Err.Raise vbObjectError + 1025, _
+                      "LerRelacoesDosBlocos", _
+                      "Não existe coluna de requisitos à esquerda do bloco iniciado na coluna " & _
+                      colunaBase & "."
+        End If
+
+        For indiceLinha = LBound(linhasNome) To UBound(linhasNome)
+
+            linhaNome = CLng(linhasNome(indiceLinha))
+
+            LerTituloDoBlocoNaPlanilha _
+                ws, _
+                linhaNome, _
+                colunaBase, _
+                idDono, _
+                codigoDono, _
+                nomeDono, _
+                textoDono
+
+            If Trim$(textoDono) <> vbNullString Then
+
+                If idDono <> vbNullString _
+                   And componentesFluxo.Exists(idDono) Then
+
+                    For linhaConector = _
+                        linhaNome To linhaNome + ALTURA_GRUPO - 1
+
+                        estilo = ObterEstiloRelacao( _
+                            ws.Cells( _
+                                linhaConector, _
+                                colunaConector))
+
+                        If estilo = xlContinuous _
+                           Or estilo = xlDouble Then
+
+                            textoConector = CStr( _
+                                ValorDaCelulaMesclada( _
+                                    ws.Cells( _
+                                        linhaConector, _
+                                        colunaConector)))
+
+                            If Trim$(textoConector) <> vbNullString Then
+
+                                Set requisitosEncontrados = _
+                                    SepararRequisitos(textoConector)
+
+                                For Each requisito In requisitosEncontrados
+
+                                    requisitoTexto = _
+                                        NormalizarRequisito(requisito)
+
+                                    If requisitoTexto <> vbNullString Then
+
+                                        If EhRequisitoEmHoras(requisitoTexto) Then
+
+                                            ' Exigências de carga horária, como
+                                            ' "100 horas", são preservadas como
+                                            ' foram escritas no Fluxograma.
+                                            idRequisito = requisitoTexto
+
+                                        Else
+
+                                            idRequisito = _
+                                                NormalizarId(requisitoTexto)
+
+                                            If StrComp( _
+                                                idRequisito, _
+                                                idDono, _
+                                                vbTextCompare) = 0 Then
+
+                                                Err.Raise _
+                                                    vbObjectError + 1020, _
+                                                    "LerRelacoesDosBlocos", _
+                                                    "O componente ID """ & _
+                                                    idDono & _
+                                                    """ está relacionado a ele mesmo em " & _
+                                                    ws.Name & "!" & _
+                                                    ws.Cells( _
+                                                        linhaConector, _
+                                                        colunaConector).Address( _
+                                                            False, _
+                                                            False)
+
+                                            End If
+
+                                        End If
+
+                                        If estilo = xlDouble Then
+
+                                            AdicionarRelacaoUnica _
+                                                mapaCor, _
+                                                idDono, _
+                                                idRequisito
+
+                                        Else
+
+                                            AdicionarRelacaoUnica _
+                                                mapaPre, _
+                                                idDono, _
+                                                idRequisito
+
+                                        End If
+
+                                    End If
+
+                                Next requisito
+
+                            End If
+
+                        End If
+
+                    Next linhaConector
+
+                End If
+
+            End If
+
+        Next indiceLinha
+
+    Next indiceColuna
+
+End Sub
+
+Private Function ObterEstiloRelacao( _
+    ByVal celula As Range) As Variant
+
+    Dim estiloInferior As Variant
+    Dim estiloSuperior As Variant
+
+    estiloInferior = _
+        celula.Borders(xlEdgeBottom).LineStyle
+
+    estiloSuperior = _
+        celula.Borders(xlEdgeTop).LineStyle
+
+    If estiloInferior = xlDouble _
+       Or estiloSuperior = xlDouble Then
+
+        ObterEstiloRelacao = xlDouble
+
+    ElseIf estiloInferior = xlContinuous _
+        Or estiloSuperior = xlContinuous Then
+
+        ObterEstiloRelacao = xlContinuous
+
+    Else
+
+        ObterEstiloRelacao = xlLineStyleNone
+
+    End If
+
+End Function
+
+Private Sub ValidarReferenciasDeRequisitos( _
+    ByVal componentesFluxo As Object, _
+    ByVal mapaPre As Object, _
+    ByVal mapaCor As Object)
+
+    ValidarMapaDeRelacoes _
+        "pré-requisito", _
+        componentesFluxo, _
+        mapaPre
+
+    ValidarMapaDeRelacoes _
+        "correquisito", _
+        componentesFluxo, _
+        mapaCor
+
+End Sub
+
+Private Sub ValidarMapaDeRelacoes( _
+    ByVal tipoRelacao As String, _
+    ByVal componentesFluxo As Object, _
+    ByVal mapa As Object)
+
+    Dim idDono As Variant
+    Dim idReq As Variant
+    Dim lista As Object
+
+    For Each idDono In mapa.Keys
+
+        Set lista = mapa.Item(idDono)
+
+        For Each idReq In lista.Keys
+
+            ' Requisitos expressos em horas não são IDs e, portanto,
+            ' não precisam corresponder a um bloco do Fluxograma.
+            If Not EhRequisitoEmHoras(CStr(idReq)) Then
+
+                If Not componentesFluxo.Exists(CStr(idReq)) Then
+
+                    Err.Raise vbObjectError + 1030, _
+                              "ValidarMapaDeRelacoes", _
+                              "O " & tipoRelacao & " ID """ & _
+                              CStr(idReq) & """ do componente ID """ & _
+                              CStr(idDono) & _
+                              """ não corresponde a nenhum bloco do Fluxograma." & _
+                              vbNewLine & _
+                              "Como a aba Componentes não possui mais a coluna ID, " & _
+                              "todo ID de requisito precisa existir no Fluxograma " & _
+                              "para ser convertido no respectivo código. " & _
+                              "Valores terminados em ""horas"" são preservados literalmente."
+
+                End If
+
+            End If
+
+        Next idReq
+
+    Next idDono
+
+End Sub
+
+' -----------------------------------------------------------------------------
+' CABEÇALHOS E ESTRUTURA
+' -----------------------------------------------------------------------------
+Private Function MapearCabecalhos( _
+    ByVal ws As Worksheet, _
+    ByVal linhaCabecalho As Long) As Object
+
+    Dim mapa As Object
+    Dim ultimaColuna As Long
+    Dim coluna As Long
+    Dim nome As String
+
+    Set mapa = CreateObject("Scripting.Dictionary")
+    mapa.CompareMode = vbTextCompare
+
+    ultimaColuna = _
+        ws.Cells( _
+            linhaCabecalho, _
+            ws.Columns.Count).End(xlToLeft).Column
+
+    For coluna = 1 To ultimaColuna
+
+        nome = NormalizarCabecalho( _
+            ws.Cells( _
+                linhaCabecalho, _
+                coluna).Value)
+
+        If nome <> vbNullString Then
+
+            If mapa.Exists(nome) Then
+
+                Err.Raise vbObjectError + 1040, _
+                          "MapearCabecalhos", _
+                          "Cabeçalho duplicado na aba " & _
+                          ws.Name & ": """ & nome & _
+                          """ nas colunas " & _
+                          mapa.Item(nome) & " e " & coluna & "."
+
+            End If
+
+            mapa.Add nome, coluna
+
+        End If
+
+    Next coluna
+
+    Set MapearCabecalhos = mapa
+
+End Function
+
+Private Sub ValidarCabecalhosObrigatorios( _
+    ByVal cabecalhos As Object)
+
+    Dim obrigatorios As Variant
+    Dim nome As Variant
+    Dim faltantes As String
+
+    obrigatorios = Array( _
+        "codigo", _
+        "nome", _
+        "periodo", _
+        "cht", _
+        "chp", _
+        "chd", _
+        "che", _
+        "tot", _
+        "tipo", _
+        "obrigatorio", _
+        "ativo", _
+        "pre_requisitos", _
+        "correquisitos")
+
+    For Each nome In obrigatorios
+
+        If Not cabecalhos.Exists(CStr(nome)) Then
+            faltantes = faltantes & _
+                "- " & CStr(nome) & vbNewLine
+        End If
+
+    Next nome
+
+    If faltantes <> vbNullString Then
+
+        Err.Raise vbObjectError + 1041, _
+                  "ValidarCabecalhosObrigatorios", _
+                  "A aba Componentes não possui os seguintes " & _
+                  "cabeçalhos obrigatórios:" & vbNewLine & faltantes
+
+    End If
+
+End Sub
+
+Private Function CarregarLinhasComponentes( _
+    ByVal ws As Worksheet, _
+    ByVal colunaCodigo As Long, _
+    ByVal ultimaLinha As Long) As Object
+
+    Dim mapa As Object
+    Dim linha As Long
+    Dim codigo As String
+
+    Set mapa = CreateObject("Scripting.Dictionary")
+    mapa.CompareMode = vbTextCompare
+
+    For linha = _
+        LINHA_CABECALHO_COMPONENTES + 1 To ultimaLinha
+
+        codigo = NormalizarCodigo( _
+            ws.Cells( _
+                linha, _
+                colunaCodigo).Value)
+
+        If codigo <> vbNullString Then
+
+            If mapa.Exists(codigo) Then
+
+                Err.Raise vbObjectError + 1050, _
+                          "CarregarLinhasComponentes", _
+                          "Código duplicado na aba Componentes: """ & _
+                          codigo & """." & vbNewLine & _
+                          "Linhas: " & _
+                          mapa.Item(codigo) & " e " & linha & "."
+
+            End If
+
+            mapa.Add codigo, linha
+
+        End If
+
+    Next linha
+
+    Set CarregarLinhasComponentes = mapa
+
+End Function
+
+' -----------------------------------------------------------------------------
+' ATUALIZAÇÃO CÉLULA A CÉLULA E INSERÇÃO DE LINHAS
+' -----------------------------------------------------------------------------
+Private Function SincronizarCamposDoComponente( _
+    ByVal ws As Worksheet, _
+    ByVal linhaDestino As Long, _
+    ByVal cabecalhos As Object, _
+    ByVal dados As Object) As Long
+
+    Dim campos As Variant
+    Dim campo As Variant
+    Dim total As Long
+
+    ' Os campos lógicos obrigatorio e ativo são tratados separadamente.
+    ' Isso evita que textos, fórmulas ou formatos anteriores façam o Excel
+    ' considerar VERDADEIRO e FALSO como valores equivalentes.
+    campos = Array( _
+        "codigo", _
+        "nome", _
+        "periodo", _
+        "cht", _
+        "chp", _
+        "chd", _
+        "che", _
+        "tot", _
+        "tipo")
+
+    For Each campo In campos
+
+        total = total + AtualizarCelulaSeDiferente( _
+            ws.Cells( _
+                linhaDestino, _
+                cabecalhos.Item(CStr(campo))), _
+            dados.Item(CStr(campo)))
+
+    Next campo
+
+    total = total + AtualizarCampoLogicoObrigatorio( _
+        ws.Cells( _
+            linhaDestino, _
+            cabecalhos.Item("obrigatorio")), _
+        CBool(dados.Item("obrigatorio")), _
+        CStr(dados.Item("codigo")))
+
+    total = total + AtualizarCampoLogico( _
+        ws.Cells( _
+            linhaDestino, _
+            cabecalhos.Item("ativo")), _
+        CBool(dados.Item("ativo")), _
+        "ativo", _
+        CStr(dados.Item("codigo")))
+
+    SincronizarCamposDoComponente = total
+
+End Function
+
+Private Function AtualizarCampoLogicoObrigatorio( _
+    ByVal destino As Range, _
+    ByVal novoValor As Boolean, _
+    ByVal codigo As String) As Long
+
+    AtualizarCampoLogicoObrigatorio = AtualizarCampoLogico( _
+        destino, _
+        novoValor, _
+        "obrigatorio", _
+        codigo)
+
+End Function
+
+Private Function AtualizarCampoLogico( _
+    ByVal destino As Range, _
+    ByVal novoValor As Boolean, _
+    ByVal nomeCampo As String, _
+    ByVal codigo As String) As Long
+
+    Dim alvo As Range
+    Dim valorAtual As Variant
+    Dim precisaAtualizar As Boolean
+
+    If destino.MergeCells Then
+        Set alvo = destino.MergeArea.Cells(1, 1)
+    Else
+        Set alvo = destino
+    End If
+
+    valorAtual = alvo.Value2
+    precisaAtualizar = True
+
+    If PodeConverterParaBooleano(valorAtual) Then
+        precisaAtualizar = _
+            (ConverterParaBooleano(valorAtual) <> novoValor)
+    End If
+
+    If Not precisaAtualizar And Not alvo.HasFormula Then
+        AtualizarCampoLogico = 0
+        Exit Function
+    End If
+
+    ' O Fluxograma é a fonte oficial para os componentes que ele contém.
+    ' Remove uma eventual fórmula antiga e grava um valor lógico real.
+    If alvo.HasFormula Then
+        alvo.ClearContents
+    End If
+
+    alvo.Value2 = CBool(novoValor)
+
+    ' Validação imediata: a macro não conclui silenciosamente caso a célula
+    ' rejeite ou reverta o valor gravado.
+    If Not PodeConverterParaBooleano(alvo.Value2) Then
+        Err.Raise vbObjectError + 1070, _
+                  "AtualizarCampoLogico", _
+                  "Não foi possível gravar o campo """ & nomeCampo & _
+                  """ do componente """ & codigo & """ em " & _
+                  alvo.Worksheet.Name & "!" & alvo.Address(False, False) & "."
+    End If
+
+    If ConverterParaBooleano(alvo.Value2) <> novoValor Then
+        Err.Raise vbObjectError + 1071, _
+                  "AtualizarCampoLogico", _
+                  "O campo """ & nomeCampo & """ do componente """ & _
+                  codigo & """ deveria receber " & _
+                  IIf(novoValor, "VERDADEIRO", "FALSO") & _
+                  ", mas a célula permaneceu com """ & _
+                  CStr(alvo.Value) & """ em " & _
+                  alvo.Worksheet.Name & "!" & alvo.Address(False, False) & "."
+    End If
+
+    AtualizarCampoLogico = 1
+
+End Function
+
+Private Function AtualizarCelulaSeDiferente( _
+    ByVal destino As Range, _
+    ByVal novoValor As Variant) As Long
+
+    If ValoresEquivalentes( _
+        destino.Value2, _
+        novoValor) Then
+
+        AtualizarCelulaSeDiferente = 0
+        Exit Function
+
+    End If
+
+    If ValorEhVazio(novoValor) Then
+        destino.ClearContents
+    Else
+        destino.Value = novoValor
+    End If
+
+    AtualizarCelulaSeDiferente = 1
+
+End Function
+
+Private Function AdicionarNovaLinhaComponente( _
+    ByVal ws As Worksheet, _
+    ByRef ultimaLinha As Long, _
+    ByVal ultimaColuna As Long) As Long
+
+    Dim novaLinha As Long
+    Dim linhaModelo As Long
+    Dim tabela As ListObject
+    Dim linhaTabela As ListRow
+    Dim coluna As Long
+
+    Set tabela = TabelaQueContemCabecalho( _
+        ws, _
+        LINHA_CABECALHO_COMPONENTES)
+
+    If Not tabela Is Nothing Then
+
+        Set linhaTabela = tabela.ListRows.Add
+        novaLinha = linhaTabela.Range.Row
+
+    Else
+
+        novaLinha = ultimaLinha + 1
+
+        If novaLinha < _
+            LINHA_CABECALHO_COMPONENTES + 1 Then
+
+            novaLinha = _
+                LINHA_CABECALHO_COMPONENTES + 1
+
+        End If
+
+        linhaModelo = ultimaLinha
+
+        If linhaModelo >= _
+            LINHA_CABECALHO_COMPONENTES + 1 Then
+
+            ws.Range( _
+                ws.Cells(linhaModelo, 1), _
+                ws.Cells( _
+                    linhaModelo, _
+                    ultimaColuna)).Copy
+
+            ws.Cells(novaLinha, 1).PasteSpecial _
+                xlPasteFormats
+
+            ws.Cells(novaLinha, 1).PasteSpecial _
+                xlPasteValidation
+
+            ws.Cells(novaLinha, 1).PasteSpecial _
+                xlPasteFormulas
+
+            Application.CutCopyMode = False
+
+            ws.Rows(novaLinha).RowHeight = _
+                ws.Rows(linhaModelo).RowHeight
+
+            ' Mantém fórmulas copiadas e limpa apenas constantes.
+            For coluna = 1 To ultimaColuna
+
+                If Not ws.Cells( _
+                    novaLinha, _
+                    coluna).HasFormula Then
+
+                    ws.Cells( _
+                        novaLinha, _
+                        coluna).ClearContents
+
+                End If
+
+            Next coluna
+
+        End If
+
+    End If
+
+    ultimaLinha = novaLinha
+    AdicionarNovaLinhaComponente = novaLinha
+
+End Function
+
+' -----------------------------------------------------------------------------
+' ORDENAÇÃO NATURAL PELO CÓDIGO
+' -----------------------------------------------------------------------------
+Private Sub OrdenarComponentesPorCodigo( _
+    ByVal ws As Worksheet, _
+    ByVal linhaCabecalho As Long, _
+    ByVal ultimaLinha As Long, _
+    ByVal ultimaColuna As Long, _
+    ByVal colunaCodigo As Long)
+
+    Dim tabela As ListObject
+
+    If ultimaLinha <= linhaCabecalho + 1 Then
+        Exit Sub
+    End If
+
+    Set tabela = TabelaQueContemCelula( _
+        ws, _
+        ws.Cells( _
+            linhaCabecalho, _
+            colunaCodigo))
+
+    If Not tabela Is Nothing Then
+
+        OrdenarTabelaPorCodigoNatural _
+            tabela, _
+            colunaCodigo - tabela.Range.Column + 1
+
+    Else
+
+        OrdenarIntervaloPorCodigoNatural _
+            ws, _
+            linhaCabecalho, _
+            ultimaLinha, _
+            ultimaColuna, _
+            colunaCodigo
+
+    End If
+
+End Sub
+
+Private Sub OrdenarTabelaPorCodigoNatural( _
+    ByVal tabela As ListObject, _
+    ByVal indiceColunaCodigo As Long)
+
+    Dim colunaAuxiliar As ListColumn
+    Dim intervaloChave As Range
+    Dim linha As Long
+    Dim nomeAuxiliar As String
+
+    nomeAuxiliar = "__ordem_natural_codigo_" & _
+        Format$(Timer * 100, "0")
+
+    Set colunaAuxiliar = tabela.ListColumns.Add
+    colunaAuxiliar.Name = nomeAuxiliar
+
+    If Not tabela.DataBodyRange Is Nothing Then
+
+        Set intervaloChave = _
+            colunaAuxiliar.DataBodyRange
+
+        For linha = 1 To tabela.DataBodyRange.Rows.Count
+
+            intervaloChave.Cells(linha, 1).Value = _
+                ChaveOrdenacaoNatural( _
+                    tabela.DataBodyRange.Cells( _
+                        linha, _
+                        indiceColunaCodigo).Value)
+
+        Next linha
+
+        With tabela.Sort
+
+            .SortFields.Clear
+
+            .SortFields.Add _
+                Key:=intervaloChave, _
+                SortOn:=xlSortOnValues, _
+                Order:=xlAscending, _
+                DataOption:=xlSortNormal
+
+            .Header = xlYes
+            .MatchCase = False
+            .Orientation = xlTopToBottom
+            .Apply
+
+        End With
+
+    End If
+
+    colunaAuxiliar.Delete
+
+End Sub
+
+Private Sub OrdenarIntervaloPorCodigoNatural( _
+    ByVal ws As Worksheet, _
+    ByVal linhaCabecalho As Long, _
+    ByVal ultimaLinha As Long, _
+    ByVal ultimaColuna As Long, _
+    ByVal colunaCodigo As Long)
+
+    Dim colunaAuxiliar As Long
+    Dim linha As Long
+    Dim intervaloOrdenacao As Range
+    Dim intervaloChave As Range
+
+    colunaAuxiliar = ultimaColuna + 1
+
+    ws.Cells( _
+        linhaCabecalho, _
+        colunaAuxiliar).Value = "__ordem_natural_codigo"
+
+    For linha = linhaCabecalho + 1 To ultimaLinha
+
+        ws.Cells( _
+            linha, _
+            colunaAuxiliar).Value = _
+                ChaveOrdenacaoNatural( _
+                    ws.Cells( _
+                        linha, _
+                        colunaCodigo).Value)
+
+    Next linha
+
+    Set intervaloOrdenacao = ws.Range( _
+        ws.Cells(linhaCabecalho, 1), _
+        ws.Cells( _
+            ultimaLinha, _
+            colunaAuxiliar))
+
+    Set intervaloChave = ws.Range( _
+        ws.Cells( _
+            linhaCabecalho + 1, _
+            colunaAuxiliar), _
+        ws.Cells( _
+            ultimaLinha, _
+            colunaAuxiliar))
+
+    With ws.Sort
+
+        .SortFields.Clear
+
+        .SortFields.Add _
+            Key:=intervaloChave, _
+            SortOn:=xlSortOnValues, _
+            Order:=xlAscending, _
+            DataOption:=xlSortNormal
+
+        .SetRange intervaloOrdenacao
+        .Header = xlYes
+        .MatchCase = False
+        .Orientation = xlTopToBottom
+        .Apply
+
+    End With
+
+    ws.Range( _
+        ws.Cells( _
+            linhaCabecalho, _
+            colunaAuxiliar), _
+        ws.Cells( _
+            ultimaLinha, _
+            colunaAuxiliar)).Clear
+
+End Sub
+
+Private Function ChaveOrdenacaoNatural( _
+    ByVal valor As Variant) As String
+
+    Dim texto As String
+    Dim resultado As String
+    Dim digitos As String
+    Dim caractere As String
+    Dim i As Long
+
+    texto = UCase$(Trim$(CStr(valor)))
+
+    If texto = vbNullString Then
+        ChaveOrdenacaoNatural = String$(60, "Z")
+        Exit Function
+    End If
+
+    i = 1
+
+    Do While i <= Len(texto)
+
+        caractere = Mid$(texto, i, 1)
+
+        If caractere Like "#" Then
+
+            digitos = vbNullString
+
+            Do While i <= Len(texto) _
+                And Mid$(texto, i, 1) Like "#"
+
+                digitos = digitos & _
+                    Mid$(texto, i, 1)
+
+                i = i + 1
+
+            Loop
+
+            resultado = resultado & _
+                Right$( _
+                    String$(14, "0") & digitos, _
+                    14)
+
+        Else
+
+            resultado = resultado & caractere
+            i = i + 1
+
+        End If
+
+    Loop
+
+    ChaveOrdenacaoNatural = resultado
+
+End Function
+
+' -----------------------------------------------------------------------------
+' REQUISITOS — IDs de disciplinas ou valores terminados em "horas"
+' -----------------------------------------------------------------------------
+Private Sub AdicionarRelacaoUnica( _
+    ByVal mapa As Object, _
+    ByVal idDono As String, _
+    ByVal idRequisito As String)
+
+    Dim lista As Object
+
+    If Not mapa.Exists(idDono) Then
+
+        Set lista = CreateObject("Scripting.Dictionary")
+        lista.CompareMode = vbTextCompare
+        mapa.Add idDono, lista
+
+    Else
+
+        Set lista = mapa.Item(idDono)
+
+    End If
+
+    If Not lista.Exists(idRequisito) Then
+        lista.Add idRequisito, True
+    End If
+
+End Sub
+
+Private Function ObterListaCodigosOrdenada( _
+    ByVal mapa As Object, _
+    ByVal idDono As String, _
+    ByVal componentesFluxo As Object) As String
+
+    Dim listaRequisitos As Object
+    Dim valoresSaida As Object
+    Dim requisito As Variant
+    Dim dadosRequisito As Object
+    Dim valorSaida As String
+
+    If Not mapa.Exists(idDono) Then
+        ObterListaCodigosOrdenada = vbNullString
+        Exit Function
+    End If
+
+    Set listaRequisitos = mapa.Item(idDono)
+
+    Set valoresSaida = CreateObject("Scripting.Dictionary")
+    valoresSaida.CompareMode = vbTextCompare
+
+    For Each requisito In listaRequisitos.Keys
+
+        If EhRequisitoEmHoras(CStr(requisito)) Then
+
+            ' Mantém literalmente a exigência informada no Fluxograma.
+            valorSaida = NormalizarRequisito(requisito)
+
+        Else
+
+            If Not componentesFluxo.Exists(CStr(requisito)) Then
+
+                Err.Raise vbObjectError + 1031, _
+                          "ObterListaCodigosOrdenada", _
+                          "Não foi possível converter o ID de requisito """ & _
+                          CStr(requisito) & """ em código."
+
+            End If
+
+            Set dadosRequisito = _
+                componentesFluxo.Item(CStr(requisito))
+
+            valorSaida = _
+                NormalizarCodigo(dadosRequisito.Item("codigo"))
+
+            If valorSaida = vbNullString Then
+
+                Err.Raise vbObjectError + 1032, _
+                          "ObterListaCodigosOrdenada", _
+                          "O bloco de ID """ & CStr(requisito) & _
+                          """ não possui código válido."
+
+            End If
+
+        End If
+
+        If valorSaida <> vbNullString Then
+
+            If Not valoresSaida.Exists(valorSaida) Then
+                valoresSaida.Add valorSaida, True
+            End If
+
+        End If
+
+    Next requisito
+
+    ObterListaCodigosOrdenada = _
+        JuntarConjuntoOrdenado(valoresSaida, "|")
+
+End Function
+
+Private Function ContarRelacoes( _
+    ByVal mapa As Object) As Long
+
+    Dim idDono As Variant
+    Dim lista As Object
+    Dim total As Long
+
+    For Each idDono In mapa.Keys
+
+        Set lista = mapa.Item(idDono)
+        total = total + lista.Count
+
+    Next idDono
+
+    ContarRelacoes = total
+
+End Function
+
+Private Function SepararRequisitos( _
+    ByVal texto As String) As Collection
+
+    Dim resultado As New Collection
+    Dim textoNormalizado As String
+    Dim partes As Variant
+    Dim parte As Variant
+    Dim requisito As String
+    Dim posicaoHifen As Long
+
+    textoNormalizado = texto
+    textoNormalizado = Replace(textoNormalizado, vbCrLf, "|")
+    textoNormalizado = Replace(textoNormalizado, vbCr, "|")
+    textoNormalizado = Replace(textoNormalizado, vbLf, "|")
+    textoNormalizado = Replace(textoNormalizado, ";", "|")
+    textoNormalizado = Replace(textoNormalizado, ",", "|")
+    textoNormalizado = Replace(textoNormalizado, "/", "|")
+
+    partes = Split(textoNormalizado, "|")
+
+    For Each parte In partes
+
+        requisito = NormalizarRequisito(parte)
+
+        If requisito <> vbNullString Then
+
+            If Not EhRequisitoEmHoras(requisito) Then
+
+                ' Mantém compatibilidade com anotações como "12 - texto".
+                ' Nesse caso, somente o ID à esquerda do hífen é utilizado.
+                posicaoHifen = _
+                    InStr(1, requisito, "-", vbBinaryCompare)
+
+                If posicaoHifen > 0 Then
+                    requisito = _
+                        NormalizarId( _
+                            Left$(requisito, posicaoHifen - 1))
+                Else
+                    requisito = NormalizarId(requisito)
+                End If
+
+            End If
+
+            If requisito <> vbNullString Then
+                resultado.Add requisito
+            End If
+
+        End If
+
+    Next parte
+
+    Set SepararRequisitos = resultado
+
+End Function
+
+Private Function NormalizarRequisito( _
+    ByVal valor As Variant) As String
+
+    Dim texto As String
+
+    If IsError(valor) Or IsEmpty(valor) Or IsNull(valor) Then
+        NormalizarRequisito = vbNullString
+        Exit Function
+    End If
+
+    texto = CStr(valor)
+    texto = Replace(texto, ChrW(160), " ")
+    texto = Replace(texto, vbTab, " ")
+    texto = Trim$(texto)
+
+    NormalizarRequisito = texto
+
+End Function
+
+Private Function EhRequisitoEmHoras( _
+    ByVal valor As Variant) As Boolean
+
+    Dim texto As String
+    Dim parteNumerica As String
+
+    texto = LCase$(NormalizarRequisito(valor))
+
+    If Len(texto) <= Len("horas") Then
+        EhRequisitoEmHoras = False
+        Exit Function
+    End If
+
+    If Right$(texto, Len("horas")) <> "horas" Then
+        EhRequisitoEmHoras = False
+        Exit Function
+    End If
+
+    parteNumerica = _
+        Trim$(Left$(texto, Len(texto) - Len("horas")))
+
+    EhRequisitoEmHoras = _
+        (parteNumerica <> vbNullString And IsNumeric(parteNumerica))
+
+End Function
+
+' -----------------------------------------------------------------------------
+' EXTRAÇÃO, NORMALIZAÇÃO E CARGAS
+' -----------------------------------------------------------------------------
+Private Function NormalizarQuebrasELimparEspacos( _
+    ByVal texto As String) As String
+
+    Dim resultado As String
+
+    resultado = texto
+    resultado = Replace(resultado, vbCrLf, " ")
+    resultado = Replace(resultado, vbCr, " ")
+    resultado = Replace(resultado, vbLf, " ")
+    resultado = Replace(resultado, ChrW(160), " ")
+
+    Do While InStr(resultado, "  ") > 0
+        resultado = Replace(resultado, "  ", " ")
+    Loop
+
+    NormalizarQuebrasELimparEspacos = Trim$(resultado)
+
+End Function
+
+Private Function NormalizarCodigo( _
+    ByVal valor As Variant) As String
+
+    Dim texto As String
+
+    If IsError(valor) _
+       Or IsEmpty(valor) _
+       Or IsNull(valor) Then
+
+        NormalizarCodigo = vbNullString
+        Exit Function
+
+    End If
+
+    texto = CStr(valor)
+    texto = Replace(texto, ChrW(160), " ")
+    texto = Trim$(texto)
+
+    Do While InStr(texto, "  ") > 0
+        texto = Replace(texto, "  ", " ")
+    Loop
+
+    NormalizarCodigo = texto
+
+End Function
+
+Private Function NormalizarId( _
+    ByVal valor As Variant) As String
+
+    Dim texto As String
+
+    If IsError(valor) _
+       Or IsEmpty(valor) _
+       Or IsNull(valor) Then
+
+        NormalizarId = vbNullString
+        Exit Function
+
+    End If
+
+    If VarType(valor) <> vbString _
+       And IsNumeric(valor) Then
+
+        If CDbl(valor) = Fix(CDbl(valor)) Then
+            NormalizarId = Format$(CDbl(valor), "0")
+        Else
+            NormalizarId = Trim$(CStr(valor))
+        End If
+
+        Exit Function
+
+    End If
+
+    texto = CStr(valor)
+    texto = Replace(texto, ChrW(160), " ")
+    texto = Trim$(texto)
+
+    NormalizarId = texto
+
+End Function
+
+Private Function NormalizarCabecalho( _
+    ByVal valor As Variant) As String
+
+    Dim texto As String
+
+    If IsError(valor) _
+       Or IsEmpty(valor) _
+       Or IsNull(valor) Then
+
+        NormalizarCabecalho = vbNullString
+        Exit Function
+
+    End If
+
+    texto = NormalizarTextoComparacao(CStr(valor))
+    texto = Replace(texto, "-", "_")
+    texto = Replace(texto, " ", "_")
+
+    Do While InStr(texto, "__") > 0
+        texto = Replace(texto, "__", "_")
+    Loop
+
+    NormalizarCabecalho = texto
+
+End Function
+
+Private Function NormalizarTextoComparacao( _
+    ByVal texto As String) As String
+
+    Dim resultado As String
+
+    resultado = LCase$(Trim$(texto))
+    resultado = Replace(resultado, ChrW(160), " ")
+
+    resultado = Replace(resultado, "á", "a")
+    resultado = Replace(resultado, "à", "a")
+    resultado = Replace(resultado, "â", "a")
+    resultado = Replace(resultado, "ã", "a")
+    resultado = Replace(resultado, "ä", "a")
+
+    resultado = Replace(resultado, "é", "e")
+    resultado = Replace(resultado, "è", "e")
+    resultado = Replace(resultado, "ê", "e")
+    resultado = Replace(resultado, "ë", "e")
+
+    resultado = Replace(resultado, "í", "i")
+    resultado = Replace(resultado, "ì", "i")
+    resultado = Replace(resultado, "î", "i")
+    resultado = Replace(resultado, "ï", "i")
+
+    resultado = Replace(resultado, "ó", "o")
+    resultado = Replace(resultado, "ò", "o")
+    resultado = Replace(resultado, "ô", "o")
+    resultado = Replace(resultado, "õ", "o")
+    resultado = Replace(resultado, "ö", "o")
+
+    resultado = Replace(resultado, "ú", "u")
+    resultado = Replace(resultado, "ù", "u")
+    resultado = Replace(resultado, "û", "u")
+    resultado = Replace(resultado, "ü", "u")
+
+    resultado = Replace(resultado, "ç", "c")
+
+    Do While InStr(resultado, "  ") > 0
+        resultado = Replace(resultado, "  ", " ")
+    Loop
+
+    NormalizarTextoComparacao = Trim$(resultado)
+
+End Function
+
+Private Function NormalizarTextoParaTokens( _
+    ByVal texto As String) As String
+
+    Dim resultado As String
+    Dim caracteres As Variant
+    Dim caractere As Variant
+
+    resultado = NormalizarTextoComparacao(texto)
+
+    caracteres = Array( _
+        ":", _
+        ";", _
+        ",", _
+        ".", _
+        "-", _
+        "_", _
+        "/", _
+        "\", _
+        "(", _
+        ")", _
+        "[", _
+        "]", _
+        "{", _
+        "}", _
+        vbCr, _
+        vbLf, _
+        vbTab)
+
+    For Each caractere In caracteres
+        resultado = Replace(resultado, CStr(caractere), " ")
+    Next caractere
+
+    Do While InStr(resultado, "  ") > 0
+        resultado = Replace(resultado, "  ", " ")
+    Loop
+
+    NormalizarTextoParaTokens = Trim$(resultado)
+
+End Function
+
+Private Function LerCarga( _
+    ByVal celula As Range, _
+    ByVal nomeCampo As String) As Variant
+
+    If Trim$(CStr(celula.Value)) = vbNullString Then
+
+        LerCarga = Empty
+        Exit Function
+
+    End If
+
+    If Not IsNumeric(celula.Value) Then
+
+        Err.Raise vbObjectError + 1060, _
+                  "LerCarga", _
+                  "Valor não numérico para """ & nomeCampo & """ em " & _
+                  celula.Worksheet.Name & "!" & _
+                  celula.Address(False, False) & ": """ & _
+                  CStr(celula.Value) & """."
+
+    End If
+
+    LerCarga = CDbl(celula.Value)
+
+End Function
+
+Private Function ValorDaCelulaMesclada( _
+    ByVal celula As Range) As Variant
+
+    If celula.MergeCells Then
+        ValorDaCelulaMesclada = celula.MergeArea.Cells(1, 1).Value
+    Else
+        ValorDaCelulaMesclada = celula.Value
+    End If
+
+End Function
+
+' -----------------------------------------------------------------------------
+' COMPARAÇÃO DE VALORES
+' -----------------------------------------------------------------------------
+Private Function ValoresEquivalentes( _
+    ByVal valorAtual As Variant, _
+    ByVal novoValor As Variant) As Boolean
+
+    If ValorEhVazio(valorAtual) _
+       And ValorEhVazio(novoValor) Then
+
+        ValoresEquivalentes = True
+        Exit Function
+
+    End If
+
+    If VarType(valorAtual) = vbBoolean _
+       Or VarType(novoValor) = vbBoolean Then
+
+        If PodeConverterParaBooleano(valorAtual) _
+           And PodeConverterParaBooleano(novoValor) Then
+
+            ValoresEquivalentes = _
+                (ConverterParaBooleano(valorAtual) = _
+                 ConverterParaBooleano(novoValor))
+
+            Exit Function
+
+        End If
+
+    End If
+
+    If IsNumeric(valorAtual) _
+       And IsNumeric(novoValor) Then
+
+        ValoresEquivalentes = _
+            (Abs( _
+                CDbl(valorAtual) - _
+                CDbl(novoValor)) < 0.0000001)
+
+        Exit Function
+
+    End If
+
+    ValoresEquivalentes = _
+        (StrComp( _
+            Trim$(CStr(valorAtual)), _
+            Trim$(CStr(novoValor)), _
+            vbTextCompare) = 0)
+
+End Function
+
+Private Function ValorEhVazio( _
+    ByVal valor As Variant) As Boolean
+
+    If IsError(valor) Then
+
+        ValorEhVazio = False
+
+    ElseIf IsEmpty(valor) _
+        Or IsNull(valor) Then
+
+        ValorEhVazio = True
+
+    Else
+
+        ValorEhVazio = _
+            (Trim$(CStr(valor)) = vbNullString)
+
+    End If
+
+End Function
+
+Private Function PodeConverterParaBooleano( _
+    ByVal valor As Variant) As Boolean
+
+    Dim texto As String
+
+    If VarType(valor) = vbBoolean Then
+
+        PodeConverterParaBooleano = True
+        Exit Function
+
+    End If
+
+    texto = NormalizarTextoComparacao(CStr(valor))
+
+    PodeConverterParaBooleano = _
+        (texto = "true" _
+         Or texto = "false" _
+         Or texto = "verdadeiro" _
+         Or texto = "falso" _
+         Or texto = "sim" _
+         Or texto = "nao" _
+         Or texto = "1" _
+         Or texto = "0")
+
+End Function
+
+Private Function ConverterParaBooleano( _
+    ByVal valor As Variant) As Boolean
+
+    Dim texto As String
+
+    If VarType(valor) = vbBoolean Then
+
+        ConverterParaBooleano = CBool(valor)
+        Exit Function
+
+    End If
+
+    texto = NormalizarTextoComparacao(CStr(valor))
+
+    ConverterParaBooleano = _
+        (texto = "true" _
+         Or texto = "verdadeiro" _
+         Or texto = "sim" _
+         Or texto = "1")
+
+End Function
+
+' -----------------------------------------------------------------------------
+' PLANILHAS, TABELAS E UTILITÁRIOS
+' -----------------------------------------------------------------------------
+Private Function ObterPlanilhaObrigatoria( _
+    ByVal livro As Workbook, _
+    ByVal nomePlanilha As String) As Worksheet
+
+    Dim ws As Worksheet
+
+    Set ws = ObterPlanilhaSeExistir( _
+        livro, _
+        nomePlanilha)
+
+    If ws Is Nothing Then
+
+        Err.Raise vbObjectError + 1080, _
+                  "ObterPlanilhaObrigatoria", _
+                  "A aba obrigatória """ & nomePlanilha & _
+                  """ não foi encontrada no arquivo " & _
+                  livro.Name & "."
+
+    End If
+
+    Set ObterPlanilhaObrigatoria = ws
+
+End Function
+
+Private Function ObterPlanilhaSeExistir( _
+    ByVal livro As Workbook, _
+    ByVal nomePlanilha As String) As Worksheet
+
+    Dim ws As Worksheet
+
+    For Each ws In livro.Worksheets
+
+        If StrComp( _
+            ws.Name, _
+            nomePlanilha, _
+            vbTextCompare) = 0 Then
+
+            Set ObterPlanilhaSeExistir = ws
+            Exit Function
+
+        End If
+
+    Next ws
+
+    Set ObterPlanilhaSeExistir = Nothing
+
+End Function
+
+Private Function TabelaQueContemCabecalho( _
+    ByVal ws As Worksheet, _
+    ByVal linhaCabecalho As Long) As ListObject
+
+    Dim tabela As ListObject
+
+    For Each tabela In ws.ListObjects
+
+        If tabela.HeaderRowRange.Row = linhaCabecalho Then
+
+            Set TabelaQueContemCabecalho = tabela
+            Exit Function
+
+        End If
+
+    Next tabela
+
+    Set TabelaQueContemCabecalho = Nothing
+
+End Function
+
+Private Function TabelaQueContemCelula( _
+    ByVal ws As Worksheet, _
+    ByVal celula As Range) As ListObject
+
+    Dim tabela As ListObject
+
+    For Each tabela In ws.ListObjects
+
+        If Not Intersect( _
+            celula, _
+            tabela.Range) Is Nothing Then
+
+            Set TabelaQueContemCelula = tabela
+            Exit Function
+
+        End If
+
+    Next tabela
+
+    Set TabelaQueContemCelula = Nothing
+
+End Function
+
+Private Function UltimaLinhaPorColuna( _
+    ByVal ws As Worksheet, _
+    ByVal coluna As Long) As Long
+
+    Dim ultimaLinha As Long
+
+    ultimaLinha = _
+        ws.Cells( _
+            ws.Rows.Count, _
+            coluna).End(xlUp).Row
+
+    If ultimaLinha < LINHA_CABECALHO_COMPONENTES Then
+        ultimaLinha = LINHA_CABECALHO_COMPONENTES
+    End If
+
+    UltimaLinhaPorColuna = ultimaLinha
+
+End Function
+
+Private Function UltimaColunaUtilizada( _
+    ByVal ws As Worksheet) As Long
+
+    Dim ultimaCelula As Range
+
+    On Error Resume Next
+
+    Set ultimaCelula = ws.Cells.Find( _
+        What:="*", _
+        After:=ws.Cells(1, 1), _
+        LookIn:=xlFormulas, _
+        LookAt:=xlPart, _
+        SearchOrder:=xlByColumns, _
+        SearchDirection:=xlPrevious, _
+        MatchCase:=False)
+
+    On Error GoTo 0
+
+    If ultimaCelula Is Nothing Then
+        UltimaColunaUtilizada = 1
+    Else
+        UltimaColunaUtilizada = ultimaCelula.Column
+    End If
+
+End Function
+
+Private Sub AdicionarChaveSeAusente( _
+    ByVal mapa As Object, _
+    ByVal chave As String)
+
+    If Not mapa.Exists(chave) Then
+        mapa.Add chave, True
+    End If
+
+End Sub
+
+Private Function JuntarConjuntoOrdenado( _
+    ByVal conjunto As Object, _
+    ByVal separador As String) As String
+
+    Dim chaves As Variant
+    Dim i As Long
+    Dim j As Long
+    Dim temporario As Variant
+    Dim resultado As String
+
+    If conjunto Is Nothing Then
+        JuntarConjuntoOrdenado = vbNullString
+        Exit Function
+    End If
+
+    If conjunto.Count = 0 Then
+        JuntarConjuntoOrdenado = vbNullString
+        Exit Function
+    End If
+
+    chaves = conjunto.Keys
+
+    For i = LBound(chaves) To UBound(chaves) - 1
+
+        For j = i + 1 To UBound(chaves)
+
+            If StrComp( _
+                ChaveOrdenacaoNatural(chaves(i)), _
+                ChaveOrdenacaoNatural(chaves(j)), _
+                vbTextCompare) > 0 Then
+
+                temporario = chaves(i)
+                chaves(i) = chaves(j)
+                chaves(j) = temporario
+
+            End If
+
+        Next j
+
+    Next i
+
+    For i = LBound(chaves) To UBound(chaves)
+
+        If resultado = vbNullString Then
+            resultado = CStr(chaves(i))
+        Else
+            resultado = resultado & _
+                separador & CStr(chaves(i))
+        End If
+
+    Next i
+
+    JuntarConjuntoOrdenado = resultado
+
+End Function
+

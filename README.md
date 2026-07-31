@@ -34,7 +34,7 @@ para a referência de commit.
 ## 2. Arquitetura
 
 ```
-dados/perfis/<id>/perfil.yaml (com legislacao:/competencias:) + matriz_curricular.xlsx
+dados/perfis/<id>/perfil.yaml (com legislacao:) + matriz_curricular.xlsx (com Competencias)
   (+ heranca: dados/compartilhados/, + extends: outro perfil)
      → ppcgen.leitores → ppcgen.validadores → ppcgen.geradores
      → ppcgen.compiladores → PDF em saida/<id>/
@@ -171,7 +171,7 @@ nem dentro da própria pasta de dados do perfil — sempre em
 ## 14. Fluxo de trabalho recomendado
 
 1. Editar `dados/perfis/<id>/matriz_curricular.xlsx`, `perfil.yaml` (que
-   inclui `legislacao:`/`competencias:`) ou `textos/*.tex`.
+   inclui `legislacao:`) ou `textos/*.tex`.
 2. `python -m ppcgen validar --perfil <id>` até revisar todos os erros.
 3. `python -m ppcgen completo --perfil <id>` (ou `make complete
    PROFILE=<id>`).

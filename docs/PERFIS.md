@@ -111,23 +111,16 @@ legislacao:
     documento: Resolução CNE/CES nº 7, de 18 de dezembro de 2018
     ano: 2018
     observacoes: ...
-
-# Catálogo de competências deste perfil (substitui o antigo
-# referenciais/competencias.yaml) — lista vazia é válida.
-competencias:
-  - id: PROJETAR_SISTEMAS_CONTROLE
-    descricao: "Projetar, especificar e sintonizar sistemas de controle..."
-    obrigatoria: true
-    fonte: MEC_CNE_CES_7_2018
 ```
 
 Campos desconhecidos em qualquer seção fazem o carregamento falhar com
 `ConfiguracaoInvalida` (erro de digitação nunca é ignorado silenciosamente).
 Não existe mais pasta `referenciais/` em nenhum perfil — núcleos, áreas,
-temas transversais e conteúdos curriculares são abas de registro da
-própria `matriz_curricular.xlsx` (`Nucleos`/`Areas`/`Temas`/`Conteudos`,
-ver `docs/DICIONARIO_DADOS.md`); legislação e competências são as duas
-listas acima, direto em `perfil.yaml`.
+temas transversais, conteúdos curriculares e competências são abas de
+registro da própria `matriz_curricular.xlsx`
+(`Nucleos`/`Areas`/`Temas`/`Conteudos`/`Competencias`, ver
+`docs/DICIONARIO_DADOS.md`); só legislação é a lista acima, direto em
+`perfil.yaml`.
 
 ## Status
 

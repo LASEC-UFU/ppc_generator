@@ -46,10 +46,10 @@ Um script de migração deve:
   (`docs/DICIONARIO_DADOS.md`);
 - extrair catálogos hardcoded do gerador antigo (ex.: listas de conteúdo
   fixas no código-fonte de um gerador anterior) para as abas de registro
-  da matriz (`Nucleos`/`Areas`/`Temas`/`Conteudos`) ou para
-  `legislacao:`/`competencias:` em `perfil.yaml`, conforme o caso — ver
-  `docs/DICIONARIO_DADOS.md` — documentando de onde vieram, nunca
-  inventando ids novos silenciosamente;
+  da matriz (`Nucleos`/`Areas`/`Temas`/`Conteudos`/`Competencias`,
+  populando a coluna `componentes` de cada uma) ou para `legislacao:` em
+  `perfil.yaml`, conforme o caso — ver `docs/DICIONARIO_DADOS.md` —
+  documentando de onde vieram, nunca inventando ids novos silenciosamente;
 - copiar fichas curriculares para as subpastas por tipo, usando o leitor
   real de fichas (`ppcgen.leitores.fichas.carregar_fichas`) para casar
   cada arquivo com um componente da matriz — fichas não reconhecidas vão
