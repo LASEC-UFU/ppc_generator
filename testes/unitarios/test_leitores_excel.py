@@ -159,6 +159,31 @@ def test_componentes_de_catalogo_vazio_nao_vincula_nada(tmp_path):
     assert referenciais.areas[0].componentes == []
 
 
+def test_periodo_aceita_numero_puro_ou_texto_com_numero(tmp_path):
+    """``periodo`` aceita tanto número puro quanto texto livre em volta
+    (``5º Período``, ``5ºPeriodo``...) — usa o primeiro número encontrado.
+    Outros campos numéricos (cht/chp/...) não ganham essa tolerância, só
+    ``periodo``."""
+
+    caminho = tmp_path / "matriz.xlsx"
+    wb = openpyxl.Workbook()
+    wb.remove(wb.active)
+    componentes = wb.create_sheet("Componentes")
+    componentes.append(["codigo", "nome", "tipo", "periodo"])
+    componentes.append(["X1", "Disciplina X1", "disciplina", 5])
+    componentes.append(["X2", "Disciplina X2", "disciplina", "5º Período"])
+    componentes.append(["X3", "Disciplina X3", "disciplina", "5ºPeriodo"])
+    componentes.append(["X4", "Disciplina X4", "disciplina", "Período 5"])
+    wb.save(caminho)
+
+    curriculo, _referenciais, _avisos = carregar_matriz(caminho)
+    por_codigo = curriculo.por_codigo()
+    assert por_codigo["X1"].periodo == 5
+    assert por_codigo["X2"].periodo == 5
+    assert por_codigo["X3"].periodo == 5
+    assert por_codigo["X4"].periodo == 5
+
+
 def test_carregar_registros_referenciais_completo(tmp_path):
     caminho = tmp_path / "matriz.xlsx"
     wb = openpyxl.Workbook()
@@ -181,6 +206,10 @@ def test_carregar_registros_referenciais_completo(tmp_path):
     competencias.append(["id", "descricao", "obrigatoria", "fonte"])
     competencias.append(["COMP_01", "Competência de teste", True, "Fonte X"])
 
+    bibliografia = wb.create_sheet("Bibliografia")
+    bibliografia.append(["chave", "tipo", "autor", "titulo", "ano", "url"])
+    bibliografia.append(["teste_2024", "misc", "Autor Teste", "Título de Teste", "2024", "https://exemplo.org"])
+
     wb.save(caminho)
 
     _curriculo, referenciais, _avisos = carregar_matriz(caminho)
@@ -189,6 +218,10 @@ def test_carregar_registros_referenciais_completo(tmp_path):
     assert referenciais.conteudos[0].obrigatorio is True
     assert referenciais.competencias[0].id == "COMP_01"
     assert referenciais.competencias[0].obrigatoria is True
+    assert referenciais.bibliografia[0].chave == "teste_2024"
+    assert referenciais.bibliografia[0].tipo == "misc"
+    assert referenciais.bibliografia[0].ano == "2024"
+    assert referenciais.bibliografia[0].url == "https://exemplo.org"
 
 
 def test_codigo_provisorio_e_unidade_oferta_derivados_do_codigo(tmp_path):

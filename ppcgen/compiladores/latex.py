@@ -19,34 +19,21 @@ from ppcgen.utilitarios.logging import obter_logger
 logger = obter_logger(__name__)
 
 
-_EXTENSOES_IMAGEM = {".png", ".jpg", ".jpeg", ".pdf", ".eps"}
-
-
 def _copiar_arvore(origem: Path, destino: Path) -> None:
     if origem.exists():
         shutil.copytree(origem, destino, dirs_exist_ok=True)
 
 
-def _copiar_imagens(origem: Path, destino: Path) -> None:
-    """Copia só os arquivos de imagem de ``origem`` para ``destino`` — usado
-    para trazer a pasta de identidade visual compartilhada (que também
-    contém ``cores.yaml``, não um arquivo LaTeX) para dentro de ``figuras/``.
-    """
-
-    if not origem.exists():
-        return
-    destino.mkdir(parents=True, exist_ok=True)
-    for arquivo in origem.iterdir():
-        if arquivo.is_file() and arquivo.suffix.lower() in _EXTENSOES_IMAGEM:
-            shutil.copyfile(arquivo, destino / arquivo.name)
-
-
 def montar_arvore_latex(perfil: Perfil, pasta_destino: Path) -> Path:
     """Monta, em ``pasta_destino``, uma árvore LaTeX autocontida e pronta
     para compilar: templates genéricos (``templates/latex/``) + conteúdo do
-    perfil (``textos/``, ``frontmatter/``, ``figuras/``, bibliografia),
-    resolvido através da cadeia de herança (``extends``), com os
-    ``overrides/`` do perfil aplicados por cima (Seção 6/9).
+    perfil (``textos/``, ``frontmatter/``, ``figuras/``), resolvido através
+    da cadeia de herança (``extends``), com os ``overrides/`` do perfil
+    aplicados por cima (Seção 6/9). A bibliografia não é copiada aqui — é
+    gerada a partir da aba ``Bibliografia`` da matriz por
+    ``ppcgen.geradores.latex.gerar_arquivos_latex`` direto em
+    ``gerado/bibliografia.bib`` (mesma pasta ``pasta_destino``, ver
+    ``ppcgen.geradores.bibliografia``).
 
     Não grava nada dentro da pasta do perfil (Seção 12) — tudo é escrito em
     ``pasta_destino`` (``saida/<perfil_id>/latex/``).
@@ -73,33 +60,6 @@ def montar_arvore_latex(perfil: Perfil, pasta_destino: Path) -> Path:
         if folha_rosto.exists():
             (pasta_destino / "frontmatter").mkdir(parents=True, exist_ok=True)
             shutil.copyfile(folha_rosto, pasta_destino / "frontmatter" / "folha_rosto.tex")
-
-    # 2b) Identidade visual compartilhada (logos institucionais etc.), só se
-    #     declarada explicitamente em heranca.identidade_visual (Seção 6: sem
-    #     acesso implícito a dados/compartilhados/) — disponível em
-    #     ``figuras/compartilhadas/`` para os textos do perfil referenciarem.
-    if perfil.heranca.identidade_visual:
-        pasta_identidade = perfil.caminho_compartilhado(perfil.heranca.identidade_visual).parent
-        _copiar_imagens(pasta_identidade, pasta_destino / "figuras" / "compartilhadas")
-
-    # 3) Bibliografia: concatena as fontes compartilhadas (heranca.referencias)
-    #    com a bibliografia própria do perfil, sempre deixando o arquivo de
-    #    destino existir (mesmo vazio) para que \addbibresource nunca aponte
-    #    para um caminho inexistente.
-    (pasta_destino / "referencias").mkdir(parents=True, exist_ok=True)
-    destino_biblio = pasta_destino / "referencias" / "bibliografia.bib"
-    partes_bib = []
-    for caminho_rel in perfil.heranca.referencias:
-        caminho_bib_compartilhado = perfil.caminho_compartilhado(caminho_rel)
-        if caminho_bib_compartilhado.exists():
-            partes_bib.append(caminho_bib_compartilhado.read_text(encoding="utf-8"))
-    caminho_biblio = perfil.resolver_arquivo(perfil.arquivos.bibliografia)
-    if caminho_biblio is not None:
-        partes_bib.append(caminho_biblio.read_text(encoding="utf-8"))
-    if partes_bib:
-        destino_biblio.write_text("\n\n".join(partes_bib), encoding="utf-8")
-    else:
-        destino_biblio.write_text("% Nenhuma bibliografia declarada neste perfil.\n", encoding="utf-8")
 
     # 4) Overrides do perfil (prioridade máxima — Seção 9).
     _copiar_arvore(perfil.diretorio / perfil.arquivos.overrides / "latex", pasta_destino)

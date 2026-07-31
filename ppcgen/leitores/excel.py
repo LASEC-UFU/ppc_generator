@@ -22,7 +22,11 @@ Esquema de abas adotado (documentado em ``docs/DICIONARIO_DADOS.md``):
    alguma DCN (id, descrição, obrigatório, fonte, componentes).
 7. ``Competencias``  — catálogo de competências do curso (id, descrição,
    obrigatória, fonte, componentes).
-8. ``Certificacoes`` — opcional: certificacao_id -> codigo_componente (0+).
+8. ``Bibliografia``  — catálogo de referências bibliográficas (chave, tipo,
+   autor, título, ano...) — ver ``ppcgen.geradores.bibliografia``, que a
+   renderiza em BibTeX/biblatex válido no momento da geração; não existe
+   ``.bib`` estático em ``dados/``.
+9. ``Certificacoes`` — opcional: certificacao_id -> codigo_componente (0+).
 
 Em cada aba de catálogo (3-7), ``componentes`` é uma célula com códigos de
 componente separados por ``|`` — os componentes vinculados àquele item. O
@@ -46,6 +50,7 @@ não são lidas por este módulo.
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 import openpyxl
@@ -59,6 +64,7 @@ from ppcgen.modelos import (
     Conteudo,
     Correquisito,
     Curriculo,
+    EntradaBibliografica,
     Equivalencia,
     NucleoCurricular,
     PreRequisito,
@@ -75,6 +81,7 @@ ABAS_OPCIONAIS = (
     "Temas",
     "Conteudos",
     "Competencias",
+    "Bibliografia",
     "Certificacoes",
 )
 
@@ -108,6 +115,28 @@ def _int_ou_none(valor) -> int | None:
     if valor is None or valor == "":
         return None
     return int(valor)
+
+
+def _periodo(valor) -> int | None:
+    """Igual a ``_int_ou_none``, mas também aceita texto livre em volta do
+    número (``5º Período``, ``5ºPeriodo``, ``Período 5``...) — usa o
+    primeiro número encontrado na célula. Só para a coluna ``periodo``:
+    outros campos numéricos (cht/chp/.../ano) continuam exigindo número
+    puro, para não mascarar erro de digitação real neles."""
+
+    if valor is None or valor == "":
+        return None
+    if isinstance(valor, (int, float)):
+        return int(valor)
+    texto = str(valor).strip()
+    try:
+        return int(texto)
+    except ValueError:
+        pass
+    encontrado = re.search(r"\d+", texto)
+    if encontrado is None:
+        raise ValueError(f"não foi possível extrair um número de período de {valor!r}")
+    return int(encontrado.group())
 
 
 def _str_ou_vazio(valor) -> str:
@@ -267,6 +296,32 @@ def carregar_registros_referenciais(wb) -> ReferenciaisCurso:
                     )
                 )
 
+    if "Bibliografia" in wb.sheetnames:
+        for row in _linhas(wb["Bibliografia"]):
+            chave = _str_ou_vazio(row.get("chave"))
+            if chave:
+                referenciais.bibliografia.append(
+                    EntradaBibliografica(
+                        chave=chave,
+                        tipo=_str_ou_vazio(row.get("tipo")) or "misc",
+                        autor=_str_ou_vazio(row.get("autor")),
+                        titulo=_str_ou_vazio(row.get("titulo")),
+                        ano=_str_ou_vazio(row.get("ano")),
+                        mes=_str_ou_vazio(row.get("mes")),
+                        dia=_str_ou_vazio(row.get("dia")),
+                        endereco=_str_ou_vazio(row.get("endereco")),
+                        editora=_str_ou_vazio(row.get("editora")),
+                        organizacao=_str_ou_vazio(row.get("organizacao")),
+                        instituicao=_str_ou_vazio(row.get("instituicao")),
+                        edicao=_str_ou_vazio(row.get("edicao")),
+                        serie=_str_ou_vazio(row.get("serie")),
+                        doi=_str_ou_vazio(row.get("doi")),
+                        paginas=_str_ou_vazio(row.get("paginas")),
+                        url=_str_ou_vazio(row.get("url")),
+                        nota=_str_ou_vazio(row.get("nota")),
+                    )
+                )
+
     return referenciais
 
 
@@ -386,7 +441,7 @@ def carregar_matriz(caminho: str | Path) -> tuple[Curriculo, ReferenciaisCurso, 
                 extensao=_int_ou_none(row.get("che")),
                 total=_int_ou_none(row.get("tot")),
             ),
-            periodo=_int_ou_none(row.get("periodo")),
+            periodo=_periodo(row.get("periodo")),
             ativo=_bool(row.get("ativo"), padrao=True),
             obrigatorio=_bool(row.get("obrigatorio")),
             pre_requisitos=_parse_prerequisitos(row.get("pre_requisitos")),

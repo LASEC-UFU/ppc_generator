@@ -151,6 +151,7 @@ def _mesclar_referenciais(base: ReferenciaisCurso, atual: ReferenciaisCurso) -> 
         conteudos=_merge(base.conteudos, atual.conteudos),
         legislacao=_merge(base.legislacao, atual.legislacao),
         temas_transversais=_merge(base.temas_transversais, atual.temas_transversais),
+        bibliografia=_merge(base.bibliografia, atual.bibliografia),
     )
 
 
@@ -368,7 +369,7 @@ def cmd_limpar(args: argparse.Namespace) -> int:
     for pasta_cache in raiz.rglob("__pycache__"):
         shutil.rmtree(pasta_cache, ignore_errors=True)
 
-    print("Dados de entrada (dados/perfis, dados/compartilhados) foram preservados.")
+    print("Dados de entrada (dados/) foram preservados.")
     return 0
 
 

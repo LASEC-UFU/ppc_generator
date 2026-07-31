@@ -1,8 +1,8 @@
 """Teste de integração ponta a ponta (Seção 20): carrega o perfil mínimo de
-testes (``testes/perfis_exemplo/perfil_minimo``, isolado dos dados reais de
-produção — Seção 21), valida, gera os arquivos LaTeX, monta a árvore de
-compilação e tenta compilar de verdade (se o TeX estiver disponível no
-ambiente), conferindo os artefatos esperados.
+testes (``testes/perfis_exemplo``, isolado dos dados reais de produção —
+Seção 21), valida, gera os arquivos LaTeX, monta a árvore de compilação e
+tenta compilar de verdade (se o TeX estiver disponível no ambiente),
+conferindo os artefatos esperados.
 """
 
 from __future__ import annotations
@@ -24,7 +24,7 @@ RAIZ_FIXTURES = Path(__file__).resolve().parent.parent / "perfis_exemplo"
 
 @pytest.fixture
 def perfil_minimo():
-    return carregar_perfil(RAIZ_FIXTURES / "perfil_minimo")
+    return carregar_perfil(RAIZ_FIXTURES)
 
 
 def _carregar_curriculo_e_referenciais(perfil):

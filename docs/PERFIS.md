@@ -5,11 +5,13 @@
 Um **perfil** é o conjunto completo e autocontido de dados necessários para
 gerar uma versão específica de um PPC: um curso, uma versão curricular
 diferente do mesmo curso, ou uma proposta alternativa em avaliação. Cada
-perfil vive em `dados/perfis/<id>/` e não depende de nada fora da sua
-própria pasta, exceto o que ele referenciar explicitamente em `heranca:`
-(dados institucionais compartilhados em `dados/compartilhados/`) ou em
+perfil vive na sua própria pasta (normalmente `dados/perfis/<id>/`, mas o
+caminho pode ser qualquer um — ver "Descoberta de perfis" abaixo) e não
+depende de nada fora dela, exceto o que ele referenciar explicitamente em
 `extends:` (herda de outro perfil inteiro) — ver a seção `perfil.yaml`
-abaixo para os dois campos.
+abaixo. Não existe mecanismo de dados compartilhados entre perfis: cada um
+carrega seus próprios dados institucionais, autoridades, imagens e
+bibliografia.
 
 O sistema **nunca** assume um perfil padrão. Todo comando que opera sobre
 um perfil exige `--perfil <id>` ou `--perfil-dir <caminho>` explicitamente
@@ -19,16 +21,18 @@ testes ou geração oficial.
 
 ## Identificador do perfil
 
-O `id` é o nome da pasta em `dados/perfis/` e também o campo `perfil.id`
-dentro do `perfil.yaml` — os dois precisam ser iguais. Formato exigido
+Por padrão, o `id` é o nome da pasta em `dados/perfis/` e também o campo
+`perfil.id` dentro do `perfil.yaml` — os dois precisam ser iguais (a menos
+que o perfil esteja registrado explicitamente em `dados/perfis.yaml`, ver
+"Descoberta de perfis" abaixo, caso em que o `id` só precisa bater com o
+que está no registro). Formato exigido
 (validado como `PERFIL-000` se violado): letras minúsculas, dígitos e `_`
 apenas (`^[a-z0-9_]+$`), e não pode começar com `00` — esse prefixo é
 reservado para material de referência mantido manualmente dentro de
 `saida/` (ex.: `saida/00old/`, uma cópia antiga guardada à mão para
 comparação), que `ppcgen limpar --todos` ignora de propósito por não
-começar com o nome de um perfil real. Convenção usada pelos perfis de
-exemplo deste repositório: `<curso>_<versao>`, ex.
-`engenharia_computacao_2026_1`, `controle_automacao_2027_1`.
+começar com o nome de um perfil real. Convenção usada pelo perfil deste
+repositório: `<curso>_<versao>`, ex. `tecnologo_automacao_2027_1`.
 
 ## `perfil.yaml`: as seções
 
@@ -76,7 +80,6 @@ oferta:                      # formato de oferta do curso — todos os campos
 
 arquivos:                    # todos opcionais — valores abaixo são o padrão
   matriz: matriz_curricular.xlsx
-  bibliografia: referencias/bibliografia.bib
   textos: textos
   fichas: fichas
   figuras: figuras
@@ -93,13 +96,6 @@ geracao:
 
 saida:
   nome_base: PPC
-
-heranca:                     # referencia dados/compartilhados/ (opcional)
-  instituicao: compartilhados/instituicao/ufu.yaml
-  unidade: compartilhados/instituicao/feelt.yaml
-  identidade_visual: compartilhados/identidade_visual/cores.yaml
-  autoridades: compartilhados/instituicao/autoridades.yaml
-  referencias: [compartilhados/referencias/referencias_institucionais.bib]
 
 # Catálogo de referenciais legais deste perfil (substitui o antigo
 # referenciais/legislacao.yaml e o antigo heranca.legislacao — cada
@@ -162,9 +158,23 @@ não é preciso registrar um perfil em nenhum lugar central para que ele
 apareça em `python -m ppcgen perfis` ou seja incluído nos comandos em
 lote.
 
-Um `dados/perfis.yaml` opcional pode sobrepor a descoberta automática
-(por exemplo, para listar perfis fora de `dados/perfis/` ou fixar uma
-ordem de exibição), mas não é necessário no uso comum.
+Um `dados/perfis.yaml` opcional pode sobrepor a descoberta automática, para
+listar perfis fora de `dados/perfis/` ou fixar uma ordem de exibição — não
+é necessário no uso comum. Exemplo real deste repositório: cada perfil vive
+direto em `dados/<id>/` (sem a pasta intermediária `dados/perfis/`), então
+`dados/perfis.yaml` registra cada um explicitamente:
+
+```yaml
+perfis:
+  - id: tecnologo_automacao_2027_1
+    caminho: "tecnologo_automacao_2027_1"
+    ativo: true
+```
+
+(`caminho` é relativo a `dados/`.) Isso preserva `--perfil
+tecnologo_automacao_2027_1` funcionando normalmente em todos os comandos —
+um segundo projeto independente entraria como
+`dados/engenharia_automacao_2027_1/` mais uma entrada nova aqui.
 
 ## `.ppcgen.local.yaml` (conveniência de desenvolvimento — não oficial)
 

@@ -24,9 +24,7 @@ da matriz, só a presença/coerência dos arquivos declarados.
 | `PERFIL-002` | ERRO | `perfil.extends` aponta para um perfil base inexistente |
 | `PERFIL-003` | ALERTA | um dos 12 capítulos obrigatórios de `textos/` está ausente ou vazio |
 | `PERFIL-004` | ALERTA | nenhuma ficha em `fichas/optativas/` (perfil nem perfil base) |
-| `PERFIL-005` | ALERTA | bibliografia (`arquivos.bibliografia`) não localizada |
 | `PERFIL-006` | ALERTA | uma das subpastas padrão de `fichas/` não existe (só quando o perfil não tem `extends`) |
-| `PERFIL-007` | ERRO | um recurso declarado em `heranca` não existe em `dados/compartilhados/` |
 | `PERFIL-008` | ERRO | `geracao.template` diferente de `"padrao"` e a pasta correspondente não existe em `templates/latex/` |
 
 ## Identificação (`ppcgen.validadores.codigos`)

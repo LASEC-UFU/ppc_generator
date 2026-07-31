@@ -12,8 +12,11 @@ registro em abas próprias da matriz (`Nucleos`/`Areas`/`Temas`/
 `Conteudos`/`Competencias`) — cada uma vincula os componentes que cobre
 via sua própria coluna `componentes` (ver "Padrão `componentes`" abaixo);
 a aba `Componentes` não tem colunas equivalentes, a direção é
-catálogo → componente, não o contrário. Legislação é lista em
-`perfil.yaml` (não há mais pasta `referenciais/`). Pré-requisitos e
+catálogo → componente, não o contrário. Bibliografia é a aba
+`Bibliografia`, uma linha por referência — o `.bib` compilado é sempre
+gerado a partir dela, nunca um arquivo `.bib` estático (ver "Aba
+`Bibliografia`" abaixo). Legislação é lista em `perfil.yaml` (não há mais
+pasta `referenciais/`). Pré-requisitos e
 correquisitos são colunas da própria aba `Componentes`.
 
 ## `matriz_curricular.xlsx`
@@ -192,6 +195,44 @@ Catálogo de competências do curso — substitui o antigo
 `COMPETENCIA_OBRIGATORIA_SEM_COBERTURA` (alerta) se `componentes` estiver
 vazio ou só tiver códigos inativos.
 
+### Aba `Bibliografia`
+
+Catálogo de referências bibliográficas do PPC — uma linha por entrada
+BibTeX/biblatex. Não existe `.bib` estático em `dados/`: o único `.bib` do
+projeto é gerado a partir desta aba, em `saida/<id>/latex/gerado/
+bibliografia.bib`, toda vez que `ppcgen gerar`/`completo` roda (ver
+`ppcgen.geradores.bibliografia`) — editar essa aba é a única forma de
+mudar a bibliografia; o `.bib` gerado nunca deve ser editado à mão.
+
+| Campo | Tipo | Obrigatório | Exemplo |
+|---|---|---|---|
+| `chave` | texto | sim, único | `ufu_guia_ppc_2021` |
+| `tipo` | texto (tipo de entrada BibTeX) | sim | `misc`, `book`, `techreport`, `article`... |
+| `autor` | texto | não | `Universidade Federal de Uberlândia (UFU)` |
+| `titulo` | texto | não | `Guia de Elaboração de Projetos Pedagógicos...` |
+| `ano` | texto | não | `2021` |
+| `mes` | texto | não | `mar` |
+| `dia` | texto | não | `18` |
+| `endereco` | texto | não | `Uberlândia, MG` |
+| `editora` | texto | não | `UNESCO Publishing` |
+| `organizacao` | texto | não | `Ministério da Educação` |
+| `instituicao` | texto | não | `Association for Computing Machinery` |
+| `edicao` | texto | não | `3` |
+| `serie` | texto | não | `Conversations for Tomorrow` |
+| `doi` | texto | não | `10.1145/3408839` |
+| `paginas` | texto | não | `30--31` |
+| `url` | texto | não | `https://prograd.ufu.br/.../guia_ppc_3a_edicao.pdf` |
+| `nota` | texto | não | observação livre — vira o campo BibTeX `note` |
+
+Texto UTF-8 normal, sem escapes de LaTeX (nada de `{\c c}`/`\~a`) — o
+gerador aplica o escape necessário automaticamente, exceto em `url`, que
+vai dentro de `\url{...}` (verbatim, não precisa e não deve ser escapado).
+`autor` e `titulo` viram os campos BibTeX `author`/`title`; os demais campos
+têm o mesmo nome em português e em BibTeX (`endereco`→`address`,
+`editora`→`publisher` etc. — ver `ppcgen.geradores.bibliografia` para o
+mapeamento completo); `url` + o texto fixo "Disponível em:" viram o campo
+`howpublished`.
+
 ### Aba `Certificacoes` (opcional)
 
 Só é lida se existir. `certificacao_id`, `nome`, `codigo_componente` (uma
@@ -208,10 +249,10 @@ silenciosamente; elas não são validadas nem geram nenhuma saída.
 Ver `docs/PERFIS.md` para a lista comentada de todas as seções e
 `ppcgen/config.py` para a lista definitiva de campos de cada uma
 (`InfoPerfil`, `CursoConfig`, `InstituicaoConfig`, `CurriculoConfig`,
-`OfertaConfig`, `ArquivosConfig`, `GeracaoConfig`, `SaidaConfig`,
-`HerancaConfig`) — os nomes dos campos no YAML são idênticos aos
-atributos das dataclasses, e um campo desconhecido causa erro imediato ao
-carregar (`ConfiguracaoInvalida`).
+`OfertaConfig`, `ArquivosConfig`, `GeracaoConfig`, `SaidaConfig`) — os
+nomes dos campos no YAML são idênticos aos atributos das dataclasses, e um
+campo desconhecido causa erro imediato ao carregar
+(`ConfiguracaoInvalida`).
 
 ### `legislacao:` (lista, top-level em `perfil.yaml`)
 

@@ -170,13 +170,47 @@ class TemaTransversal:
 
 
 @dataclass
+class EntradaBibliografica:
+    """Uma entrada BibTeX/biblatex — Seção 3. Vem da aba ``Bibliografia`` da
+    matriz curricular; ``ppcgen.geradores.bibliografia`` a renderiza em texto
+    BibTeX válido no momento da geração (nunca um ``.bib`` estático em
+    ``dados/`` — ver módulo citado)."""
+
+    chave: str
+    tipo: str
+    autor: str = ""
+    titulo: str = ""
+    ano: str = ""
+    mes: str = ""
+    dia: str = ""
+    endereco: str = ""
+    editora: str = ""
+    organizacao: str = ""
+    instituicao: str = ""
+    edicao: str = ""
+    serie: str = ""
+    doi: str = ""
+    paginas: str = ""
+    url: str = ""
+    nota: str = ""
+
+    @property
+    def id(self) -> str:
+        """Alias de ``chave`` — só para reaproveitar ``_mesclar_por_id``/
+        ``_merge`` (``ppcgen.cli``/``ppcgen.config``), que mesclam todo
+        catálogo por um atributo ``id`` comum."""
+        return self.chave
+
+
+@dataclass
 class ReferenciaisCurso:
     """Conjunto completo de referenciais configurados para o curso ativo.
 
-    ``nucleos``/``areas``/``temas_transversais``/``conteudos``/``competencias``
-    vêm das abas de registro da matriz curricular (``ppcgen.leitores.excel``);
-    ``legislacao`` vem diretamente de ``perfil.yaml`` (``Perfil.legislacao``)
-    — não lê mais arquivos YAML separados em ``referenciais/``."""
+    ``nucleos``/``areas``/``temas_transversais``/``conteudos``/``competencias``/
+    ``bibliografia`` vêm das abas de registro da matriz curricular
+    (``ppcgen.leitores.excel``); ``legislacao`` vem diretamente de
+    ``perfil.yaml`` (``Perfil.legislacao``) — não lê mais arquivos YAML
+    separados em ``referenciais/``."""
 
     nucleos: list[NucleoCurricular] = field(default_factory=list)
     areas: list[AreaFormacao] = field(default_factory=list)
@@ -184,6 +218,7 @@ class ReferenciaisCurso:
     conteudos: list[Conteudo] = field(default_factory=list)
     legislacao: list[ReferencialCurricular] = field(default_factory=list)
     temas_transversais: list[TemaTransversal] = field(default_factory=list)
+    bibliografia: list[EntradaBibliografica] = field(default_factory=list)
 
     def ids_nucleos(self) -> set[str]:
         return {n.id for n in self.nucleos}

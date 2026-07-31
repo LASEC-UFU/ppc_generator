@@ -3,16 +3,14 @@
 Um **perfil** é o conjunto completo e autocontido de dados necessários para
 gerar uma versão específica de um PPC (um curso, uma versão curricular, uma
 proposta alternativa...). Nada específico de um curso vive no código — tudo
-vem do `perfil.yaml` do perfil selecionado, mais os dados compartilhados que
-ele declarar explicitamente em `heranca:` (Seção 8) e, opcionalmente, de um
+vem do `perfil.yaml` do perfil selecionado, opcionalmente combinado com um
 perfil base declarado em `extends:` (Seção 9).
 
 Prioridade de valores (Seção 9):
 
     1. valores definidos no perfil atual
     2. valores herdados do perfil base (``extends``)
-    3. valores compartilhados (``heranca``)
-    4. valores padrão do sistema (defaults das dataclasses)
+    3. valores padrão do sistema (defaults das dataclasses)
 """
 
 from __future__ import annotations
@@ -61,9 +59,9 @@ class InstituicaoConfig:
     sigla: str = ""
     unidade_academica: str = ""
     extra: dict = field(default_factory=dict)
-    """Campos institucionais adicionais vindos de ``heranca`` (endereço, CEP,
-    site, telefone...) que o código genérico não precisa conhecer
-    individualmente — os templates acessam por nome (ex.: ``extra.site``)."""
+    """Campos institucionais adicionais (endereço, CEP, site, telefone...)
+    que o código genérico não precisa conhecer individualmente — os
+    templates acessam por nome (ex.: ``extra.site``)."""
 
 
 @dataclass
@@ -105,7 +103,6 @@ class OfertaConfig:
 @dataclass
 class ArquivosConfig:
     matriz: str = "matriz_curricular.xlsx"
-    bibliografia: str = "referencias/bibliografia.bib"
     textos: str = "textos"
     fichas: str = "fichas"
     figuras: str = "figuras"
@@ -134,15 +131,6 @@ class SaidaConfig:
 
 
 @dataclass
-class HerancaConfig:
-    instituicao: str | None = None
-    unidade: str | None = None
-    identidade_visual: str | None = None
-    autoridades: str | None = None
-    referencias: list[str] = field(default_factory=list)
-
-
-@dataclass
 class Perfil:
     info: InfoPerfil
     curso: CursoConfig
@@ -152,7 +140,6 @@ class Perfil:
     arquivos: ArquivosConfig
     geracao: GeracaoConfig
     saida: SaidaConfig
-    heranca: HerancaConfig
     diretorio: Path
     raiz_dados: Path
     legislacao: list[ReferencialCurricular] = field(default_factory=list)
@@ -166,8 +153,7 @@ class Perfil:
     def caminho(self, relativo: str) -> Path:
         """Resolve um caminho declarado em ``arquivos`` relativo à pasta do
         perfil. Rejeita caminhos que escapem da pasta do perfil (Seção 21) —
-        compartilhamento entre perfis só é permitido explicitamente, via
-        ``heranca``/``caminho_compartilhado``.
+        perfis não compartilham arquivos entre si.
         """
 
         candidato = (self.diretorio / relativo).resolve()
@@ -175,7 +161,7 @@ class Perfil:
         if raiz not in candidato.parents and candidato != raiz:
             raise ConfiguracaoInvalida(
                 f"Caminho '{relativo}' do perfil '{self.info.id}' escapa da sua própria "
-                "pasta — use `heranca` para compartilhar arquivos entre perfis (Seção 21)."
+                "pasta (Seção 21)."
             )
         return self.diretorio / relativo
 
@@ -191,11 +177,6 @@ class Perfil:
         if self.perfil_base is not None:
             return self.perfil_base.resolver_arquivo(relativo)
         return None
-
-    def caminho_compartilhado(self, relativo: str) -> Path:
-        """Resolve um caminho declarado em ``heranca`` relativo a ``dados/``."""
-
-        return self.raiz_dados / relativo
 
 
 def _merge_dict(base: dict, sobre: dict) -> dict:
@@ -215,24 +196,6 @@ def _ler_yaml(caminho: Path) -> dict:
         raise ConfiguracaoInvalida(f"Arquivo compartilhado não encontrado: {caminho}")
     with open(caminho, encoding="utf-8") as f:
         return yaml.safe_load(f) or {}
-
-
-def _resolver_heranca_config(heranca_bruta: dict, raiz_dados: Path) -> dict:
-    """Carrega os YAML declarados em ``heranca.instituicao``/``heranca.unidade``
-    e devolve um dict mesclável nos blocos de configuração do perfil (hoje,
-    apenas ``instituicao``). Recursos ausentes geram erro claro (Seção 8):
-    "o perfil deverá continuar válido... produzindo uma mensagem de erro
-    clara" é satisfeito por ``ConfiguracaoInvalida`` apontando o arquivo.
-    """
-
-    combinado: dict = {}
-    for chave in ("instituicao", "unidade"):
-        caminho_rel = heranca_bruta.get(chave)
-        if not caminho_rel:
-            continue
-        dados = _ler_yaml(raiz_dados / caminho_rel)
-        combinado = _merge_dict(combinado, {"instituicao": dados.get("instituicao", {})})
-    return combinado
 
 
 def _extrair_extra_instituicao(dados: dict) -> dict:
@@ -305,11 +268,7 @@ def carregar_perfil(
         perfil_base = carregar_perfil(base_dir, raiz_dados=raiz_dados, _pilha=(*_pilha, perfil_id))
         base_efetivo = perfil_base._bruto_efetivo
 
-    heranca_bruta = bruto.get("heranca") or {}
-    compartilhado = _resolver_heranca_config(heranca_bruta, raiz_dados)
-
     efetivo: dict = {}
-    efetivo = _merge_dict(efetivo, compartilhado)
     efetivo = _merge_dict(efetivo, base_efetivo)
     efetivo = _merge_dict(efetivo, bruto)
 
@@ -335,7 +294,6 @@ def carregar_perfil(
         arquivos=_construir(ArquivosConfig, efetivo.get("arquivos") or {}),
         geracao=_construir(GeracaoConfig, efetivo.get("geracao") or {}),
         saida=_construir(SaidaConfig, efetivo.get("saida") or {}),
-        heranca=_construir(HerancaConfig, heranca_bruta or (base_efetivo.get("heranca") or {})),
         diretorio=perfil_dir,
         raiz_dados=raiz_dados,
         legislacao=legislacao,

@@ -15,6 +15,7 @@ import yaml
 
 from ppcgen.calculo import carga_horaria_oficial, carga_por_tipo, componentes_oficiais
 from ppcgen.config import Perfil
+from ppcgen.geradores.bibliografia import gerar_bibliografia_bib
 from ppcgen.geradores.fluxo import gerar_tabela_fluxo
 from ppcgen.geradores.representacao_grafica import gerar_representacao_grafica
 from ppcgen.geradores.tabelas import (
@@ -47,8 +48,7 @@ def _ler_yaml_opcional(caminho: Path | None) -> dict:
 def gerar_frontmatter(perfil: Perfil) -> str:
     """Gera a capa e a folha de rosto (autoridades/comissão) a partir de
     ``frontmatter/{capa,autoridades,comissao}.yaml`` do perfil (com fallback
-    para o perfil base, via ``extends``) e das autoridades institucionais
-    compartilhadas (``heranca.autoridades``), sem exigir que o perfil escreva
+    para o perfil base, via ``extends``), sem exigir que o perfil escreva
     LaTeX à mão para isso — ``frontmatter/folha_rosto.tex`` continua
     disponível para conteúdo adicional livre (ver templates/latex/Main.tex).
 
@@ -65,12 +65,6 @@ def gerar_frontmatter(perfil: Perfil) -> str:
     comissao = _ler_yaml_opcional(perfil.resolver_arquivo(f"{pasta_front}/comissao.yaml")).get(
         "comissao", {}
     )
-
-    autoridades_compartilhadas = []
-    if perfil.heranca.autoridades:
-        autoridades_compartilhadas = _ler_yaml_opcional(
-            perfil.caminho_compartilhado(perfil.heranca.autoridades)
-        ).get("autoridades", [])
 
     logo_tex = ""
     if capa.get("logo_curso"):
@@ -109,7 +103,7 @@ def gerar_frontmatter(perfil: Perfil) -> str:
 
     linhas_autoridades = "\\\\\n".join(
         rf"\textsc{{\tiny {escapar(a['cargo'])}}} \\ \hspace*{{5mm}} \textbf{{{escapar(a['nome'])}}}"
-        for a in (*autoridades_compartilhadas, *autoridades_perfil)
+        for a in autoridades_perfil
     )
 
     membros_comissao = comissao.get("membros", [])
@@ -212,6 +206,7 @@ def gerar_arquivos_latex(
     )
     escrever("curso_macros.tex", macros)
     escrever("frontmatter.tex", gerar_frontmatter(perfil))
+    escrever("bibliografia.bib", gerar_bibliografia_bib(referenciais.bibliografia))
 
     # --- Fluxo curricular e representação gráfica -------------------------
     escrever("tab_fluxo_curricular.tex", gerar_tabela_fluxo(curriculo, perfil, nomes_por_codigo))

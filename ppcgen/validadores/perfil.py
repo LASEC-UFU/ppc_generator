@@ -73,16 +73,6 @@ def validar_perfil(perfil: Perfil) -> ResultadoValidacao:
                 )
             )
 
-    caminho_biblio = perfil.resolver_arquivo(perfil.arquivos.bibliografia)
-    if caminho_biblio is None:
-        resultado.adicionar(
-            AlertaValidacao(
-                "PERFIL-005",
-                f"bibliografia {perfil.arquivos.bibliografia} não localizada — capítulos "
-                "que citam referências não devem compilar sem ela.",
-            )
-        )
-
     for nome_arquivo in _TEXTOS_OBRIGATORIOS:
         caminho = perfil.resolver_arquivo(f"{perfil.arquivos.textos}/{nome_arquivo}")
         if caminho is None:
@@ -116,28 +106,6 @@ def validar_perfil(perfil: Perfil) -> ResultadoValidacao:
                 AlertaValidacao(
                     "PERFIL-006",
                     f"pasta de fichas '{perfil.arquivos.fichas}/{sub}' não existe.",
-                )
-            )
-
-    for chave, caminho_rel in (
-        ("instituicao", perfil.heranca.instituicao),
-        ("unidade", perfil.heranca.unidade),
-        ("identidade_visual", perfil.heranca.identidade_visual),
-    ):
-        if caminho_rel and not perfil.caminho_compartilhado(caminho_rel).exists():
-            resultado.adicionar(
-                ErroValidacao(
-                    "PERFIL-007",
-                    f"recurso compartilhado declarado em heranca.{chave} não existe: "
-                    f"{caminho_rel}.",
-                )
-            )
-    for caminho_rel in perfil.heranca.referencias:
-        if not perfil.caminho_compartilhado(caminho_rel).exists():
-            resultado.adicionar(
-                ErroValidacao(
-                    "PERFIL-007",
-                    f"recurso compartilhado declarado em heranca não existe: {caminho_rel}.",
                 )
             )
 

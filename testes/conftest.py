@@ -11,7 +11,6 @@ from ppcgen.config import (
     CurriculoConfig,
     CursoConfig,
     GeracaoConfig,
-    HerancaConfig,
     InfoPerfil,
     InstituicaoConfig,
     OfertaConfig,
@@ -80,7 +79,6 @@ def construir_perfil(tmp_path: Path | None = None, **overrides) -> Perfil:
         "arquivos": ArquivosConfig(),
         "geracao": GeracaoConfig(),
         "saida": SaidaConfig(),
-        "heranca": HerancaConfig(),
         "diretorio": diretorio,
         "raiz_dados": diretorio.parent if diretorio != Path(".") else Path("."),
     }

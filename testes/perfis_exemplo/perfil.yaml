@@ -35,7 +35,6 @@ curriculo:
   periodo_minimo_estagio: null
 arquivos:
   matriz: matriz_curricular.xlsx
-  bibliografia: referencias/bibliografia.bib
   textos: textos
   fichas: fichas
   figuras: figuras

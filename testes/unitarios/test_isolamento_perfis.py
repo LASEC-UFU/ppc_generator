@@ -1,6 +1,5 @@
 """Testes de isolamento entre perfis (Seção 21): um perfil não pode ler nem
-escrever fora da própria pasta a não ser via ``heranca`` explícita; a
-seleção de perfil nunca é implícita.
+escrever fora da própria pasta; a seleção de perfil nunca é implícita.
 """
 
 from __future__ import annotations

@@ -1,0 +1,9 @@
+# Registro explícito de perfis (opcional — ver docs/PERFIS.md). Necessário
+# porque cada perfil vive direto em dados/<id>/ (sem a pasta intermediária
+# dados/perfis/), então a descoberta automática (que só olha
+# dados/perfis/*) não encontraria nenhum. Adicione uma entrada aqui para
+# cada novo projeto/PPC independente criado em dados/<id>/.
+perfis:
+  - id: tecnologo_automacao_2027_1
+    caminho: "tecnologo_automacao_2027_1"
+    ativo: true

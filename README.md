@@ -35,7 +35,7 @@ para a referência de commit.
 
 ```
 dados/perfis/<id>/perfil.yaml (com legislacao:) + matriz_curricular.xlsx (com Competencias)
-  (+ heranca: dados/compartilhados/, + extends: outro perfil)
+  (+ extends: outro perfil)
      → ppcgen.leitores → ppcgen.validadores → ppcgen.geradores
      → ppcgen.compiladores → PDF em saida/<id>/
 ```
@@ -47,9 +47,11 @@ ppcgen/             pacote Python genérico (leitores, validadores,
 templates/          LaTeX genérico (Main.tex + configuracoes/) — sem
                      texto de curso nenhum
 dados/
-  perfis/<id>/       um curso/versão/proposta por pasta, autocontido
-  compartilhados/    dados institucionais comuns a vários perfis
-                      (referenciados explicitamente via heranca:)
+  <id>/              um curso/versão/proposta por pasta, autocontido —
+                      um projeto/PPC independente (neste repositório,
+                      direto em dados/<id>/, registrado em
+                      dados/perfis.yaml; ver docs/PERFIS.md, "Descoberta
+                      de perfis")
 saida/<id>/          PDFs e relatórios gerados (gitignorado)
 testes/              testes unitários e de integração (pytest)
 docs/                esta documentação
@@ -147,9 +149,9 @@ python -m ppcgen limpar --todos
 
 ## 12. Isolamento entre perfis
 
-Cada perfil só lê/grava dentro da própria pasta (`dados/perfis/<id>/`),
-exceto o que declarar explicitamente em `heranca:` ou `extends:` (ver
-`docs/PERFIS.md`). Saída de um perfil nunca é escrita dentro de outro,
+Cada perfil só lê/grava dentro da própria pasta, exceto o que declarar
+explicitamente em `extends:` (ver `docs/PERFIS.md`). Saída de um perfil
+nunca é escrita dentro de outro,
 nem dentro da própria pasta de dados do perfil — sempre em
 `saida/<id>/`. Um caminho que tente escapar da pasta do perfil
 (`../outro_perfil/...`) é rejeitado com erro.
@@ -160,7 +162,7 @@ nem dentro da própria pasta de dados do perfil — sempre em
 |---|---|---|
 | `Informe --perfil <id> ou --perfil-dir <caminho>` | nenhum perfil selecionado | todo comando exige seleção explícita — ver `docs/PERFIS.md` (inclusive a conveniência opcional `.ppcgen.local.yaml` para desenvolvimento local) |
 | `ConfiguracaoInvalida: Campo(s) desconhecido(s)` | campo digitado errado em `perfil.yaml` | conferir grafia contra `ppcgen/config.py` / `docs/PERFIS.md` |
-| `ConfiguracaoInvalida: Caminho ... escapa da sua própria pasta` | um `arquivos.*`/caminho tentando sair da pasta do perfil | use `heranca`/`extends` para compartilhar dados entre perfis, nunca um caminho relativo `../` |
+| `ConfiguracaoInvalida: Caminho ... escapa da sua própria pasta` | um `arquivos.*`/caminho tentando sair da pasta do perfil | use `extends` para herdar de outro perfil, nunca um caminho relativo `../` |
 | `FormatoInvalido: Aba obrigatória ausente` | aba `Componentes` faltando/renomeada no `.xlsx` | conferir nomes exatos das abas (`docs/DICIONARIO_DADOS.md`) |
 | `[ERRO] CARGA_TOTAL_INCONSISTENTE` | `tot` não bate com `cht+chp+chd+che` | corrigir a planilha (o validador não infere qual campo está errado) |
 | `[ERRO] CICLO_PREREQUISITOS` | dependência circular | a mensagem mostra o caminho completo do ciclo — remover uma das arestas |

@@ -138,7 +138,9 @@ Depois que o perfil novo compila:
   novo sistema não reproduz automaticamente).
 - **Capítulos**: confira que os 12 capítulos têm conteúdo real
   equivalente, não só os placeholders do scaffold.
-- **Bibliografia**: confira que as citações usadas nos capítulos migrados
+- **Bibliografia**: as referências vão na aba `Bibliografia` da matriz
+  (uma linha por entrada — ver `docs/DICIONARIO_DADOS.md`), nunca num
+  `.bib` solto. Confira que as citações usadas nos capítulos migrados
   resolvem (`latexmk`/`biber` avisam sobre citação indefinida no log).
 - **Erros/alertas de validação**: rode `python -m ppcgen validar --perfil
   <id>` e revise cada um — a meta não é zero alertas (dados reais têm

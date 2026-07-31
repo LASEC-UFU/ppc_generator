@@ -27,7 +27,20 @@ curso:
 instituicao:
   nome: "Universidade Federal de Uberlândia"
   sigla: "UFU"
+  orgao_superior: "Ministério da Educação"
+  endereco: "Av. João Naves de Ávila, 2121, Campus Santa Mônica"
+  cep: "38400-902"
+  municipio: "Uberlândia"
+  estado: "Minas Gerais"
+  uf: "MG"
+  site: "http://www.ufu.br"
+  telefone: "(34) 3239 2911"
   unidade_academica: "Faculdade de Engenharia Elétrica"
+  unidade_sigla: "FEELT"
+  unidade_endereco: "Av. João Naves de Ávila, 2121, Bloco 3N, Campus Santa Mônica"
+  unidade_cep: "38400-902"
+  unidade_site: "http://www.feelt.ufu.br"
+  unidade_telefone: "(34) 3239 4701"
 
 curriculo:
   carga_horaria_total: 2400
@@ -51,8 +64,7 @@ oferta:
   status_validacao_institucional: pendente
 
 arquivos:
-  matriz: "matriz_curricular.xlsx"
-  bibliografia: "referencias/bibliografia.bib"
+  matriz: "matriz_curricular.xlsm"
   textos: "textos"
   fichas: "fichas"
   figuras: "figuras"
@@ -74,14 +86,6 @@ saida:
   nome_base: "PPC_Tecnologo_Automacao_2027_1"
   gerar_corpo: true
   gerar_completo: true
-
-heranca:
-  instituicao: "compartilhados/instituicao/ufu.yaml"
-  unidade: "compartilhados/instituicao/feelt.yaml"
-  identidade_visual: "compartilhados/identidade_visual/cores.yaml"
-  autoridades: "compartilhados/instituicao/autoridades.yaml"
-  referencias:
-    - "compartilhados/referencias/referencias_institucionais.bib"
 
 # Catálogo de referenciais legais deste curso — fonte única, sem mais
 # nenhum referenciais/legislacao.yaml nem compartilhados/legislacao/*.yaml

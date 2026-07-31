@@ -51,6 +51,14 @@ def _criar_matriz_vazia(caminho: Path) -> None:
         ("Temas", ["id", "nome", "descricao", "fonte_normativa", "status", "componentes"]),
         ("Conteudos", ["id", "descricao", "obrigatorio", "fonte", "componentes"]),
         ("Competencias", ["id", "descricao", "obrigatoria", "fonte", "componentes"]),
+        (
+            "Bibliografia",
+            [
+                "chave", "tipo", "autor", "titulo", "ano", "mes", "dia", "endereco",
+                "editora", "organizacao", "instituicao", "edicao", "serie", "doi",
+                "paginas", "url", "nota",
+            ],
+        ),
     ):
         ws = wb.create_sheet(aba)
         ws.append(cabecalho)
@@ -69,7 +77,6 @@ def criar_perfil(pasta_perfis: Path, perfil_id: str, nome: str) -> Path:
     destino.mkdir(parents=True)
     (destino / "textos").mkdir()
     (destino / "frontmatter").mkdir()
-    (destino / "referencias").mkdir()
     (destino / "figuras" / "imagens_capitulos").mkdir(parents=True)
     (destino / "figuras" / "diagramas").mkdir(parents=True)
     (destino / "overrides" / "latex").mkdir(parents=True)
@@ -117,7 +124,6 @@ def criar_perfil(pasta_perfis: Path, perfil_id: str, nome: str) -> Path:
         },
         "arquivos": {
             "matriz": "matriz_curricular.xlsx",
-            "bibliografia": "referencias/bibliografia.bib",
             "textos": "textos",
             "fichas": "fichas",
             "figuras": "figuras",
@@ -154,9 +160,6 @@ def criar_perfil(pasta_perfis: Path, perfil_id: str, nome: str) -> Path:
             f"% TODO: escrever o capítulo '{titulo}'.\n", encoding="utf-8"
         )
 
-    (destino / "referencias" / "bibliografia.bib").write_text(
-        "% Adicione aqui as referências bibliográficas deste perfil.\n", encoding="utf-8"
-    )
     (destino / "frontmatter" / "capa.yaml").write_text("capa:\n  ano: null\n", encoding="utf-8")
     (destino / "frontmatter" / "autoridades.yaml").write_text("autoridades: []\n", encoding="utf-8")
     (destino / "frontmatter" / "comissao.yaml").write_text(
@@ -167,10 +170,12 @@ def criar_perfil(pasta_perfis: Path, perfil_id: str, nome: str) -> Path:
     (destino / "README.md").write_text(
         f"# Perfil: {perfil_id}\n\n{nome}\n\nStatus: rascunho — gerado por "
         "`python -m ppcgen perfil-criar`. Preencha `perfil.yaml` (incluindo a "
-        "seção `legislacao:`), `matriz_curricular.xlsx` (componentes e as "
+        "seção `legislacao:`), `matriz_curricular.xlsx` (componentes; as "
         "abas Nucleos/Areas/Temas/Conteudos/Competencias, cada uma com sua "
         "coluna `componentes` listando os códigos vinculados, separados por "
-        "`|`) e `textos/` antes de validar.\n",
+        "`|`; e a aba Bibliografia, uma linha por referência — o `.bib` "
+        "compilado é sempre gerado a partir dela, nunca editado à mão) e "
+        "`textos/` antes de validar.\n",
         encoding="utf-8",
     )
 

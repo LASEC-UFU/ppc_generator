@@ -18,12 +18,11 @@ python -m ppcgen perfil-criar --id engenharia_software_2027_1 --nome "Engenharia
 Isso cria `dados/perfis/engenharia_software_2027_1/` com toda a árvore
 padrão de um perfil já no lugar: `perfil.yaml` mínimo (já com `legislacao:
 []`), `matriz_curricular.xlsx` só com cabeçalhos (incluindo as abas de
-registro `Nucleos`/`Areas`/`Temas`/`Conteudos`/`Competencias`, todas
-vazias), os 12 `textos/*.tex` com um `\chapter{}` placeholder cada,
-`frontmatter/*.yaml` vazios, `referencias/bibliografia.bib` vazio, e as
-subpastas de `fichas/`/`anexos/`/`overrides/`. O perfil já é
-estruturalmente válido neste ponto (`perfil-validar` passa), só sem
-conteúdo real.
+registro `Nucleos`/`Areas`/`Temas`/`Conteudos`/`Competencias`/
+`Bibliografia`, todas vazias), os 12 `textos/*.tex` com um `\chapter{}`
+placeholder cada, `frontmatter/*.yaml` vazios, e as subpastas de
+`fichas/`/`anexos/`/`overrides/`. O perfil já é estruturalmente válido
+neste ponto (`perfil-validar` passa), só sem conteúdo real.
 
 ## 3. Preencher `perfil.yaml`
 
@@ -32,10 +31,11 @@ Ver `docs/PERFIS.md` para o significado de cada campo. No mínimo, decida:
 - `curso.numero_periodos` e as cargas horárias esperadas em `curriculo:`
   (você vai conferir depois que a matriz bate com esses números — é assim
   que `CARGA_TOTAL_DIVERGENTE` funciona).
-- Se este curso pertence à mesma instituição de um perfil existente,
-  preencha `heranca:` apontando para `dados/compartilhados/` em vez de
-  copiar os dados institucionais. Se a instituição ainda não existe em
-  `compartilhados/`, crie-a lá primeiro — não duplique dentro do perfil.
+- Preencha `instituicao:` com todos os dados institucionais (nome, sigla,
+  unidade acadêmica e os campos extras que o perfil precisar — endereço,
+  site, telefone... — ver `ppcgen.config.InstituicaoConfig.extra`). Não há
+  mecanismo de compartilhamento entre perfis: se outro perfil já tem os
+  mesmos dados, copie o bloco `instituicao:` dele.
 - Preencha `legislacao:` (lista de referenciais legais deste curso) — não
   há mais arquivo externo para isso, é tudo aqui (ver
   `docs/DICIONARIO_DADOS.md` para os campos de cada entrada). Competências
@@ -47,8 +47,9 @@ Ver `docs/PERFIS.md` para o significado de cada campo. No mínimo, decida:
 
 Edite `matriz_curricular.xlsx`. Aba obrigatória: `Componentes`. Opcionais:
 `Equivalencias`, `Nucleos`, `Areas`, `Temas`, `Conteudos`, `Competencias`,
-`Certificacoes` — schema completo em `docs/DICIONARIO_DADOS.md`. Pontos
-que costumam pegar quem preenche pela primeira vez:
+`Bibliografia`, `Certificacoes` — schema completo em
+`docs/DICIONARIO_DADOS.md`. Pontos que costumam pegar quem preenche pela
+primeira vez:
 
 - **Núcleo, áreas, temas, conteúdos e competências de um componente NÃO
   são colunas de `Componentes`** — são a coluna `componentes` (códigos
@@ -71,6 +72,9 @@ que costumam pegar quem preenche pela primeira vez:
   `Conteudos`/`Competencias` precisa existir na aba `Componentes`, ou o
   validador acusa `*_COMPONENTE_INEXISTENTE`; um mesmo componente em mais
   de uma linha de `Nucleos` acusa `NUCLEO_MULTIPLO_PARA_COMPONENTE`.
+- **Não existe `.bib` para editar à mão** — a bibliografia é a aba
+  `Bibliografia` (uma linha por referência), e o `.bib` compilado é sempre
+  gerado a partir dela por `ppcgen gerar`/`completo`.
 
 ## 6. Escrever os 12 capítulos em `textos/`
 
@@ -90,9 +94,8 @@ Capítulos obrigatórios (validados por `PERFIL-003`): `identificacao`,
 
 Macros disponíveis sem precisar `\input` nada: `\ppccurso`,
 `\ppccursocurto`, `\ppcinstituicao`, `\ppcunidadeacademica` — definidas a
-partir de `perfil.yaml`/`heranca.instituicao` em
-`ppcgen.geradores.latex` (arquivo `curso_macros.tex`, gerado
-automaticamente).
+partir de `perfil.yaml` em `ppcgen.geradores.latex` (arquivo
+`curso_macros.tex`, gerado automaticamente).
 
 ## 7. Frontmatter
 
