@@ -34,7 +34,7 @@ para a referência de commit.
 ## 2. Arquitetura
 
 ```
-dados/perfis/<id>/perfil.yaml + matriz_curricular.xlsx + referenciais/*.yaml
+dados/perfis/<id>/perfil.yaml (com legislacao:/competencias:) + matriz_curricular.xlsx
   (+ heranca: dados/compartilhados/, + extends: outro perfil)
      → ppcgen.leitores → ppcgen.validadores → ppcgen.geradores
      → ppcgen.compiladores → PDF em saida/<id>/
@@ -161,7 +161,7 @@ nem dentro da própria pasta de dados do perfil — sempre em
 | `Informe --perfil <id> ou --perfil-dir <caminho>` | nenhum perfil selecionado | todo comando exige seleção explícita — ver `docs/PERFIS.md` (inclusive a conveniência opcional `.ppcgen.local.yaml` para desenvolvimento local) |
 | `ConfiguracaoInvalida: Campo(s) desconhecido(s)` | campo digitado errado em `perfil.yaml` | conferir grafia contra `ppcgen/config.py` / `docs/PERFIS.md` |
 | `ConfiguracaoInvalida: Caminho ... escapa da sua própria pasta` | um `arquivos.*`/caminho tentando sair da pasta do perfil | use `heranca`/`extends` para compartilhar dados entre perfis, nunca um caminho relativo `../` |
-| `FormatoInvalido: Aba obrigatória ausente` | aba `Curso` ou `Componentes` faltando/renomeada no `.xlsx` | conferir nomes exatos das abas (`docs/DICIONARIO_DADOS.md`) |
+| `FormatoInvalido: Aba obrigatória ausente` | aba `Componentes` faltando/renomeada no `.xlsx` | conferir nomes exatos das abas (`docs/DICIONARIO_DADOS.md`) |
 | `[ERRO] CARGA_TOTAL_INCONSISTENTE` | `tot` não bate com `cht+chp+chd+che` | corrigir a planilha (o validador não infere qual campo está errado) |
 | `[ERRO] CICLO_PREREQUISITOS` | dependência circular | a mensagem mostra o caminho completo do ciclo — remover uma das arestas |
 | `Herança circular de perfis detectada` | `extends` formando um ciclo entre perfis | corrigir a cadeia de `extends` em `perfil.yaml` |
@@ -170,8 +170,8 @@ nem dentro da própria pasta de dados do perfil — sempre em
 
 ## 14. Fluxo de trabalho recomendado
 
-1. Editar `dados/perfis/<id>/matriz_curricular.xlsx` (ou
-   `referenciais/*.yaml`, `perfil.yaml`, `textos/*.tex`).
+1. Editar `dados/perfis/<id>/matriz_curricular.xlsx`, `perfil.yaml` (que
+   inclui `legislacao:`/`competencias:`) ou `textos/*.tex`.
 2. `python -m ppcgen validar --perfil <id>` até revisar todos os erros.
 3. `python -m ppcgen completo --perfil <id>` (ou `make complete
    PROFILE=<id>`).

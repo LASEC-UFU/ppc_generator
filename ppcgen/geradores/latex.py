@@ -24,8 +24,7 @@ from ppcgen.geradores.tabelas import (
     tabela_prerequisitos,
     tabela_referencia,
 )
-from ppcgen.leitores.yaml import ReferenciaisCurso
-from ppcgen.modelos import ComponenteCurricular, Curriculo, TipoComponente
+from ppcgen.modelos import ComponenteCurricular, Curriculo, ReferenciaisCurso, TipoComponente
 from ppcgen.utilitarios.latex import cabecalho_gerado, escapar
 from ppcgen.utilitarios.textos import slug
 

@@ -76,10 +76,8 @@ oferta:                      # formato de oferta do curso — todos os campos
 
 arquivos:                    # todos opcionais — valores abaixo são o padrão
   matriz: matriz_curricular.xlsx
-  equivalencias: equivalencias.xlsx
   bibliografia: referencias/bibliografia.bib
   textos: textos
-  referenciais: referenciais
   fichas: fichas
   figuras: figuras
   anexos: anexos
@@ -102,11 +100,34 @@ heranca:                     # referencia dados/compartilhados/ (opcional)
   identidade_visual: compartilhados/identidade_visual/cores.yaml
   autoridades: compartilhados/instituicao/autoridades.yaml
   referencias: [compartilhados/referencias/referencias_institucionais.bib]
-  legislacao: [compartilhados/legislacao/extensao.yaml, ...]
+
+# Catálogo de referenciais legais deste perfil (substitui o antigo
+# referenciais/legislacao.yaml e o antigo heranca.legislacao — cada
+# perfil declara sua própria lista completa, sem arquivo externo).
+legislacao:
+  - id: MEC_CNE_CES_7_2018
+    nome: Diretrizes para a extensão na Educação Superior
+    tipo: resolucao
+    documento: Resolução CNE/CES nº 7, de 18 de dezembro de 2018
+    ano: 2018
+    observacoes: ...
+
+# Catálogo de competências deste perfil (substitui o antigo
+# referenciais/competencias.yaml) — lista vazia é válida.
+competencias:
+  - id: PROJETAR_SISTEMAS_CONTROLE
+    descricao: "Projetar, especificar e sintonizar sistemas de controle..."
+    obrigatoria: true
+    fonte: MEC_CNE_CES_7_2018
 ```
 
 Campos desconhecidos em qualquer seção fazem o carregamento falhar com
 `ConfiguracaoInvalida` (erro de digitação nunca é ignorado silenciosamente).
+Não existe mais pasta `referenciais/` em nenhum perfil — núcleos, áreas,
+temas transversais e conteúdos curriculares são abas de registro da
+própria `matriz_curricular.xlsx` (`Nucleos`/`Areas`/`Temas`/`Conteudos`,
+ver `docs/DICIONARIO_DADOS.md`); legislação e competências são as duas
+listas acima, direto em `perfil.yaml`.
 
 ## Status
 

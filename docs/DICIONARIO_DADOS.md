@@ -2,20 +2,19 @@
 
 Este schema é o mesmo para a matriz curricular de qualquer perfil — o
 caminho é `dados/perfis/<id>/matriz_curricular.xlsx` (configurável via
-`arquivos.matriz` em `perfil.yaml`, ver `docs/PERFIS.md`). Não existe mais
-uma matriz única na raiz de `dados/`.
+`arquivos.matriz` em `perfil.yaml`, ver `docs/PERFIS.md`).
+
+**Fontes únicas, sem sobreposição**: cada dado deste projeto vive em
+exatamente um lugar. A versão curricular é `perfil.info.versao` (não há
+mais aba `Curso` na matriz). Núcleos, áreas de formação, temas
+transversais e conteúdos curriculares são catálogos de registro em abas
+próprias da matriz (`Nucleos`/`Areas`/`Temas`/`Conteudos`). Legislação e
+competências são listas em `perfil.yaml` (não há mais pasta
+`referenciais/`). Pré-requisitos, correquisitos e os vínculos
+componente→área/tema/conteúdo/competência são colunas da própria aba
+`Componentes` — não abas de junção separadas.
 
 ## `matriz_curricular.xlsx`
-
-### Aba `Curso`
-
-Tabela chave/valor (colunas `campo`, `valor`), metadados desta versão da matriz.
-
-| Campo | Tipo | Obrigatório | Exemplo | Descrição |
-|---|---|---|---|---|
-| `versao_curricular` | texto | sim | `2026-1-exemplo` | Identificador da versão curricular representada por este arquivo. Usado por `ppcgen comparar`. |
-| `data_geracao` | data (`AAAA-MM-DD`) | não | `2026-07-29` | Data de criação/última edição relevante da planilha. |
-| `observacoes` | texto | não | — | Observações livres sobre esta versão. |
 
 ### Aba `Componentes`
 
@@ -36,39 +35,38 @@ integrador, estágio, TCC, atividade complementar, optativa...).
 | `chd` | inteiro ou vazio | não | ≥ 0 | `0` | idem; soma entra no percentual de EaD |
 | `che` | inteiro ou vazio | não | ≥ 0 | `0` | idem; soma entra no percentual de extensão |
 | `tot` | inteiro ou vazio | sim (recomendado) | ≥ 0 | `60` | deve ser igual a `cht+chp+chd+che` quando todas informadas |
-| `nucleo_id` | texto | sim para componente ativo | id existente em `referenciais/nucleos.yaml` | `TECNOLOGICO` | `COMPONENTE_SEM_NUCLEO`, `NUCLEO_INEXISTENTE` |
+| `nucleo_id` | texto | sim para componente ativo | id existente na aba `Nucleos` | `TECNOLOGICO` | `COMPONENTE_SEM_NUCLEO`, `NUCLEO_INEXISTENTE` |
 | `unidade_oferta` | texto | não | — | `FEELT` | apenas informativo |
-| `ementa` | texto | não | — | — | usado na tabela de disciplinas equivalentes |
 | `observacoes` | texto | não | — | — | usado como "justificativa" para downgrade de `CLASSIFICACAO_CONTRADITORIA` |
+| `pre_requisitos` | texto (lista) | não | ver sintaxe abaixo | `CTR401, CTR203 (opcional), >=1200h` | `PREREQUISITO_INEXISTENTE`, `PREREQUISITO_AUTORREFERENCIA`, `PREREQUISITO_PERIODO_INVALIDO`, `CICLO_PREREQUISITOS` |
+| `correquisitos` | texto (lista) | não | ver sintaxe abaixo | `CTR305, CTR306 (opcional)` | `CORREQUISITO_INEXISTENTE`, `CORREQUISITO_AUTORREFERENCIA`, `CORREQUISITO_PERIODO_DIVERGENTE` |
+| `areas` | texto (lista, ids separados por vírgula) | sim para componente ativo (0+, mas ao menos 1) | ids existentes na aba `Areas` | `CONTROLE, AUTOMACAO` | `COMPONENTE_SEM_AREA`, `AREA_INEXISTENTE` |
+| `temas` | texto (lista, ids separados por vírgula) | não | ids existentes na aba `Temas` | `LIBRAS` | `TEMA_TRANSVERSAL_INEXISTENTE` |
+| `conteudos` | texto (lista, ids separados por vírgula) | não | ids existentes na aba `Conteudos` | `DCN_BASE_00, DCN_BASE_03` | `CONTEUDO_INEXISTENTE` |
+| `competencias` | texto (lista, ids separados por vírgula) | não | ids existentes em `perfil.competencias` | `PROJETAR_SISTEMAS_CONTROLE` | `COMPETENCIA_INEXISTENTE` |
 
-### Aba `Pre-requisitos`
+#### Sintaxe de `pre_requisitos`/`correquisitos`
 
-Uma linha por relação componente → pré-requisito (0 ou mais por componente).
+Célula com itens separados por vírgula. Cada item é um dos três formatos
+abaixo — nunca um código mágico como `"*"` para "carga horária mínima"
+(ver `ppcgen.validadores.prerequisitos`):
 
-| Campo | Tipo | Obrigatório | Exemplo | Regra de validação |
-|---|---|---|---|---|
-| `codigo_componente` | texto | sim | `CTR501` | deve existir em `Componentes` |
-| `codigo_prerequisito` | texto ou vazio | condicional* | `CTR401` | `PREREQUISITO_INEXISTENTE`, `PREREQUISITO_AUTORREFERENCIA`, `PREREQUISITO_PERIODO_INVALIDO`, `CICLO_PREREQUISITOS` |
-| `opcional` | booleano | não (padrão `FALSE`) | `FALSE` | rebaixa `PREREQUISITO_INEXISTENTE` de erro para alerta |
-| `carga_horaria_minima` | inteiro ou vazio | condicional* | `1200` | usado em vez de `codigo_prerequisito` para requisitos por carga horária acumulada (nunca um código mágico como `"*"`) |
+- **código simples** (obrigatório): `CTR401`
+- **código opcional**: `CTR401 (opcional)` — rebaixa
+  `PREREQUISITO_INEXISTENTE`/`CORREQUISITO_INEXISTENTE` de erro para
+  alerta se o código não existir
+- **carga horária mínima acumulada** (só em `pre_requisitos`, não existe
+  equivalente em `correquisitos`): `>=1200h`
 
-\* uma linha deve ter `codigo_prerequisito` **ou** `carga_horaria_minima`
-preenchido — nunca os dois vazios (`PREREQUISITO_MALFORMADO`).
+Não se usa `?` como marcador de "opcional" porque códigos de componente já
+podem legitimamente conter `?`/`!` (convenção de código provisório, ver
+`codigo_provisorio` acima) — usar `?` também para "opcional" criaria
+ambiguidade.
 
-### Aba `Correquisitos`
-
-| Campo | Tipo | Obrigatório | Regra de validação |
-|---|---|---|---|
-| `codigo_componente` | texto | sim | deve existir em `Componentes` |
-| `codigo_correquisito` | texto | sim | `CORREQUISITO_INEXISTENTE`, `CORREQUISITO_AUTORREFERENCIA`; período diferente do componente gera `CORREQUISITO_PERIODO_DIVERGENTE` (alerta) |
-| `opcional` | booleano | não | rebaixa `CORREQUISITO_INEXISTENTE` para alerta |
+Exemplo de célula combinando os três formatos:
+`CTR401, CTR203 (opcional), >=1200h`
 
 ### Aba `Equivalencias`
-
-Mesmo schema do arquivo dedicado `equivalencias.xlsx` (ver abaixo) — as
-duas fontes são somadas em `Curriculo.equivalencias`; use a aba dentro da
-matriz para equivalências que fazem sentido acompanhar a própria versão
-curricular, e o arquivo dedicado para as demais.
 
 | Campo | Tipo | Obrigatório | Descrição |
 |---|---|---|---|
@@ -76,55 +74,15 @@ curricular, e o arquivo dedicado para as demais.
 | `codigo_destino` | texto | sim | Código ao qual `codigo_origem` equivale — deve existir na matriz atual (`EQUIVALENCIA_DESTINO_INEXISTENTE` se não existir). |
 | `observacao` | texto | não | Ex.: unidade acadêmica de origem, condição da equivalência. |
 
-## `equivalencias.xlsx`
+Gera a tabela "Disciplinas Equivalentes" em `textos/estrutura_curricular.tex`
+via `gerado/tab_disciplinas_equivalentes.tex` (só escrito se houver ao
+menos uma equivalência). Não existe mais um arquivo `equivalencias.xlsx`
+separado — tudo fica nesta aba.
 
-Arquivo dedicado por perfil (`arquivos.equivalencias`, padrão
-`equivalencias.xlsx`), mesmo schema da aba `Equivalencias` acima (uma
-única planilha sem nome fixo — lida como `wb[wb.sheetnames[0]]`). Gera a
-tabela "Disciplinas Equivalentes" em `textos/estrutura_curricular.tex` via
-`gerado/tab_disciplinas_equivalentes.tex` (só escrito se houver ao menos
-uma equivalência).
+### Aba `Nucleos`
 
-### Aba `Areas`
-
-Junção componente → área de formação (0 ou mais por componente; **não**
-gera erro se vazia — mas `COMPONENTE_SEM_AREA` é emitido se um componente
-ativo não aparecer aqui nenhuma vez).
-
-| Campo | Tipo | Obrigatório | Exemplo |
-|---|---|---|---|
-| `codigo_componente` | texto | sim | `CTR401` |
-| `area_id` | texto | sim | `CONTROLE` (deve existir em `referenciais/areas_formacao.yaml`) |
-
-### Aba `Temas`
-
-Junção componente → tema transversal (0 ou mais). `tema_id` deve existir em
-`referenciais/temas_transversais.yaml` (`TEMA_TRANSVERSAL_INEXISTENTE`).
-
-### Aba `Competencias`
-
-Junção componente → competência (0 ou mais). `competencia_id` deve existir
-em `referenciais/competencias.yaml` (`COMPETENCIA_INEXISTENTE`).
-
-### Aba `Conteudos`
-
-Junção componente → conteúdo curricular (0 ou mais). `conteudo_id` deve
-existir em `referenciais/conteudos.yaml` (`CONTEUDO_INEXISTENTE`). Usada
-para currículos regidos por DCN que exigem cobertura explícita de uma
-lista de conteúdos obrigatórios (ex.: DCN de Computação) — opcional para
-cursos cujas diretrizes não exigem esse rastreamento.
-
-| Campo | Tipo | Obrigatório | Exemplo |
-|---|---|---|---|
-| `codigo_componente` | texto | sim | `CTR401` |
-| `conteudo_id` | texto | sim | `DCN_BASE_00` (deve existir em `referenciais/conteudos.yaml`) |
-
-### Aba `Certificacoes` (opcional)
-
-Só é lida se existir. `certificacao_id`, `nome`, `codigo_componente` (uma
-linha por componente que conta para aquela certificação).
-
-## `referenciais/nucleos.yaml`
+Catálogo dos núcleos curriculares do curso — substitui o antigo
+`referenciais/nucleos.yaml`.
 
 | Campo | Tipo | Obrigatório | Exemplo |
 |---|---|---|---|
@@ -132,11 +90,16 @@ linha por componente que conta para aquela certificação).
 | `nome` | texto | sim | `Formação Tecnológica e Profissional` |
 | `descricao` | texto | não | — |
 
-## `referenciais/areas_formacao.yaml`
+### Aba `Areas`
 
-Mesmos campos de `nucleos.yaml` (`id`, `nome`, `descricao`).
+Catálogo das áreas de formação — substitui o antigo
+`referenciais/areas_formacao.yaml`. Mesmos campos de `Nucleos` (`id`,
+`nome`, `descricao`).
 
-## `referenciais/temas_transversais.yaml`
+### Aba `Temas`
+
+Catálogo dos temas transversais — substitui o antigo
+`referenciais/temas_transversais.yaml`.
 
 | Campo | Tipo | Obrigatório | Valores possíveis | Exemplo |
 |---|---|---|---|---|
@@ -148,37 +111,14 @@ Mesmos campos de `nucleos.yaml` (`id`, `nome`, `descricao`).
 
 `status: obrigatorio` faz o validador emitir
 `TEMA_TRANSVERSAL_OBRIGATORIO_SEM_COBERTURA` se nenhum componente ativo
-referenciar o tema.
+referenciar o tema (coluna `temas` da aba `Componentes`).
 
-## `referenciais/competencias.yaml`
-
-| Campo | Tipo | Obrigatório | Exemplo |
-|---|---|---|---|
-| `id` | texto | sim | `PROJETAR_SISTEMAS_CONTROLE` |
-| `descricao` | texto | sim | `Projetar, especificar e sintonizar sistemas de controle...` |
-| `obrigatoria` | booleano | não (padrão `FALSE`) | `TRUE` |
-| `fonte` | texto | não | id de um item em `legislacao.yaml`, ex. `MEC_CATALOGO_CST` |
-
-## `referenciais/legislacao.yaml`
-
-| Campo | Tipo | Obrigatório | Exemplo |
-|---|---|---|---|
-| `id` | texto | sim | `MEC_CNE_CES_7_2018` |
-| `nome` | texto | sim | `Diretrizes para a extensão na Educação Superior` |
-| `tipo` | texto | não | `resolucao`, `lei`, `decreto`, `catalogo`, `parecer` |
-| `documento` | texto | não | `Resolução CNE/CES nº 7, de 18 de dezembro de 2018` |
-| `ano` | inteiro ou vazio | não | `2018` |
-| `observacoes` | texto | não | — |
-
-Pode ser complementado (nunca sobrescrito) por `heranca.legislacao`, campo
-de `perfil.yaml` (ver `docs/PERFIS.md`).
-
-## `referenciais/conteudos.yaml`
+### Aba `Conteudos`
 
 Catálogo de conteúdos curriculares obrigatórios exigidos por uma DCN
 específica (ex.: DCN de Computação) — opcional, só necessário para cursos
 cujas diretrizes exigem rastrear cobertura de conteúdo, não só de carga
-horária/competência.
+horária/competência. Substitui o antigo `referenciais/conteudos.yaml`.
 
 | Campo | Tipo | Obrigatório | Exemplo |
 |---|---|---|---|
@@ -189,15 +129,59 @@ horária/competência.
 
 `obrigatorio: TRUE` faz o validador emitir
 `CONTEUDO_OBRIGATORIO_SEM_COBERTURA` (alerta) se nenhum componente ativo
-referenciar o conteúdo na aba `Conteudos` da matriz.
+referenciar o conteúdo na coluna `conteudos` da aba `Componentes`.
+
+### Aba `Certificacoes` (opcional)
+
+Só é lida se existir. `certificacao_id`, `nome`, `codigo_componente` (uma
+linha por componente que conta para aquela certificação).
+
+### Outras abas
+
+A matriz pode conter abas fora deste esquema (ex.: um fluxograma visual
+próprio do curso) — o leitor (`ppcgen.leitores.excel`) as ignora
+silenciosamente; elas não são validadas nem geram nenhuma saída.
 
 ## `perfil.yaml`
 
 Ver `docs/PERFIS.md` para a lista comentada de todas as seções e
 `ppcgen/config.py` para a lista definitiva de campos de cada uma
 (`InfoPerfil`, `CursoConfig`, `InstituicaoConfig`, `CurriculoConfig`,
-`ArquivosConfig`, `GeracaoConfig`, `SaidaConfig`, `HerancaConfig`) — os
-nomes dos campos no YAML são idênticos aos atributos das dataclasses, e um
-campo desconhecido causa erro imediato ao carregar (`ConfiguracaoInvalida`).
-Substituiu o `config/curso.yaml` único de versões anteriores deste projeto
-— agora cada perfil tem o seu.
+`OfertaConfig`, `ArquivosConfig`, `GeracaoConfig`, `SaidaConfig`,
+`HerancaConfig`) — os nomes dos campos no YAML são idênticos aos
+atributos das dataclasses, e um campo desconhecido causa erro imediato ao
+carregar (`ConfiguracaoInvalida`).
+
+### `legislacao:` (lista, top-level em `perfil.yaml`)
+
+Catálogo de referenciais legais deste perfil — substitui o antigo
+`referenciais/legislacao.yaml` **e** o mecanismo `heranca.legislacao`
+(arquivos compartilhados em `dados/compartilhados/legislacao/`, que não
+existe mais). Cada perfil declara sua própria lista completa, sem
+arquivo externo para editar em separado.
+
+| Campo | Tipo | Obrigatório | Exemplo |
+|---|---|---|---|
+| `id` | texto | sim | `MEC_CNE_CES_7_2018` |
+| `nome` | texto | sim | `Diretrizes para a extensão na Educação Superior` |
+| `tipo` | texto | não | `resolucao`, `lei`, `decreto`, `catalogo`, `parecer`, `portaria` |
+| `documento` | texto | não | `Resolução CNE/CES nº 7, de 18 de dezembro de 2018` |
+| `ano` | inteiro ou vazio | não | `2018` |
+| `observacoes` | texto | não | — |
+
+Se `perfil.extends` aponta para um perfil base, as listas de `legislacao`
+de ambos são mescladas por `id` (o perfil atual sobrescreve o base em caso
+de colisão) — ver Seção 9 de `docs/PERFIS.md`.
+
+### `competencias:` (lista, top-level em `perfil.yaml`)
+
+Catálogo de competências deste perfil — substitui o antigo
+`referenciais/competencias.yaml`. Mesma semântica de herança por `id` que
+`legislacao:`, acima.
+
+| Campo | Tipo | Obrigatório | Exemplo |
+|---|---|---|---|
+| `id` | texto | sim | `PROJETAR_SISTEMAS_CONTROLE` |
+| `descricao` | texto | sim | `Projetar, especificar e sintonizar sistemas de controle...` |
+| `obrigatoria` | booleano | não (padrão `FALSE`) | `TRUE` |
+| `fonte` | texto | não | id de um item em `legislacao:`, ex. `MEC_CATALOGO_CST` |

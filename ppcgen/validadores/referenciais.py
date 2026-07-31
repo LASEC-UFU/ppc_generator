@@ -1,14 +1,14 @@
 """Validações contra os referenciais configuráveis (Seção 8): núcleos, áreas,
-temas transversais e competências devem existir no catálogo carregado de
-``referenciais/*.yaml`` — nenhum identificador é aceito "de graça". Também
-reporta competências/conteúdos marcados como obrigatórios que não têm
-nenhum componente ativo cobrindo-os.
+temas transversais e conteúdos devem existir nas abas de registro da matriz
+(``Nucleos``/``Areas``/``Temas``/``Conteudos``); competências devem existir
+em ``perfil.competencias`` (``perfil.yaml``) — nenhum identificador é
+aceito "de graça". Também reporta competências/conteúdos marcados como
+obrigatórios que não têm nenhum componente ativo cobrindo-os.
 """
 
 from __future__ import annotations
 
-from ppcgen.leitores.yaml import ReferenciaisCurso
-from ppcgen.modelos import AlertaValidacao, Curriculo, ErroValidacao, ResultadoValidacao
+from ppcgen.modelos import AlertaValidacao, Curriculo, ErroValidacao, ReferenciaisCurso, ResultadoValidacao
 
 
 def validar_referenciais(curriculo: Curriculo, referenciais: ReferenciaisCurso) -> ResultadoValidacao:
@@ -33,8 +33,8 @@ def validar_referenciais(curriculo: Curriculo, referenciais: ReferenciaisCurso) 
             resultado.adicionar(
                 ErroValidacao(
                     "NUCLEO_INEXISTENTE",
-                    f"núcleo '{c.nucleo}' de '{c.codigo}' não está definido em "
-                    "referenciais/nucleos.yaml.",
+                    f"núcleo '{c.nucleo}' de '{c.codigo}' não está definido na "
+                    "aba Nucleos da matriz curricular.",
                     componente=c.codigo,
                 )
             )
@@ -53,8 +53,8 @@ def validar_referenciais(curriculo: Curriculo, referenciais: ReferenciaisCurso) 
                     resultado.adicionar(
                         ErroValidacao(
                             "AREA_INEXISTENTE",
-                            f"área '{area}' de '{c.codigo}' não está definida em "
-                            "referenciais/areas_formacao.yaml.",
+                            f"área '{area}' de '{c.codigo}' não está definida na "
+                            "aba Areas da matriz curricular.",
                             componente=c.codigo,
                         )
                     )
@@ -66,7 +66,7 @@ def validar_referenciais(curriculo: Curriculo, referenciais: ReferenciaisCurso) 
                         ErroValidacao(
                             "TEMA_TRANSVERSAL_INEXISTENTE",
                             f"tema transversal '{tema}' de '{c.codigo}' não está definido "
-                            "em referenciais/temas_transversais.yaml.",
+                            "na aba Temas da matriz curricular.",
                             componente=c.codigo,
                         )
                     )
@@ -78,7 +78,7 @@ def validar_referenciais(curriculo: Curriculo, referenciais: ReferenciaisCurso) 
                         ErroValidacao(
                             "COMPETENCIA_INEXISTENTE",
                             f"competência '{competencia}' de '{c.codigo}' não está definida "
-                            "em referenciais/competencias.yaml.",
+                            "em perfil.competencias (perfil.yaml).",
                             componente=c.codigo,
                         )
                     )
@@ -90,7 +90,7 @@ def validar_referenciais(curriculo: Curriculo, referenciais: ReferenciaisCurso) 
                         ErroValidacao(
                             "CONTEUDO_INEXISTENTE",
                             f"conteúdo '{conteudo}' de '{c.codigo}' não está definido "
-                            "em referenciais/conteudos.yaml.",
+                            "na aba Conteudos da matriz curricular.",
                             componente=c.codigo,
                         )
                     )

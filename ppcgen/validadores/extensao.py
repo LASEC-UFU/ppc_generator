@@ -1,7 +1,7 @@
 """Validação do percentual mínimo de extensão (Seção 9 / Resolução CNE/CES
 nº 7/2018, quando configurada como referencial do perfil — ver
-``referenciais/legislacao.yaml``; este módulo não assume nenhum percentual
-por si, apenas aplica o que estiver em ``perfil.yaml``).
+``perfil.legislacao`` em ``perfil.yaml``; este módulo não assume nenhum
+percentual por si, apenas aplica o que estiver em ``perfil.yaml``).
 """
 
 from __future__ import annotations

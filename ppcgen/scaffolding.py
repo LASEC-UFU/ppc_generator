@@ -31,38 +31,26 @@ _TEXTOS = (
     "consideracoes_finais.tex",
 )
 
-_REFERENCIAIS_VAZIOS = {
-    "nucleos.yaml": "nucleos: []\n",
-    "areas_formacao.yaml": "areas: []\n",
-    "competencias.yaml": "competencias: []\n",
-    "legislacao.yaml": "referenciais: []\n",
-    "temas_transversais.yaml": "temas: []\n",
-}
-
 
 def _criar_matriz_vazia(caminho: Path) -> None:
     wb = openpyxl.Workbook()
     wb.remove(wb.active)
-
-    curso = wb.create_sheet("Curso")
-    curso.append(["campo", "valor"])
-    curso.append(["versao_curricular", ""])
 
     componentes = wb.create_sheet("Componentes")
     componentes.append(
         [
             "codigo", "nome", "tipo", "periodo", "ativo", "obrigatorio",
             "codigo_provisorio", "cht", "chp", "chd", "che", "tot",
-            "nucleo_id", "unidade_oferta", "ementa", "observacoes",
+            "nucleo_id", "unidade_oferta", "observacoes",
+            "pre_requisitos", "correquisitos", "areas", "temas", "conteudos", "competencias",
         ]
     )
     for aba, cabecalho in (
-        ("Pre-requisitos", ["codigo_componente", "codigo_prerequisito", "opcional", "carga_horaria_minima"]),
-        ("Correquisitos", ["codigo_componente", "codigo_correquisito", "opcional"]),
         ("Equivalencias", ["codigo_origem", "codigo_destino", "observacao"]),
-        ("Areas", ["codigo_componente", "area_id"]),
-        ("Temas", ["codigo_componente", "tema_id"]),
-        ("Competencias", ["codigo_componente", "competencia_id"]),
+        ("Nucleos", ["id", "nome", "descricao"]),
+        ("Areas", ["id", "nome", "descricao"]),
+        ("Temas", ["id", "nome", "descricao", "fonte_normativa", "status"]),
+        ("Conteudos", ["id", "descricao", "obrigatorio", "fonte"]),
     ):
         ws = wb.create_sheet(aba)
         ws.append(cabecalho)
@@ -79,7 +67,6 @@ def criar_perfil(pasta_perfis: Path, perfil_id: str, nome: str) -> Path:
         raise ConfiguracaoInvalida(f"Já existe um perfil em {destino}.")
 
     destino.mkdir(parents=True)
-    (destino / "referenciais").mkdir()
     (destino / "textos").mkdir()
     (destino / "frontmatter").mkdir()
     (destino / "referencias").mkdir()
@@ -130,10 +117,8 @@ def criar_perfil(pasta_perfis: Path, perfil_id: str, nome: str) -> Path:
         },
         "arquivos": {
             "matriz": "matriz_curricular.xlsx",
-            "equivalencias": "equivalencias.xlsx",
             "bibliografia": "referencias/bibliografia.bib",
             "textos": "textos",
-            "referenciais": "referenciais",
             "fichas": "fichas",
             "figuras": "figuras",
             "anexos": "anexos",
@@ -155,19 +140,14 @@ def criar_perfil(pasta_perfis: Path, perfil_id: str, nome: str) -> Path:
             "gerar_corpo": True,
             "gerar_completo": True,
         },
+        "legislacao": [],
+        "competencias": [],
     }
     (destino / "perfil.yaml").write_text(
         yaml.safe_dump(perfil_yaml, allow_unicode=True, sort_keys=False), encoding="utf-8"
     )
 
     _criar_matriz_vazia(destino / "matriz_curricular.xlsx")
-
-    equivalencias = openpyxl.Workbook()
-    equivalencias.active.append(["codigo_origem", "codigo_destino", "observacao"])
-    equivalencias.save(destino / "equivalencias.xlsx")
-
-    for nome_arquivo, conteudo in _REFERENCIAIS_VAZIOS.items():
-        (destino / "referenciais" / nome_arquivo).write_text(conteudo, encoding="utf-8")
 
     for nome_arquivo in _TEXTOS:
         titulo = nome_arquivo.replace(".tex", "").replace("_", " ").title()
@@ -187,8 +167,10 @@ def criar_perfil(pasta_perfis: Path, perfil_id: str, nome: str) -> Path:
 
     (destino / "README.md").write_text(
         f"# Perfil: {perfil_id}\n\n{nome}\n\nStatus: rascunho — gerado por "
-        "`python -m ppcgen perfil-criar`. Preencha `perfil.yaml`, "
-        "`matriz_curricular.xlsx`, `referenciais/` e `textos/` antes de validar.\n",
+        "`python -m ppcgen perfil-criar`. Preencha `perfil.yaml` (incluindo as "
+        "seções `legislacao:`/`competencias:`), `matriz_curricular.xlsx` "
+        "(componentes e as abas Nucleos/Areas/Temas/Conteudos) e `textos/` "
+        "antes de validar.\n",
         encoding="utf-8",
     )
 

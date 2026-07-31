@@ -46,25 +46,14 @@ curriculo:
 oferta:
   formato: presencial
   possui_carga_ead: true
-  # curriculo.percentual_maximo_ead acima (30%) É o teto legal exato para
-  # oferta.formato=presencial — não uma folga arbitrária (ver
-  # ppcgen.validadores.ead.TETO_EAD_POR_FORMATO).
   norma_federal: "Decreto nº 12.456/2025; Portaria MEC nº 378/2025"
   norma_institucional: null
-  # PENDENTE: a UFU ainda não publicou a resolução do CONGRAD sobre oferta
-  # de componentes EaD em cursos presenciais (processo SEI
-  # 23117.070903/2023-41, altera a Resolução CONGRAD nº 35/2011) — estava
-  # pautada para a 7ª reunião/2026 do CONGRAD (24/07/2026) sem publicação
-  # localizada até a data desta auditoria (2026-07-30). Ver
-  # docs/RELATORIO_AUDITORIA_NORMATIVA.md, Seção 2.
   status_validacao_institucional: pendente
 
 arquivos:
   matriz: "matriz_curricular.xlsx"
-  equivalencias: "equivalencias.xlsx"
   bibliografia: "referencias/bibliografia.bib"
   textos: "textos"
-  referenciais: "referenciais"
   fichas: "fichas"
   figuras: "figuras"
   anexos: "anexos"
@@ -93,11 +82,157 @@ heranca:
   autoridades: "compartilhados/instituicao/autoridades.yaml"
   referencias:
     - "compartilhados/referencias/referencias_institucionais.bib"
-  legislacao:
-    - "compartilhados/legislacao/extensao.yaml"
-    - "compartilhados/legislacao/organizacao_academica.yaml"
-    - "compartilhados/legislacao/educacao_ambiental.yaml"
-    - "compartilhados/legislacao/direitos_humanos.yaml"
-    - "compartilhados/legislacao/libras.yaml"
-    - "compartilhados/legislacao/relacoes_etnico_raciais.yaml"
-    - "compartilhados/legislacao/prevencao_desastres.yaml"
+
+# Catálogo de referenciais legais deste curso — fonte única, sem mais
+# nenhum referenciais/legislacao.yaml nem compartilhados/legislacao/*.yaml
+# (os sete arquivos que existiam ali tiveram o conteúdo trazido para cá,
+# porque só este perfil os usava e o mecanismo `heranca.legislacao` foi
+# removido do ppcgen).
+legislacao:
+  - id: CNCST_2024_AUTOMACAO_INDUSTRIAL
+    nome: >
+      Catálogo Nacional de Cursos Superiores de Tecnologia (4ª edição) —
+      Curso Superior de Tecnologia em Automação Industrial, eixo
+      tecnológico Controle e Processos Industriais, área tecnológica
+      Eletrônica e Automação (código CINE Brasil 0714A01)
+    tipo: catalogo_nacional
+    documento: Portaria MEC nº 514, de 4 de junho de 2024
+    ano: 2024
+    observacoes: >
+      Base da denominação regulatória do curso (textos/identificacao.tex)
+      e da carga horária mínima de 2.400h (curriculo.carga_horaria_total,
+      acima). A estrutura de eixos/áreas tecnológicas do CNCST é definida
+      pela Resolução CNE/CP nº 2, de 4 de abril de 2024. Ficha
+      catalográfica do CNCST para este curso: titulação Tecnólogo em
+      Automação Industrial, duração estimada 3 anos; requisitos de
+      ingresso — Ensino Médio concluído ou equivalente, aprovação em
+      processo seletivo; ocupações CBO associadas — 2021-15 (Tecnólogo em
+      Mecatrônica), 2021-20 (Tecnólogo em Automação); infraestrutura
+      mínima exigida — biblioteca com acervo físico ou virtual específico
+      e atualizado, laboratório de informática, laboratório de automação
+      industrial, laboratório de eletrônica, laboratório de hidráulica e
+      pneumática, laboratório de instalações elétricas, laboratório de
+      redes industriais; estágio pode ser obrigatório por decisão da
+      instituição, mas não integra a carga horária mínima do CNCST.
+
+  - id: CNE_CP_1_2021
+    nome: Diretrizes Curriculares Nacionais Gerais para a Educação Profissional e Tecnológica
+    tipo: resolucao
+    documento: Resolução CNE/CP nº 1, de 5 de janeiro de 2021
+    ano: 2021
+    observacoes: >
+      Fundamento das diretrizes curriculares gerais deste CST — distinto
+      e mais específico que a Resolução CNE/CP nº 2/2024, que trata só da
+      estrutura de eixos/áreas do CNCST/CNCT.
+
+  - id: CONFEA_313_1986
+    nome: >
+      Exercício profissional dos Tecnólogos das áreas submetidas à
+      regulamentação e fiscalização do Sistema Confea/Crea
+    tipo: resolucao
+    documento: Resolução CONFEA nº 313, de 26 de setembro de 1986
+    ano: 1986
+    observacoes: >
+      Base legal profissional mais específica para atribuições do
+      Tecnólogo (com base na Lei nº 5.194/1966) do que a Resolução CONFEA
+      nº 1.073/2016, abaixo — usar as duas em conjunto.
+
+  - id: CONFEA_1073_2016
+    nome: >
+      Regulamenta a atribuição de títulos, atividades, competências e
+      campos de atuação profissionais no âmbito do Sistema Confea/Crea
+    tipo: resolucao
+    documento: Resolução CONFEA nº 1.073, de 19 de abril de 2016
+    ano: 2016
+    observacoes: >
+      Base legal profissional para a titulação de Tecnólogo em Automação
+      Industrial. Ocupações CBO associadas (2021-15 Tecnólogo em
+      Mecatrônica; 2021-20 Tecnólogo em Automação) — ver entrada
+      CNCST_2024_AUTOMACAO_INDUSTRIAL acima.
+
+  - id: INEP_CINE_BRASIL_622_2025
+    nome: Política de aplicação da Classificação Internacional Normalizada da Educação adaptada (CINE Brasil)
+    tipo: portaria
+    documento: Portaria Inep nº 622, de 8 de setembro de 2025
+    ano: 2025
+    observacoes: >
+      Norma vigente do enquadramento CINE Brasil deste curso (código
+      0714A01, "Automação Industrial", eixo 0714 "Eletrônica e
+      Automação"). Substitui, para fins deste projeto, qualquer política
+      de CINE Brasil anterior eventualmente citada.
+
+  - id: MEC_CNE_CES_7_2018
+    nome: Diretrizes para a extensão na Educação Superior
+    tipo: resolucao
+    documento: Resolução CNE/CES nº 7, de 18 de dezembro de 2018
+    ano: 2018
+    observacoes: >
+      Base para o percentual mínimo de carga horária de extensão
+      (curriculo.percentual_minimo_extensao, acima).
+
+  - id: UFU_CONGRAD_177_2026
+    nome: Regulamenta a inserção e operacionalização das ACEs nos currículos de graduação da UFU
+    tipo: resolucao
+    documento: Resolução CONGRAD nº 177, de 20 de fevereiro de 2026
+    ano: 2026
+    observacoes: >
+      Norma institucional vigente da UFU para toda a carga horária de
+      extensão deste curso: mínimo de 10% da carga horária total (art. 4º
+      §1º), piso absoluto de 160h para Tecnologia quando não fixado em
+      legislação superior (art. 4º §3º III); ACEs distribuídas em no
+      mínimo 3 componentes curriculares, em períodos distintos (art. 6º
+      §4º); execução obrigatoriamente presencial — a exceção de mediação
+      digital do art. 5º §7º II vale só para bacharelados, não para este
+      curso; estágio obrigatório, monitoria e tutoria não contam como ACE
+      (art. 5º §4º). Revoga os arts. 1º a 11 da Resolução CONGRAD nº
+      13/2019 e altera a Resolução CONGRAD nº 15/2016.
+
+  - id: UFU_CONGRAD_46_2022
+    nome: Normas Gerais da Graduação da UFU
+    tipo: resolucao
+    documento: Resolução CONGRAD nº 46, de 28 de março de 2022
+    ano: 2022
+    observacoes: >
+      Rege organização, funcionamento, avaliação, alteração, criação e
+      extinção de cursos de graduação na UFU. Alterada pela Resolução
+      CONGRAD nº 78, de 16 de novembro de 2022; revogou parcialmente a
+      Resolução CONGRAD nº 15/2011 (não citar mais como vigente).
+
+  - id: CNE_2_2012
+    nome: Educação Ambiental
+    tipo: resolucao
+    documento: Resolução CNE nº 2, de 15 de junho de 2012
+    ano: 2012
+
+  - id: CNE_1_2012
+    nome: Educação em Direitos Humanos
+    tipo: resolucao
+    documento: Resolução CNE nº 1, de 30 de maio de 2012
+    ano: 2012
+
+  - id: DECRETO_5626_2005
+    nome: Ensino de Libras
+    tipo: decreto
+    documento: Decreto nº 5.626, de 22 de dezembro de 2005
+    ano: 2005
+
+  - id: CNE_CP_1_2004
+    nome: Educação das Relações Étnico-Raciais
+    tipo: resolucao
+    documento: Resolução CNE/CP nº 1, de 17 de junho de 2004
+    ano: 2004
+
+  - id: LEI_13425_2017
+    nome: Educação para Prevenção e Redução de Desastres
+    tipo: lei
+    documento: Lei nº 13.425, de 30 de março de 2017
+    ano: 2017
+    observacoes: >
+      A lei se refere explicitamente a cursos de Engenharia — este curso
+      trata o tema como sugerido, não obrigatório (ver a aba Temas da
+      matriz curricular).
+
+# Nenhuma competência específica catalogada ainda para este curso — lista
+# vazia é válida (ver ppcgen/config.py); preencher quando o NDE definir o
+# quadro de competências do egresso.
+competencias: []

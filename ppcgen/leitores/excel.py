@@ -2,21 +2,31 @@
 
 Esquema de abas adotado (documentado em ``docs/DICIONARIO_DADOS.md``):
 
-1. ``Curso``            — metadados da versão curricular (chave/valor).
-2. ``Componentes``      — todos os componentes do curso (obrigatórios,
+1. ``Componentes``   — todos os componentes do curso (obrigatórios,
    optativos pré-aprovados, extensão, estágio, TCC, AAC...), diferenciados
-   pelo campo ``tipo`` — não por prefixo/sufixo de código.
-3. ``Pre-requisitos``   — tabela de junção codigo_componente -> pré-requisito.
-4. ``Correquisitos``    — tabela de junção codigo_componente -> correquisito.
-5. ``Equivalencias``    — codigo_origem -> codigo_destino.
-6. ``Areas``            — tabela de junção codigo_componente -> area_id (0+).
-7. ``Temas``            — tabela de junção codigo_componente -> tema_id (0+).
-8. ``Competencias``     — tabela de junção codigo_componente -> competencia_id (0+).
-9. ``Certificacoes``    — opcional: certificacao_id -> codigo_componente (0+).
+   pelo campo ``tipo`` — não por prefixo/sufixo de código. Pré-requisitos,
+   correquisitos, áreas, temas transversais, conteúdos e competências de
+   cada componente são colunas desta própria aba (listas separadas por
+   vírgula), não abas de junção separadas — ver ``_lista_ids``/
+   ``_parse_prerequisitos``/``_parse_correquisitos`` abaixo para a sintaxe
+   exata.
+2. ``Equivalencias`` — codigo_origem -> codigo_destino.
+3. ``Nucleos``       — catálogo de núcleos curriculares (id, nome, descrição).
+4. ``Areas``         — catálogo de áreas de formação (id, nome, descrição).
+5. ``Temas``         — catálogo de temas transversais (id, nome, descrição,
+   fonte normativa, status).
+6. ``Conteudos``     — catálogo de conteúdos curriculares exigidos por
+   alguma DCN (id, descrição, obrigatório, fonte).
+7. ``Certificacoes`` — opcional: certificacao_id -> codigo_componente (0+).
 
-Núcleo é uma coluna direta em ``Componentes`` (cardinalidade 1) e optativas
-pré-aprovadas são apenas componentes com ``tipo=carga_optativa`` — evitando
-abas redundantes com a mesma informação em formatos diferentes.
+Núcleo é uma coluna direta em ``Componentes`` (cardinalidade 1). Os
+catálogos de legislação e competências não vivem na matriz — são
+``perfil.legislacao``/``perfil.competencias``, direto em ``perfil.yaml``
+(``ppcgen.config``), porque não são dados curriculares por componente. Não
+há mais aba ``Curso``: a versão curricular é ``perfil.info.versao`` (Seção
+sobre fontes únicas em ``docs/DICIONARIO_DADOS.md``) — outras abas que a
+planilha tenha (ex.: um fluxograma visual próprio de cada curso) não fazem
+parte deste esquema e não são lidas por este módulo.
 """
 
 from __future__ import annotations
@@ -27,26 +37,31 @@ import openpyxl
 
 from ppcgen.excecoes import ArquivoNaoEncontrado, FormatoInvalido
 from ppcgen.modelos import (
+    AreaFormacao,
     CargaHoraria,
     ComponenteCurricular,
+    Conteudo,
     Correquisito,
     Curriculo,
     Equivalencia,
+    NucleoCurricular,
     PreRequisito,
+    ReferenciaisCurso,
+    TemaTransversal,
     TipoComponente,
 )
 
-ABAS_OBRIGATORIAS = ("Curso", "Componentes")
+ABAS_OBRIGATORIAS = ("Componentes",)
 ABAS_OPCIONAIS = (
-    "Pre-requisitos",
-    "Correquisitos",
     "Equivalencias",
+    "Nucleos",
     "Areas",
     "Temas",
-    "Competencias",
     "Conteudos",
     "Certificacoes",
 )
+
+_SUFIXO_OPCIONAL = "(opcional)"
 
 
 def _linhas(planilha) -> list[dict]:
@@ -93,8 +108,131 @@ def _tipo_componente(valor) -> TipoComponente:
         ) from exc
 
 
-def carregar_matriz(caminho: str | Path) -> tuple[Curriculo, dict, list[str]]:
-    """Lê a matriz curricular e retorna ``(Curriculo, metadados_curso, avisos_leitura)``.
+def _lista_ids(valor) -> list[str]:
+    """Split de uma célula com IDs separados por vírgula (usada para áreas,
+    temas, conteúdos e competências) — células vazias viram lista vazia,
+    nunca ``[""]``."""
+
+    texto = _str_ou_vazio(valor)
+    if not texto:
+        return []
+    return [item.strip() for item in texto.split(",") if item.strip()]
+
+
+def _extrair_opcional(item: str) -> tuple[str, bool]:
+    """Separa o sufixo `` (opcional)`` (case-insensitive) de um item de
+    pré-requisito/correquisito. Não usa ``?`` como marcador porque códigos
+    de componente já podem legitimamente conter ``?`` (Seção sobre
+    ``CODIGO_PROVISORIO`` em ``docs/VALIDACOES.md``)."""
+
+    if item.lower().endswith(_SUFIXO_OPCIONAL):
+        return item[: -len(_SUFIXO_OPCIONAL)].strip(), True
+    return item, False
+
+
+def _parse_correquisitos(valor) -> list[Correquisito]:
+    correquisitos = []
+    for item in _lista_ids(valor):
+        codigo, opcional = _extrair_opcional(item)
+        correquisitos.append(Correquisito(codigo=codigo, opcional=opcional))
+    return correquisitos
+
+
+def _parse_prerequisitos(valor) -> list[PreRequisito]:
+    """Cada item é um código de componente (com sufixo opcional `` (opcional)``)
+    ou uma exigência de carga horária mínima acumulada, escrita
+    ``>=NNNh`` (nunca um código mágico como ``"*"`` — ver
+    ``ppcgen.validadores.prerequisitos``). Exemplo de célula:
+    ``CTR401, CTR203 (opcional), >=1200h``."""
+
+    pre_requisitos = []
+    for item in _lista_ids(valor):
+        if item.replace(" ", "").upper().startswith(">="):
+            carga_texto = item.split(">=", 1)[1].strip().rstrip("hH").strip()
+            pre_requisitos.append(
+                PreRequisito(codigo="", carga_horaria_minima=_int_ou_none(carga_texto))
+            )
+            continue
+        codigo, opcional = _extrair_opcional(item)
+        pre_requisitos.append(PreRequisito(codigo=codigo, opcional=opcional))
+    return pre_requisitos
+
+
+def carregar_registros_referenciais(wb) -> ReferenciaisCurso:
+    """Lê os catálogos de núcleos/áreas/temas/conteúdos das abas de registro
+    da própria matriz (``Nucleos``/``Areas``/``Temas``/``Conteudos``) —
+    substitui os antigos ``referenciais/*.yaml``. Retorna um
+    :class:`ReferenciaisCurso` só com esses quatro campos preenchidos;
+    ``legislacao``/``competencias`` vêm de ``perfil.yaml``, não daqui."""
+
+    referenciais = ReferenciaisCurso()
+
+    if "Nucleos" in wb.sheetnames:
+        for row in _linhas(wb["Nucleos"]):
+            id_ = _str_ou_vazio(row.get("id"))
+            if id_:
+                referenciais.nucleos.append(
+                    NucleoCurricular(
+                        id=id_,
+                        nome=_str_ou_vazio(row.get("nome")),
+                        descricao=_str_ou_vazio(row.get("descricao")),
+                    )
+                )
+
+    if "Areas" in wb.sheetnames:
+        for row in _linhas(wb["Areas"]):
+            id_ = _str_ou_vazio(row.get("id"))
+            if id_:
+                referenciais.areas.append(
+                    AreaFormacao(
+                        id=id_,
+                        nome=_str_ou_vazio(row.get("nome")),
+                        descricao=_str_ou_vazio(row.get("descricao")),
+                    )
+                )
+
+    if "Temas" in wb.sheetnames:
+        for row in _linhas(wb["Temas"]):
+            id_ = _str_ou_vazio(row.get("id"))
+            if id_:
+                referenciais.temas_transversais.append(
+                    TemaTransversal(
+                        id=id_,
+                        nome=_str_ou_vazio(row.get("nome")),
+                        descricao=_str_ou_vazio(row.get("descricao")),
+                        fonte_normativa=_str_ou_vazio(row.get("fonte_normativa")),
+                        status=_str_ou_vazio(row.get("status")) or "ativo",
+                    )
+                )
+
+    if "Conteudos" in wb.sheetnames:
+        for row in _linhas(wb["Conteudos"]):
+            id_ = _str_ou_vazio(row.get("id"))
+            if id_:
+                referenciais.conteudos.append(
+                    Conteudo(
+                        id=id_,
+                        descricao=_str_ou_vazio(row.get("descricao")),
+                        obrigatorio=_bool(row.get("obrigatorio")),
+                        fonte=_str_ou_vazio(row.get("fonte")),
+                    )
+                )
+
+    return referenciais
+
+
+def carregar_matriz(caminho: str | Path) -> tuple[Curriculo, ReferenciaisCurso, list[str]]:
+    """Lê a matriz curricular e retorna ``(Curriculo, referenciais,
+    avisos_leitura)``.
+
+    ``Curriculo.versao`` vem em branco daqui — a versão curricular é
+    ``perfil.info.versao`` (já existe em ``perfil.yaml``; não duplicamos o
+    dado numa aba ``Curso`` separada). Quem chama com um ``Perfil`` em mãos
+    deve fazer ``curriculo.versao = perfil.info.versao`` depois de carregar.
+
+    ``referenciais`` traz só núcleos/áreas/temas/conteúdos (das abas de
+    registro da própria matriz) — quem chama ainda precisa preencher
+    ``legislacao``/``competencias`` a partir de ``perfil.yaml``.
 
     ``avisos_leitura`` registra situações que o leitor não deve "corrigir"
     silenciosamente (ex.: célula de status ativo/inativo em branco) — cabe ao
@@ -111,22 +249,14 @@ def carregar_matriz(caminho: str | Path) -> tuple[Curriculo, dict, list[str]]:
             raise FormatoInvalido(f"Aba obrigatória ausente na matriz: '{aba}'")
 
     avisos: list[str] = []
-    metadados = {
-        row.get("campo"): row.get("valor") for row in _linhas(wb["Curso"]) if row.get("campo")
-    }
 
     # ``componentes`` preserva TODAS as linhas, mesmo com código repetido —
     # um dict aqui (codigo -> componente) apagaria silenciosamente a
     # primeira ocorrência de um código duplicado, exatamente o tipo de
     # perda silenciosa que este projeto proíbe (Seção 29). Duplicatas reais
     # são responsabilidade de ``CODIGO_DUPLICADO``
-    # (``ppcgen.validadores.codigos``), não do leitor. ``por_codigo`` é só
-    # um índice auxiliar para anexar as abas de junção abaixo — em caso de
-    # código duplicado, a última ocorrência na planilha "vence" para fins
-    # de anexação (pré-requisito/área/tema/...), mas ambos os componentes
-    # continuam presentes em ``componentes``.
+    # (``ppcgen.validadores.codigos``), não do leitor.
     componentes: list[ComponenteCurricular] = []
-    por_codigo: dict[str, ComponenteCurricular] = {}
     for row in _linhas(wb["Componentes"]):
         codigo = _str_ou_vazio(row.get("codigo"))
         if not codigo:
@@ -152,73 +282,16 @@ def carregar_matriz(caminho: str | Path) -> tuple[Curriculo, dict, list[str]]:
             obrigatorio=_bool(row.get("obrigatorio")),
             codigo_provisorio=_bool(row.get("codigo_provisorio")),
             nucleo=_str_ou_vazio(row.get("nucleo_id")) or None,
+            areas=_lista_ids(row.get("areas")),
+            competencias=_lista_ids(row.get("competencias")),
+            conteudos=_lista_ids(row.get("conteudos")),
+            temas_transversais=_lista_ids(row.get("temas")),
+            pre_requisitos=_parse_prerequisitos(row.get("pre_requisitos")),
+            correquisitos=_parse_correquisitos(row.get("correquisitos")),
             unidade_oferta=_str_ou_vazio(row.get("unidade_oferta")),
-            ementa=_str_ou_vazio(row.get("ementa")),
             observacoes=_str_ou_vazio(row.get("observacoes")),
         )
         componentes.append(componente)
-        por_codigo[codigo] = componente
-
-    if "Pre-requisitos" in wb.sheetnames:
-        for row in _linhas(wb["Pre-requisitos"]):
-            comp = por_codigo.get(_str_ou_vazio(row.get("codigo_componente")))
-            if comp is None:
-                continue
-            comp.pre_requisitos.append(
-                PreRequisito(
-                    codigo=_str_ou_vazio(row.get("codigo_prerequisito")),
-                    opcional=_bool(row.get("opcional")),
-                    carga_horaria_minima=_int_ou_none(row.get("carga_horaria_minima")),
-                )
-            )
-
-    if "Correquisitos" in wb.sheetnames:
-        for row in _linhas(wb["Correquisitos"]):
-            comp = por_codigo.get(_str_ou_vazio(row.get("codigo_componente")))
-            if comp is None:
-                continue
-            comp.correquisitos.append(
-                Correquisito(
-                    codigo=_str_ou_vazio(row.get("codigo_correquisito")),
-                    opcional=_bool(row.get("opcional")),
-                )
-            )
-
-    if "Areas" in wb.sheetnames:
-        for row in _linhas(wb["Areas"]):
-            comp = por_codigo.get(_str_ou_vazio(row.get("codigo_componente")))
-            if comp is None:
-                continue
-            area_id = _str_ou_vazio(row.get("area_id"))
-            if area_id:
-                comp.areas.append(area_id)
-
-    if "Temas" in wb.sheetnames:
-        for row in _linhas(wb["Temas"]):
-            comp = por_codigo.get(_str_ou_vazio(row.get("codigo_componente")))
-            if comp is None:
-                continue
-            tema_id = _str_ou_vazio(row.get("tema_id"))
-            if tema_id:
-                comp.temas_transversais.append(tema_id)
-
-    if "Competencias" in wb.sheetnames:
-        for row in _linhas(wb["Competencias"]):
-            comp = por_codigo.get(_str_ou_vazio(row.get("codigo_componente")))
-            if comp is None:
-                continue
-            competencia_id = _str_ou_vazio(row.get("competencia_id"))
-            if competencia_id:
-                comp.competencias.append(competencia_id)
-
-    if "Conteudos" in wb.sheetnames:
-        for row in _linhas(wb["Conteudos"]):
-            comp = por_codigo.get(_str_ou_vazio(row.get("codigo_componente")))
-            if comp is None:
-                continue
-            conteudo_id = _str_ou_vazio(row.get("conteudo_id"))
-            if conteudo_id:
-                comp.conteudos.append(conteudo_id)
 
     equivalencias = []
     if "Equivalencias" in wb.sheetnames:
@@ -234,38 +307,11 @@ def carregar_matriz(caminho: str | Path) -> tuple[Curriculo, dict, list[str]]:
                     )
                 )
 
-    versao = _str_ou_vazio(metadados.get("versao_curricular")) or "sem-versao"
+    referenciais = carregar_registros_referenciais(wb)
+
     curriculo = Curriculo(
-        versao=versao,
+        versao="",
         componentes=componentes,
         equivalencias=equivalencias,
     )
-    return curriculo, metadados, avisos
-
-
-def carregar_equivalencias(caminho: str | Path) -> list[Equivalencia]:
-    """Lê o arquivo dedicado ``equivalencias.xlsx`` de um perfil (mesmo
-    esquema da aba ``Equivalencias`` da matriz — ``codigo_origem``,
-    ``codigo_destino``, ``observacao``). Complementa, não substitui, uma
-    eventual aba ``Equivalencias`` na própria matriz.
-    """
-
-    caminho = Path(caminho)
-    if not caminho.exists():
-        raise ArquivoNaoEncontrado(f"Arquivo de equivalências não encontrado: {caminho}")
-
-    wb = openpyxl.load_workbook(caminho, data_only=True)
-    planilha = wb[wb.sheetnames[0]]
-    equivalencias = []
-    for row in _linhas(planilha):
-        origem = _str_ou_vazio(row.get("codigo_origem"))
-        destino = _str_ou_vazio(row.get("codigo_destino"))
-        if origem and destino:
-            equivalencias.append(
-                Equivalencia(
-                    codigo_origem=origem,
-                    codigo_destino=destino,
-                    observacao=_str_ou_vazio(row.get("observacao")),
-                )
-            )
-    return equivalencias
+    return curriculo, referenciais, avisos

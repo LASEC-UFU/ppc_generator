@@ -132,7 +132,7 @@ def validar_perfil(perfil: Perfil) -> ResultadoValidacao:
                     f"{caminho_rel}.",
                 )
             )
-    for caminho_rel in (*perfil.heranca.referencias, *perfil.heranca.legislacao):
+    for caminho_rel in perfil.heranca.referencias:
         if not perfil.caminho_compartilhado(caminho_rel).exists():
             resultado.adicionar(
                 ErroValidacao(

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from ppcgen.leitores.yaml import ReferenciaisCurso
-from ppcgen.modelos import Competencia, Curriculo, NucleoCurricular
+from ppcgen.modelos import Competencia, Curriculo, NucleoCurricular, ReferenciaisCurso
 from ppcgen.validadores.referenciais import validar_referenciais
 from testes.conftest import componente
 

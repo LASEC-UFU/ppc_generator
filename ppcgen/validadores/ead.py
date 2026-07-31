@@ -1,7 +1,7 @@
 """Validação do percentual máximo de EaD (Seção 9). O limite não é assumido
 pelo código — vem de ``perfil.yaml`` (``curriculo.percentual_maximo_ead``,
 em pontos percentuais 0-100), que por sua vez deve refletir a legislação
-vigente configurada em ``referenciais/legislacao.yaml``.
+vigente configurada em ``perfil.legislacao`` (``perfil.yaml``).
 
 Cobre dois tipos de verificação, independentes entre si:
 

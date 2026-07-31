@@ -31,7 +31,7 @@ from ppcgen.modelos import (
 # Mapa histórico usado pelo script legado para "QEXTR" (Seção 7: identificadores
 # em vez de números). Documentado aqui apenas para permitir a migração; o
 # curso novo não deve reutilizar estes identificadores como se fossem
-# universais — cada curso define os seus em referenciais/temas_transversais.yaml.
+# universais — cada curso define os seus na aba Temas da própria matriz.
 LEGADO_QEXTR_TEMAS: dict[int, str] = {
     2: "RELACOES_ETNICO_RACIAIS",
     3: "LIBRAS",
@@ -191,7 +191,6 @@ def carregar_csv_legado(caminho: str | Path) -> ResultadoImportacaoCSV:
                     temas_transversais=temas_transversais,
                     pre_requisitos=pre_requisitos,
                     correquisitos=correquisitos,
-                    ementa=(linha.get("Ementa") or "").strip(),
                 )
             )
 

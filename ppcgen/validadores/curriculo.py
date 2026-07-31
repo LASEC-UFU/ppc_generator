@@ -12,12 +12,12 @@ exceção por problema de dado; o resultado agregado é sempre um
 from __future__ import annotations
 
 from ppcgen.config import Perfil
-from ppcgen.leitores.yaml import ReferenciaisCurso
 from ppcgen.modelos import (
     AlertaValidacao,
     Curriculo,
     ErroValidacao,
     FichaCurricular,
+    ReferenciaisCurso,
     ResultadoValidacao,
     TipoComponente,
 )

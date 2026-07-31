@@ -3,8 +3,8 @@
 Recebe dois :class:`~ppcgen.modelos.Curriculo` (tipicamente lidos de dois
 arquivos ``matriz_curricular.xlsx`` distintos, um "anterior" e um "atual") e
 produz um relatório estruturado de diferenças, sem tentar adivinhar
-renomeações de código — isso exige uma equivalência explícita, registrada em
-``dados/equivalencias.xlsx`` ou na aba ``Equivalencias`` da matriz atual.
+renomeações de código — isso exige uma equivalência explícita, registrada
+na aba ``Equivalencias`` da matriz atual.
 """
 
 from __future__ import annotations

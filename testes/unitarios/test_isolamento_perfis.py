@@ -42,8 +42,7 @@ def test_geracao_de_um_perfil_nao_grava_em_outro(tmp_path):
     """As saídas de dois perfis, geradas na mesma rodada, nunca se misturam."""
 
     from ppcgen.geradores.latex import gerar_arquivos_latex
-    from ppcgen.leitores.yaml import ReferenciaisCurso
-    from ppcgen.modelos import Curriculo
+    from ppcgen.modelos import Curriculo, ReferenciaisCurso
     from testes.conftest import componente, construir_perfil
 
     perfil_a = construir_perfil(tmp_path / "perfil_a")

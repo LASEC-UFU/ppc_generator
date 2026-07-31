@@ -23,6 +23,7 @@ from pathlib import Path
 import yaml
 
 from ppcgen.excecoes import ConfiguracaoInvalida
+from ppcgen.modelos import Competencia, ReferencialCurricular
 from ppcgen.utilitarios.caminhos import raiz_projeto
 
 
@@ -104,10 +105,8 @@ class OfertaConfig:
 @dataclass
 class ArquivosConfig:
     matriz: str = "matriz_curricular.xlsx"
-    equivalencias: str = "equivalencias.xlsx"
     bibliografia: str = "referencias/bibliografia.bib"
     textos: str = "textos"
-    referenciais: str = "referenciais"
     fichas: str = "fichas"
     figuras: str = "figuras"
     anexos: str = "anexos"
@@ -141,7 +140,6 @@ class HerancaConfig:
     identidade_visual: str | None = None
     autoridades: str | None = None
     referencias: list[str] = field(default_factory=list)
-    legislacao: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -157,6 +155,14 @@ class Perfil:
     heranca: HerancaConfig
     diretorio: Path
     raiz_dados: Path
+    legislacao: list[ReferencialCurricular] = field(default_factory=list)
+    """Catálogo de referenciais legais deste perfil — substitui o antigo
+    ``referenciais/legislacao.yaml`` (e o ``heranca.legislacao`` que
+    apontava para arquivos compartilhados): tudo fica direto em
+    ``perfil.yaml`` agora, sem arquivo externo para editar em separado."""
+    competencias: list[Competencia] = field(default_factory=list)
+    """Catálogo de competências deste perfil — substitui o antigo
+    ``referenciais/competencias.yaml``."""
     perfil_base: "Perfil | None" = None
     _bruto_efetivo: dict = field(default_factory=dict, repr=False)
 
@@ -248,6 +254,20 @@ def _construir(cls, dados: dict):
     return cls(**filtrado)
 
 
+def _construir_lista(cls, itens: list):
+    return [_construir(cls, item) for item in itens]
+
+
+def _mesclar_por_id(base: list, atual: list) -> list:
+    """Entradas do perfil atual sobrescrevem as do perfil base (``extends``,
+    Seção 9) quando o ``id`` coincide; o restante é concatenado."""
+
+    por_id = {item.id: item for item in base}
+    for item in atual:
+        por_id[item.id] = item
+    return list(por_id.values())
+
+
 def carregar_perfil(
     perfil_dir: str | Path,
     *,
@@ -299,6 +319,15 @@ def carregar_perfil(
     instituicao_dados = dict(efetivo.get("instituicao") or {})
     instituicao_extra = _extrair_extra_instituicao(instituicao_dados)
 
+    legislacao = _mesclar_por_id(
+        _construir_lista(ReferencialCurricular, base_efetivo.get("legislacao") or []),
+        _construir_lista(ReferencialCurricular, bruto.get("legislacao") or []),
+    )
+    competencias = _mesclar_por_id(
+        _construir_lista(Competencia, base_efetivo.get("competencias") or []),
+        _construir_lista(Competencia, bruto.get("competencias") or []),
+    )
+
     perfil = Perfil(
         info=_construir(InfoPerfil, info_bruta),
         curso=_construir(CursoConfig, efetivo.get("curso") or {}),
@@ -316,6 +345,8 @@ def carregar_perfil(
         heranca=_construir(HerancaConfig, heranca_bruta or (base_efetivo.get("heranca") or {})),
         diretorio=perfil_dir,
         raiz_dados=raiz_dados,
+        legislacao=legislacao,
+        competencias=competencias,
         perfil_base=perfil_base,
         _bruto_efetivo=efetivo,
     )

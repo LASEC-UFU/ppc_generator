@@ -16,11 +16,12 @@ python -m ppcgen perfil-criar --id engenharia_software_2027_1 --nome "Engenharia
 ```
 
 Isso cria `dados/perfis/engenharia_software_2027_1/` com toda a árvore
-padrão de um perfil já no lugar: `perfil.yaml` mínimo,
-`matriz_curricular.xlsx` só com cabeçalhos, `equivalencias.xlsx` vazio,
-`referenciais/*.yaml` vazios, os 12 `textos/*.tex` com um `\chapter{}`
-placeholder cada, `frontmatter/*.yaml` vazios, `referencias/bibliografia.bib`
-vazio, e as subpastas de `fichas/`/`anexos/`/`overrides/`. O perfil já é
+padrão de um perfil já no lugar: `perfil.yaml` mínimo (já com `legislacao:
+[]` e `competencias: []`), `matriz_curricular.xlsx` só com cabeçalhos
+(incluindo as abas de registro `Nucleos`/`Areas`/`Temas`/`Conteudos`, todas
+vazias), os 12 `textos/*.tex` com um `\chapter{}` placeholder cada,
+`frontmatter/*.yaml` vazios, `referencias/bibliografia.bib` vazio, e as
+subpastas de `fichas/`/`anexos/`/`overrides/`. O perfil já é
 estruturalmente válido neste ponto (`perfil-validar` passa), só sem
 conteúdo real.
 
@@ -33,20 +34,29 @@ Ver `docs/PERFIS.md` para o significado de cada campo. No mínimo, decida:
   que `CARGA_TOTAL_DIVERGENTE` funciona).
 - Se este curso pertence à mesma instituição de um perfil existente,
   preencha `heranca:` apontando para `dados/compartilhados/` em vez de
-  copiar os dados institucionais. Se a instituição/legislação ainda não
-  existe em `compartilhados/`, crie-a lá primeiro — não duplique dentro
-  do perfil.
+  copiar os dados institucionais. Se a instituição ainda não existe em
+  `compartilhados/`, crie-a lá primeiro — não duplique dentro do perfil.
+- Preencha `legislacao:` (lista de referenciais legais deste curso) e
+  `competencias:` (pode ficar `[]` se o curso não rastreia competências
+  individualmente) — não há mais arquivo externo para isso, é tudo aqui
+  (ver `docs/DICIONARIO_DADOS.md` para os campos de cada entrada).
 
 ## 4. Preencher a matriz curricular
 
-Edite `matriz_curricular.xlsx`. Abas obrigatórias: `Curso`, `Componentes`.
-Opcionais: `Pre-requisitos`, `Correquisitos`, `Equivalencias`, `Areas`,
-`Temas`, `Competencias`, `Conteudos`, `Certificacoes` — schema completo em
-`docs/DICIONARIO_DADOS.md`. Pontos que costumam pegar quem preenche pela
-primeira vez:
+Edite `matriz_curricular.xlsx`. Aba obrigatória: `Componentes`. Opcionais:
+`Equivalencias`, `Nucleos`, `Areas`, `Temas`, `Conteudos`, `Certificacoes`
+— schema completo em `docs/DICIONARIO_DADOS.md`. Pontos que costumam pegar
+quem preenche pela primeira vez:
 
-- **Núcleo é uma coluna em `Componentes`** (`nucleo_id`), não uma aba
-  separada.
+- **Núcleo é uma coluna em `Componentes`** (`nucleo_id`), com o catálogo
+  de núcleos válidos na aba `Nucleos` — não é uma aba de junção.
+- **Pré-requisitos, correquisitos, áreas, temas, conteúdos e
+  competências de um componente são colunas da própria aba
+  `Componentes`** (listas separadas por vírgula — ex.:
+  `CTR401, CTR203 (opcional), >=1200h` na coluna `pre_requisitos`), não
+  abas de junção separadas. `Nucleos`/`Areas`/`Temas`/`Conteudos` são só
+  os *catálogos* (`id`, `nome`/`descricao`, ...) contra os quais essas
+  colunas são conferidas.
 - **Optativa não é uma aba** — é um componente com `tipo=carga_optativa`
   na aba `Componentes`.
 - **`tipo`, não `obrigatorio`, decide o que conta no total oficial do
@@ -55,15 +65,10 @@ primeira vez:
   serve só para a tabela "Componentes Curriculares Obrigatórios".
 - Deixe `ativo` **explícito** (`TRUE`/`FALSE`) em vez de em branco — célula
   vazia gera um aviso (`LEITURA_DADO_OMITIDO`) mesmo assumindo `TRUE`.
-
-## 5. Preencher os referenciais
-
-`referenciais/nucleos.yaml`, `areas_formacao.yaml`, `competencias.yaml`
-(opcional), `conteudos.yaml` (opcional), `legislacao.yaml`,
-`temas_transversais.yaml` — cada um é uma lista de `id`/`nome`/campos
-próprios (schema em `docs/DICIONARIO_DADOS.md`). Todo `nucleo_id`/`area_id`/
-`competencia_id`/`conteudo_id`/`tema_id` usado na matriz precisa existir em
-algum destes arquivos, ou o validador acusa `*_INEXISTENTE`.
+- Todo `nucleo_id`/id de `areas`/`temas`/`conteudos` usado em
+  `Componentes` precisa existir na aba de registro correspondente, ou o
+  validador acusa `*_INEXISTENTE`; todo id de `competencias` precisa
+  existir em `perfil.competencias`.
 
 ## 6. Escrever os 12 capítulos em `textos/`
 
@@ -127,7 +132,7 @@ Erros (`ERRO`) interrompem a geração por padrão
 (`geracao.interromper_em_erro: true`); alertas (`ALERTA`) não impedem a
 geração, mas ficam registrados em
 `saida/<id>/relatorios/validacao.{html,json}` — nunca corrija um alerta
-"escondendo" o dado, sempre corrigindo a fonte (matriz/referenciais) ou
+"escondendo" o dado, sempre corrigindo a fonte (matriz/`perfil.yaml`) ou
 documentando por que ele é esperado.
 
 ## 10. Customizações de layout (raramente necessário)

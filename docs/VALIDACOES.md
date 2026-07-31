@@ -87,10 +87,14 @@ presencial/EaD agregado é verificado.
 
 ## Pré-requisitos e correquisitos (`ppcgen.validadores.prerequisitos`)
 
+Lidos da coluna `pre_requisitos`/`correquisitos` da aba `Componentes`
+(sintaxe em `docs/DICIONARIO_DADOS.md`) — célula
+`CTR401, CTR203 (opcional), >=1200h` vira três `PreRequisito`.
+
 | Código | Severidade | Condição |
 |---|---|---|
 | `PREREQUISITO_MALFORMADO` | ERRO | pré-requisito sem código e sem carga horária mínima |
-| `PREREQUISITO_CODIGO_MAGICO` | ERRO | código de pré-requisito começando com `*` (deve usar `carga_horaria_minima`) |
+| `PREREQUISITO_CODIGO_MAGICO` | ERRO | código de pré-requisito começando com `*` — sintaxe antiga; use `>=NNNh` na célula |
 | `PREREQUISITO_AUTORREFERENCIA` | ERRO | componente é pré-requisito de si mesmo |
 | `PREREQUISITO_INEXISTENTE` | ERRO (ALERTA se `opcional=TRUE`) | código de pré-requisito não existe na matriz |
 | `PREREQUISITO_INATIVO` | ERRO | pré-requisito existe mas está `ativo=FALSE` |
@@ -102,17 +106,23 @@ presencial/EaD agregado é verificado.
 
 ## Referenciais (`ppcgen.validadores.referenciais`)
 
+Confere as colunas `nucleo_id`/`areas`/`temas`/`competencias`/`conteudos`
+da aba `Componentes` contra os catálogos correspondentes — os quatro
+primeiros são as abas de registro da própria matriz
+(`Nucleos`/`Areas`/`Temas`/`Conteudos`); competências vêm de
+`perfil.competencias` (`perfil.yaml`). Ver `docs/DICIONARIO_DADOS.md`.
+
 | Código | Severidade | Condição |
 |---|---|---|
 | `COMPONENTE_SEM_NUCLEO` | ERRO | componente ativo sem `nucleo_id` |
-| `NUCLEO_INEXISTENTE` | ERRO | `nucleo_id` não existe em `referenciais/nucleos.yaml` |
-| `COMPONENTE_SEM_AREA` | ERRO | componente ativo sem nenhuma linha em `Areas` |
-| `AREA_INEXISTENTE` | ERRO | `area_id` não existe em `referenciais/areas_formacao.yaml` |
-| `TEMA_TRANSVERSAL_INEXISTENTE` | ERRO | `tema_id` não existe em `referenciais/temas_transversais.yaml` |
-| `COMPETENCIA_INEXISTENTE` | ERRO | `competencia_id` não existe em `referenciais/competencias.yaml` |
+| `NUCLEO_INEXISTENTE` | ERRO | `nucleo_id` não existe na aba `Nucleos` da matriz |
+| `COMPONENTE_SEM_AREA` | ERRO | componente ativo sem nenhum id na coluna `areas` |
+| `AREA_INEXISTENTE` | ERRO | id da coluna `areas` não existe na aba `Areas` da matriz |
+| `TEMA_TRANSVERSAL_INEXISTENTE` | ERRO | id da coluna `temas` não existe na aba `Temas` da matriz |
+| `COMPETENCIA_INEXISTENTE` | ERRO | id da coluna `competencias` não existe em `perfil.competencias` |
 | `COMPETENCIA_OBRIGATORIA_SEM_COBERTURA` | ALERTA | competência com `obrigatoria: true` sem nenhum componente ativo que a referencie |
 | `TEMA_TRANSVERSAL_OBRIGATORIO_SEM_COBERTURA` | ALERTA | tema com `status: obrigatorio` sem cobertura |
-| `CONTEUDO_INEXISTENTE` | ERRO | `conteudo_id` (aba `Conteudos`) não existe em `referenciais/conteudos.yaml` |
+| `CONTEUDO_INEXISTENTE` | ERRO | id da coluna `conteudos` não existe na aba `Conteudos` da matriz |
 | `CONTEUDO_OBRIGATORIO_SEM_COBERTURA` | ALERTA | conteúdo com `obrigatorio: true` sem nenhum componente ativo que o referencie |
 
 ## Equivalências (`ppcgen.validadores.prerequisitos.validar_equivalencias`)

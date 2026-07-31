@@ -2,8 +2,9 @@
 
 Nenhum destes modelos conhece regras de um curso específico (Engenharia de
 Computação, CST em Controle e Automação etc.) — os valores permitidos para
-núcleos, áreas, competências e referenciais vêm de arquivos de configuração
-(ver :mod:`ppcgen.leitores.yaml`), não de literais fixados aqui.
+núcleos, áreas, temas e conteúdos vêm das abas de registro da matriz
+curricular (ver :mod:`ppcgen.leitores.excel`), e legislação/competências
+vêm de ``perfil.yaml`` (ver :mod:`ppcgen.config`); nada é fixado aqui.
 
 Convenções:
 
@@ -149,6 +150,39 @@ class TemaTransversal:
     status: str = "ativo"
 
 
+@dataclass
+class ReferenciaisCurso:
+    """Conjunto completo de referenciais configurados para o curso ativo.
+
+    ``nucleos``/``areas``/``temas_transversais``/``conteudos`` vêm das abas
+    de registro da matriz curricular (``ppcgen.leitores.excel``);
+    ``legislacao``/``competencias`` vêm diretamente de ``perfil.yaml``
+    (``Perfil.legislacao``/``Perfil.competencias``) — nenhum dos dois lê
+    mais arquivos YAML separados em ``referenciais/``."""
+
+    nucleos: list[NucleoCurricular] = field(default_factory=list)
+    areas: list[AreaFormacao] = field(default_factory=list)
+    competencias: list[Competencia] = field(default_factory=list)
+    conteudos: list[Conteudo] = field(default_factory=list)
+    legislacao: list[ReferencialCurricular] = field(default_factory=list)
+    temas_transversais: list[TemaTransversal] = field(default_factory=list)
+
+    def ids_nucleos(self) -> set[str]:
+        return {n.id for n in self.nucleos}
+
+    def ids_areas(self) -> set[str]:
+        return {a.id for a in self.areas}
+
+    def ids_competencias(self) -> set[str]:
+        return {c.id for c in self.competencias}
+
+    def ids_conteudos(self) -> set[str]:
+        return {c.id for c in self.conteudos}
+
+    def ids_temas(self) -> set[str]:
+        return {t.id for t in self.temas_transversais}
+
+
 # ---------------------------------------------------------------------------
 # Requisitos e equivalências
 # ---------------------------------------------------------------------------
@@ -197,7 +231,6 @@ class ComponenteCurricular:
     pre_requisitos: list[PreRequisito] = field(default_factory=list)
     correquisitos: list[Correquisito] = field(default_factory=list)
     unidade_oferta: str = ""
-    ementa: str = ""
     observacoes: str = ""
 
     @property

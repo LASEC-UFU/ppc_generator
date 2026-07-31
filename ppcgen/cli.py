@@ -50,10 +50,9 @@ from ppcgen.geradores.relatorios import (
     gerar_relatorio_json,
     imprimir_resumo_terminal,
 )
-from ppcgen.leitores.excel import carregar_equivalencias, carregar_matriz
+from ppcgen.leitores.excel import carregar_matriz
 from ppcgen.leitores.fichas import carregar_fichas
-from ppcgen.leitores.yaml import ReferenciaisCurso, carregar_referenciais_curso
-from ppcgen.modelos import Curriculo, TipoComponente
+from ppcgen.modelos import Curriculo, ReferenciaisCurso, TipoComponente
 from ppcgen.scaffolding import clonar_perfil, criar_perfil
 from ppcgen.utilitarios.caminhos import raiz_projeto
 from ppcgen.utilitarios.logging import configurar, obter_logger
@@ -116,45 +115,28 @@ def _carregar_contexto(perfil: Perfil) -> tuple[Curriculo, ReferenciaisCurso, li
             f"Matriz curricular '{perfil.arquivos.matriz}' não encontrada no perfil "
             f"'{perfil.info.id}' (nem no perfil base, se houver)."
         )
-    curriculo, _metadados, avisos = carregar_matriz(caminho_matriz)
-    caminho_equivalencias = perfil.resolver_arquivo(perfil.arquivos.equivalencias)
-    if caminho_equivalencias is not None:
-        curriculo.equivalencias.extend(carregar_equivalencias(caminho_equivalencias))
-    pasta_referenciais = perfil.diretorio / perfil.arquivos.referenciais
-    referenciais = carregar_referenciais_curso(pasta_referenciais)
+    curriculo, referenciais, avisos = carregar_matriz(caminho_matriz)
+    curriculo.versao = perfil.info.versao or "sem-versao"
+
     if perfil.perfil_base is not None:
-        referenciais = _mesclar_referenciais(
-            carregar_referenciais_curso(perfil.perfil_base.diretorio / perfil.perfil_base.arquivos.referenciais),
-            referenciais,
-        )
-    referenciais = _acrescentar_legislacao_compartilhada(perfil, referenciais)
+        caminho_matriz_base = perfil.perfil_base.resolver_arquivo(perfil.perfil_base.arquivos.matriz)
+        if caminho_matriz_base is not None:
+            _curriculo_base, referenciais_base, _avisos_base = carregar_matriz(caminho_matriz_base)
+            referenciais = _mesclar_referenciais(referenciais_base, referenciais)
+
+    # legislação/competências vêm direto de perfil.yaml (já mescladas com o
+    # perfil base, se houver, em ``ppcgen.config.carregar_perfil``) — não de
+    # nenhum arquivo separado.
+    referenciais.legislacao = list(perfil.legislacao)
+    referenciais.competencias = list(perfil.competencias)
+
     return curriculo, referenciais, avisos
 
 
-def _acrescentar_legislacao_compartilhada(perfil: Perfil, referenciais: ReferenciaisCurso) -> ReferenciaisCurso:
-    """Acrescenta ao catálogo os referenciais legais compartilhados
-    declarados em ``heranca.legislacao`` (Seção 8) — não sobrescreve os do
-    perfil, apenas complementa (por id)."""
-
-    from ppcgen.leitores.yaml import carregar_referenciais_legais
-
-    if not perfil.heranca.legislacao:
-        return referenciais
-    ids_existentes = {r.id for r in referenciais.legislacao}
-    adicionais = []
-    for caminho_rel in perfil.heranca.legislacao:
-        caminho = perfil.caminho_compartilhado(caminho_rel)
-        for referencial in carregar_referenciais_legais(caminho):
-            if referencial.id not in ids_existentes:
-                adicionais.append(referencial)
-                ids_existentes.add(referencial.id)
-    referenciais.legislacao.extend(adicionais)
-    return referenciais
-
-
 def _mesclar_referenciais(base: ReferenciaisCurso, atual: ReferenciaisCurso) -> ReferenciaisCurso:
-    """Perfil derivado herda o catálogo do perfil base; entradas com o mesmo
-    id no perfil atual sobrescrevem as do base (Seção 9)."""
+    """Perfil derivado herda o catálogo (núcleos/áreas/temas/conteúdos) da
+    matriz do perfil base; entradas com o mesmo id no perfil atual
+    sobrescrevem as do base (Seção 9)."""
 
     def _merge(lista_base, lista_atual):
         por_id = {item.id: item for item in lista_base}
@@ -335,8 +317,10 @@ def cmd_completo(args: argparse.Namespace) -> int:
 
 
 def cmd_comparar(args: argparse.Namespace) -> int:
-    anterior, _meta_a, _avisos_a = carregar_matriz(args.anterior)
-    atual, _meta_b, _avisos_b = carregar_matriz(args.atual)
+    anterior, _ref_a, _avisos_a = carregar_matriz(args.anterior)
+    anterior.versao = Path(args.anterior).stem
+    atual, _ref_b, _avisos_b = carregar_matriz(args.atual)
+    atual.versao = Path(args.atual).stem
     relatorio = comparar_curriculos(anterior, atual)
 
     pasta_saida = Path(args.saida) if args.saida else raiz_projeto() / "saida"

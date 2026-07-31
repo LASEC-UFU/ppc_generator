@@ -35,10 +35,8 @@ curriculo:
   periodo_minimo_estagio: null
 arquivos:
   matriz: matriz_curricular.xlsx
-  equivalencias: equivalencias.xlsx
   bibliografia: referencias/bibliografia.bib
   textos: textos
-  referenciais: referenciais
   fichas: fichas
   figuras: figuras
   anexos: anexos
@@ -57,3 +55,9 @@ saida:
   nome_base: PPC_perfil_minimo
   gerar_corpo: true
   gerar_completo: true
+legislacao: []
+competencias:
+  - id: C1
+    descricao: Competência de teste
+    obrigatoria: true
+    fonte: ''
