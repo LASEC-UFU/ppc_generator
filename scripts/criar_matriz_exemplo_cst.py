@@ -155,8 +155,8 @@ def montar_workbook() -> openpyxl.Workbook:
     componentes.append(
         [
             "codigo", "nome", "tipo", "periodo", "ativo", "obrigatorio",
-            "codigo_provisorio", "cht", "chp", "chd", "che", "tot",
-            "nucleo_id", "unidade_oferta", "ementa", "observacoes",
+            "cht", "chp", "chd", "che", "tot",
+            "nucleo_id", "ementa", "observacoes",
         ]
     )
     for codigo, nome, tipo, periodo, obrigatorio, cht, chp, chd, che, nucleo, areas, unidade in COMPONENTES:
@@ -165,7 +165,7 @@ def montar_workbook() -> openpyxl.Workbook:
         else:
             tot = cht + chp + chd + che
         componentes.append(
-            [codigo, nome, tipo, periodo, True, obrigatorio, False, cht, chp, chd, che, tot, nucleo, unidade, "", ""]
+            [codigo, nome, tipo, periodo, True, obrigatorio, cht, chp, chd, che, tot, nucleo, "", ""]
         )
 
     preq = wb.create_sheet("Pre-requisitos")

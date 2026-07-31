@@ -37,7 +37,7 @@ da matriz, só a presença/coerência dos arquivos declarados.
 | `NOME_OBRIGATORIO` | ERRO | `nome` vazio |
 | `NOME_DUPLICADO` | ALERTA | dois componentes diferentes com o mesmo nome (normalizado) |
 | `CODIGO_CARACTERES_INVALIDOS` | ERRO | código fora do padrão `[A-Za-z0-9_!?-]+` |
-| `CODIGO_PROVISORIO` | ALERTA | `codigo_provisorio=TRUE` ou código contém `!`/`?` |
+| `CODIGO_PROVISORIO` | ALERTA | `codigo_provisorio` (derivado: `codigo` começa com `FEELT!`) ou código contém `!`/`?` |
 | `NOME_COM_ASPAS` | INFORMACAO | nome contém `"` (possível artefato de exportação) |
 | `PERIODO_FORA_DO_INTERVALO` | ERRO | `periodo` fora de `1..numero_periodos` |
 

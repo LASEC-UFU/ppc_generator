@@ -185,7 +185,6 @@ def carregar_csv_legado(caminho: str | Path) -> ResultadoImportacaoCSV:
                     periodo=periodo,
                     ativo=ativo,
                     obrigatorio=_bool(linha.get("OBR", "")),
-                    codigo_provisorio="?" in codigo or "!" in codigo,
                     nucleo=nucleo,
                     areas=areas,
                     temas_transversais=temas_transversais,

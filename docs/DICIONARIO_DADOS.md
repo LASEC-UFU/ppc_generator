@@ -29,14 +29,12 @@ integrador, estágio, TCC, atividade complementar, optativa...).
 | `periodo` | inteiro ou vazio | condicional | `1`..`numero_periodos` | `4` | `PERIODO_FORA_DO_INTERVALO`, `COMPONENTE_OBRIGATORIO_SEM_PERIODO` |
 | `ativo` | booleano | sim (recomendado explícito) | `TRUE`/`FALSE` | `TRUE` | célula em branco gera aviso `LEITURA_DADO_OMITIDO` (assume `TRUE`) |
 | `obrigatorio` | booleano | sim | `TRUE`/`FALSE` | `TRUE` | combinado com `tipo=carga_optativa` gera `CLASSIFICACAO_CONTRADITORIA` |
-| `codigo_provisorio` | booleano | não (padrão `FALSE`) | `TRUE`/`FALSE` | `FALSE` | gera `CODIGO_PROVISORIO` (alerta) quando `TRUE` ou código contém `!`/`?` |
 | `cht` | inteiro ou vazio | não | ≥ 0 | `45` | `CARGA_NEGATIVA`, soma entra em `CARGA_TOTAL_INCONSISTENTE` |
 | `chp` | inteiro ou vazio | não | ≥ 0 | `15` | idem |
 | `chd` | inteiro ou vazio | não | ≥ 0 | `0` | idem; soma entra no percentual de EaD |
 | `che` | inteiro ou vazio | não | ≥ 0 | `0` | idem; soma entra no percentual de extensão |
 | `tot` | inteiro ou vazio | sim (recomendado) | ≥ 0 | `60` | deve ser igual a `cht+chp+chd+che` quando todas informadas |
 | `nucleo_id` | texto | sim para componente ativo | id existente na aba `Nucleos` | `TECNOLOGICO` | `COMPONENTE_SEM_NUCLEO`, `NUCLEO_INEXISTENTE` |
-| `unidade_oferta` | texto | não | — | `FEELT` | apenas informativo |
 | `observacoes` | texto | não | — | — | usado como "justificativa" para downgrade de `CLASSIFICACAO_CONTRADITORIA` |
 | `pre_requisitos` | texto (lista) | não | ver sintaxe abaixo | `CTR401, CTR203 (opcional), >=1200h` | `PREREQUISITO_INEXISTENTE`, `PREREQUISITO_AUTORREFERENCIA`, `PREREQUISITO_PERIODO_INVALIDO`, `CICLO_PREREQUISITOS` |
 | `correquisitos` | texto (lista) | não | ver sintaxe abaixo | `CTR305, CTR306 (opcional)` | `CORREQUISITO_INEXISTENTE`, `CORREQUISITO_AUTORREFERENCIA`, `CORREQUISITO_PERIODO_DIVERGENTE` |
@@ -44,6 +42,20 @@ integrador, estágio, TCC, atividade complementar, optativa...).
 | `temas` | texto (lista, ids separados por vírgula) | não | ids existentes na aba `Temas` | `LIBRAS` | `TEMA_TRANSVERSAL_INEXISTENTE` |
 | `conteudos` | texto (lista, ids separados por vírgula) | não | ids existentes na aba `Conteudos` | `DCN_BASE_00, DCN_BASE_03` | `CONTEUDO_INEXISTENTE` |
 | `competencias` | texto (lista, ids separados por vírgula) | não | ids existentes em `perfil.competencias` | `PROJETAR_SISTEMAS_CONTROLE` | `COMPETENCIA_INEXISTENTE` |
+
+#### Campos derivados de `codigo` (não são colunas da planilha)
+
+`codigo_provisorio` e `unidade_oferta` (`ComponenteCurricular`, `ppcgen/modelos.py`)
+não são preenchidos na matriz — são calculados a partir do próprio `codigo`
+sempre que o componente é carregado, para não ter dois dados divergindo
+(código e uma coluna que deveria refletir o código):
+
+- `unidade_oferta`: prefixo de `codigo` até o primeiro dígito ou `!`
+  (não incluídos) — `FAMAT31011` → `FAMAT`, `FEELT!TDCA` → `FEELT`.
+- `codigo_provisorio`: `True` quando `codigo` começa com `FEELT!` (marca
+  disciplinas propostas sem código oficial/SIGAA ainda atribuído),
+  `False` caso contrário. Continua gerando `CODIGO_PROVISORIO` (ver
+  `docs/VALIDACOES.md`).
 
 #### Sintaxe de `pre_requisitos`/`correquisitos`
 
@@ -60,8 +72,8 @@ abaixo — nunca um código mágico como `"*"` para "carga horária mínima"
 
 Não se usa `?` como marcador de "opcional" porque códigos de componente já
 podem legitimamente conter `?`/`!` (convenção de código provisório, ver
-`codigo_provisorio` acima) — usar `?` também para "opcional" criaria
-ambiguidade.
+"Campos derivados de `codigo`" acima) — usar `?` também para "opcional"
+criaria ambiguidade.
 
 Exemplo de célula combinando os três formatos:
 `CTR401, CTR203 (opcional), >=1200h`

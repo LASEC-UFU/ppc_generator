@@ -40,8 +40,8 @@ def _criar_matriz_vazia(caminho: Path) -> None:
     componentes.append(
         [
             "codigo", "nome", "tipo", "periodo", "ativo", "obrigatorio",
-            "codigo_provisorio", "cht", "chp", "chd", "che", "tot",
-            "nucleo_id", "unidade_oferta", "observacoes",
+            "cht", "chp", "chd", "che", "tot",
+            "nucleo_id", "observacoes",
             "pre_requisitos", "correquisitos", "areas", "temas", "conteudos", "competencias",
         ]
     )

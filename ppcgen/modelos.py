@@ -19,6 +19,7 @@ Convenções:
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
@@ -222,7 +223,6 @@ class ComponenteCurricular:
     periodo: int | None = None
     ativo: bool = True
     obrigatorio: bool = False
-    codigo_provisorio: bool = False
     nucleo: str | None = None
     areas: list[str] = field(default_factory=list)
     competencias: list[str] = field(default_factory=list)
@@ -230,12 +230,26 @@ class ComponenteCurricular:
     temas_transversais: list[str] = field(default_factory=list)
     pre_requisitos: list[PreRequisito] = field(default_factory=list)
     correquisitos: list[Correquisito] = field(default_factory=list)
-    unidade_oferta: str = ""
     observacoes: str = ""
 
     @property
     def carga_total(self) -> int:
         return self.carga_horaria.total or 0
+
+    @property
+    def codigo_provisorio(self) -> bool:
+        """``FEELT!<mnemônico>`` marca disciplinas propostas sem código
+        oficial (SIGAA) ainda atribuído — não é um dado a preencher na
+        planilha, é inteiramente derivado do próprio código."""
+        return self.codigo.startswith("FEELT!")
+
+    @property
+    def unidade_oferta(self) -> str:
+        """Prefixo do código até o primeiro dígito ou ``!`` (não incluídos)
+        — ex.: ``FAMAT31011`` -> ``FAMAT``, ``FEELT!TDCA`` -> ``FEELT``. Não
+        é um dado a preencher na planilha, é inteiramente derivado do
+        próprio código."""
+        return re.match(r"^[^0-9!]*", self.codigo).group(0)
 
 
 @dataclass

@@ -15,18 +15,18 @@ def _matriz_minima(caminho):
     componentes.append(
         [
             "codigo", "nome", "tipo", "periodo", "ativo", "obrigatorio",
-            "codigo_provisorio", "cht", "chp", "chd", "che", "tot",
-            "nucleo_id", "unidade_oferta", "observacoes",
+            "cht", "chp", "chd", "che", "tot",
+            "nucleo_id", "observacoes",
             "pre_requisitos", "correquisitos", "areas", "temas", "conteudos", "competencias",
         ]
     )
     componentes.append(
-        ["X1", "Disciplina X1", "disciplina", 1, True, True, False, 30, 0, 0, 0, 30,
-         "BASICO", "UA1", "", "", "", "MATEMATICA", "", "", ""]
+        ["X1", "Disciplina X1", "disciplina", 1, True, True, 30, 0, 0, 0, 30,
+         "BASICO", "", "", "", "MATEMATICA", "", "", ""]
     )
     componentes.append(
-        ["X2", "Disciplina X2", "disciplina", 2, True, True, False, 30, 0, 0, 0, 30,
-         "BASICO", "UA1", "", "X1", "", "MATEMATICA", "", "", ""]
+        ["X2", "Disciplina X2", "disciplina", 2, True, True, 30, 0, 0, 0, 30,
+         "BASICO", "", "X1", "", "MATEMATICA", "", "", ""]
     )
 
     nucleos = wb.create_sheet("Nucleos")
@@ -74,9 +74,9 @@ def test_carregar_matriz_avisa_ativo_em_branco(tmp_path):
     wb.remove(wb.active)
     componentes = wb.create_sheet("Componentes")
     componentes.append(
-        ["codigo", "nome", "tipo", "periodo", "ativo", "obrigatorio", "codigo_provisorio", "cht", "chp", "chd", "che", "tot", "nucleo_id", "unidade_oferta", "observacoes"]
+        ["codigo", "nome", "tipo", "periodo", "ativo", "obrigatorio", "cht", "chp", "chd", "che", "tot", "nucleo_id", "observacoes"]
     )
-    componentes.append(["Y1", "Disciplina Y1", "disciplina", 1, None, True, False, 30, 0, 0, 0, 30, "BASICO", "UA1", ""])
+    componentes.append(["Y1", "Disciplina Y1", "disciplina", 1, None, True, 30, 0, 0, 0, 30, "BASICO", ""])
     wb.save(caminho)
 
     _curriculo, _referenciais, avisos = carregar_matriz(caminho)
@@ -101,14 +101,14 @@ def test_pre_requisitos_com_opcional_e_carga_horaria_minima(tmp_path):
     componentes.append(
         [
             "codigo", "nome", "tipo", "periodo", "ativo", "obrigatorio",
-            "codigo_provisorio", "cht", "chp", "chd", "che", "tot",
-            "nucleo_id", "unidade_oferta", "observacoes",
+            "cht", "chp", "chd", "che", "tot",
+            "nucleo_id", "observacoes",
             "pre_requisitos", "correquisitos", "areas", "temas", "conteudos", "competencias",
         ]
     )
     componentes.append(
-        ["Z1", "Estágio", "estagio", None, True, True, False, 0, 0, 0, 0, 300,
-         "TECNOLOGICO", "", "",
+        ["Z1", "Estágio", "estagio", None, True, True, 0, 0, 0, 0, 300,
+         "TECNOLOGICO", "",
          "X1, X2 (opcional), >=1200h", "X3 (opcional)", "", "", "", ""]
     )
     wb.save(caminho)
@@ -169,3 +169,30 @@ def test_carregar_registros_referenciais_completo(tmp_path):
     assert referenciais.nucleos[0].id == "BASICO"
     assert referenciais.temas_transversais[0].status == "obrigatorio"
     assert referenciais.conteudos[0].obrigatorio is True
+
+
+def test_codigo_provisorio_e_unidade_oferta_derivados_do_codigo(tmp_path):
+    """Nenhuma das duas colunas existe mais na planilha (Seção 9) — ambas
+    são calculadas a partir de ``codigo``: ``unidade_oferta`` é o prefixo
+    até o primeiro dígito/``!``; ``codigo_provisorio`` é ``True`` só para
+    o prefixo ``FEELT!``."""
+
+    caminho = tmp_path / "matriz.xlsx"
+    wb = openpyxl.Workbook()
+    wb.remove(wb.active)
+    componentes = wb.create_sheet("Componentes")
+    componentes.append(["codigo", "nome", "tipo"])
+    componentes.append(["FAMAT31011", "Cálculo I", "disciplina"])
+    componentes.append(["FEELT!TDCA", "Tópicos em Automação", "disciplina"])
+    wb.save(caminho)
+
+    curriculo, _referenciais, _avisos = carregar_matriz(caminho)
+    por_codigo = curriculo.por_codigo()
+
+    oficial = por_codigo["FAMAT31011"]
+    assert oficial.unidade_oferta == "FAMAT"
+    assert oficial.codigo_provisorio is False
+
+    provisorio = por_codigo["FEELT!TDCA"]
+    assert provisorio.unidade_oferta == "FEELT"
+    assert provisorio.codigo_provisorio is True
