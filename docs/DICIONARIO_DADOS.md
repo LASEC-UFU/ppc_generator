@@ -37,9 +37,12 @@ arquivos, geração e saída. Substitui inteiramente o antigo `perfil.yaml`.
 Seções e campos válidos (mesmos nomes/defaults das dataclasses em
 `ppcgen/config.py` — `perfil.*` usa `InfoPerfil`, `curso.*` usa
 `CursoConfig`, e assim por diante): `perfil.id`/`nome`/`status`/`versao`/
-`descricao`/`extends`; `curso.nome`/`nome_curto`/`sigla`/`grau`/
-`modalidade`/`turno`/`regime_academico`/`numero_periodos`/`campus`/
-`municipio`/`estado`; `instituicao.nome`/`sigla`/`unidade_academica` (mais
+`descricao`/`extends`; `curso.nome`/`nome_curto`/`nome_mercadologico`/
+`enfase_curricular`/`sigla`/`grau`/`modalidade`/`turno`/`regime_academico`/
+`numero_periodos`/`campus`/`municipio`/`estado` (`nome` é a denominação
+regulatória perante MEC/INEP — a única usada para fins normativos;
+`nome_mercadologico`/`enfase_curricular` são opcionais, texto livre de
+divulgação institucional, sem efeito em validações); `instituicao.nome`/`sigla`/`unidade_academica` (mais
 qualquer outra chave `instituicao.*` livre — endereço, CEP, site,
 telefone... — vira `InstituicaoConfig.extra`, acessível pelos templates
 por nome); `curriculo.carga_horaria_total`/`carga_obrigatoria`/
@@ -251,7 +254,9 @@ BibTeX/biblatex. Não existe `.bib` estático em `dados/`: o único `.bib` do
 projeto é gerado a partir desta aba, em `saida/<id>/latex/gerado/
 bibliografia.bib`, toda vez que `ppcgen gerar`/`completo` roda (ver
 `ppcgen.geradores.bibliografia`) — editar essa aba é a única forma de
-mudar a bibliografia; o `.bib` gerado nunca deve ser editado à mão.
+mudar a bibliografia; o `.bib` gerado nunca deve ser editado à mão. A geração
+também inclui as normas da aba `Legislacao`; não repita uma norma aqui quando
+ela já estiver cadastrada naquela aba.
 
 | Campo | Tipo | Obrigatório | Exemplo |
 |---|---|---|---|

@@ -31,6 +31,15 @@ def _linhas_perfil_padrao(perfil_id: str, nome: str) -> list[tuple[str, object]]
         ("perfil.extends", None),
         ("curso.nome", nome),
         ("curso.nome_curto", ""),
+        ("curso.nome_mercadologico", ""),
+        ("curso.enfase_curricular", ""),
+        ("curso.titulacao_conferida", ""),
+        ("curso.tempo_minimo_integralizacao", ""),
+        ("curso.tempo_maximo_integralizacao", ""),
+        ("curso.vagas_ofertadas", ""),
+        ("curso.eixo_tecnologico", ""),
+        ("curso.area_tecnologica", ""),
+        ("curso.codigo_cine", ""),
         ("curso.sigla", ""),
         ("curso.grau", ""),
         ("curso.modalidade", ""),
@@ -108,7 +117,7 @@ def _criar_matriz_vazia(caminho: Path, perfil_id: str, nome: str) -> None:
                 "paginas", "url", "nota",
             ],
         ),
-        ("Legislacao", ["id", "nome", "tipo", "documento", "ano", "observacoes"]),
+        ("Legislacao", ["id", "nome", "tipo", "documento", "ano", "observacoes", "url", "chave_bibliografica"]),
     ):
         ws = wb.create_sheet(aba)
         ws.append(cabecalho)

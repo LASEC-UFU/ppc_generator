@@ -197,9 +197,9 @@ def _parse_prerequisitos(valor) -> list[PreRequisito]:
 
     pre_requisitos = []
     for item in _lista_ids_pipe(valor):
-        if item.replace(" ", "").upper().startswith(">="):
-            carga_texto = item.split(">=", 1)[1].strip().rstrip("hH").strip()
-            pre_requisitos.append(PreRequisito(codigo="", carga_horaria_minima=_int_ou_none(carga_texto)))
+        carga = re.fullmatch(r"\s*(?:>=\s*)?(\d+)\s*(?:h|hora|horas)\s*", item, flags=re.IGNORECASE)
+        if carga:
+            pre_requisitos.append(PreRequisito(codigo="", carga_horaria_minima=int(carga.group(1))))
             continue
         codigo, opcional = _extrair_opcional(item)
         pre_requisitos.append(PreRequisito(codigo=codigo, opcional=opcional))
@@ -326,6 +326,8 @@ def carregar_registros_referenciais(wb) -> ReferenciaisCurso:
                         documento=_str_ou_vazio(row.get("documento")),
                         ano=_int_ou_none(row.get("ano")),
                         observacoes=_str_ou_vazio(row.get("observacoes")),
+                        url=_str_ou_vazio(row.get("url")),
+                        chave_bibliografica=_str_ou_vazio(row.get("chave_bibliografica")),
                     )
                 )
 

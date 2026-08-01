@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from ppcgen.geradores.bibliografia import gerar_bibliografia_bib
-from ppcgen.modelos import EntradaBibliografica
+from ppcgen.modelos import EntradaBibliografica, ReferencialCurricular
 
 
 def test_entrada_minima_gera_bloco_bibtex_valido():
@@ -54,3 +54,23 @@ def test_multiplas_entradas_ficam_em_blocos_separados():
     assert "@misc{a," in bib
     assert "@book{b," in bib
     assert bib.index("@misc{a,") < bib.index("@book{b,")
+
+
+def test_legislacao_tambem_entra_no_bib_sem_linha_duplicada():
+    norma = ReferencialCurricular(
+        id="LDB", nome="Lei de Diretrizes e Bases", documento="Lei nº 9.394/1996",
+        ano=1996, url="https://exemplo.org/ldb",
+    )
+    bib = gerar_bibliografia_bib([], [norma])
+    assert bib.count("@misc{LDB,") == 1
+    assert "title = {Lei nº 9.394/1996}" in bib
+    assert r"\url{https://exemplo.org/ldb}" in bib
+
+
+def test_mesma_chave_nas_duas_abas_e_emitida_uma_vez_e_recebe_url_da_norma():
+    entrada = EntradaBibliografica(chave="LDB", tipo="misc", titulo="Título detalhado")
+    norma = ReferencialCurricular(id="LDB", nome="Lei", url="https://exemplo.org/ldb")
+    bib = gerar_bibliografia_bib([entrada], [norma])
+    assert bib.count("@misc{LDB,") == 1
+    assert "title = {Título detalhado}" in bib
+    assert r"\url{https://exemplo.org/ldb}" in bib

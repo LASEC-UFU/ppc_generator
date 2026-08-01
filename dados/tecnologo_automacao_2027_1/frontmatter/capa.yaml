@@ -1,4 +1,5 @@
 capa:
   ano: 2026
-  mostrar_logo_curso: true
-  logo_curso: figuras/ecp_logo.png
+  # Não há logomarca específica aprovada para este curso; evita reutilizar a
+  # identidade visual herdada de Engenharia de Computação.
+  mostrar_logo_curso: false

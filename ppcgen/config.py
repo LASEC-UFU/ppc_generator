@@ -41,6 +41,20 @@ class InfoPerfil:
 class CursoConfig:
     nome: str = ""
     nome_curto: str = ""
+    nome_mercadologico: str = ""
+    """Nome de divulgação institucional (portal, comunicação ao público) —
+    distinto de ``nome``, a denominação regulatória perante MEC/INEP, que
+    continua sendo a única usada para fins normativos (CNCST etc.)."""
+    enfase_curricular: str = ""
+    """Linha formativa/ênfase do curso — texto curto que qualifica ``nome``
+    sem alterar a denominação regulatória em si."""
+    titulacao_conferida: str = ""
+    tempo_minimo_integralizacao: str = ""
+    tempo_maximo_integralizacao: str = ""
+    vagas_ofertadas: str = ""
+    eixo_tecnologico: str = ""
+    area_tecnologica: str = ""
+    codigo_cine: str = ""
     sigla: str = ""
     grau: str = ""
     modalidade: str = ""

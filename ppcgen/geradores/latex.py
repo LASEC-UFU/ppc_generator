@@ -207,6 +207,15 @@ def gerar_arquivos_latex(
         rf"\newcommand{{\PerfilId}}{{{escapar(perfil.info.id)}}}" "\n"
         rf"\newcommand{{\ppccurso}}{{{escapar(curso.nome)}\xspace}}" "\n"
         rf"\newcommand{{\ppccursocurto}}{{{escapar(curso.nome_curto)}\xspace}}" "\n"
+        rf"\newcommand{{\ppccursomercadologico}}{{{escapar(curso.nome_mercadologico)}\xspace}}" "\n"
+        rf"\newcommand{{\ppcenfasecurricular}}{{{escapar(curso.enfase_curricular)}\xspace}}" "\n"
+        rf"\newcommand{{\ppctitulacao}}{{{escapar(curso.titulacao_conferida)}\xspace}}" "\n"
+        rf"\newcommand{{\ppctempominimo}}{{{escapar(curso.tempo_minimo_integralizacao)}\xspace}}" "\n"
+        rf"\newcommand{{\ppctempomaximo}}{{{escapar(curso.tempo_maximo_integralizacao)}\xspace}}" "\n"
+        rf"\newcommand{{\ppcvagasofertadas}}{{{escapar(curso.vagas_ofertadas)}\xspace}}" "\n"
+        rf"\newcommand{{\ppceixotecnologico}}{{{escapar(curso.eixo_tecnologico)}\xspace}}" "\n"
+        rf"\newcommand{{\ppcareatecnologica}}{{{escapar(curso.area_tecnologica)}\xspace}}" "\n"
+        rf"\newcommand{{\ppccodigocine}}{{{escapar(curso.codigo_cine)}\xspace}}" "\n"
         rf"\newcommand{{\ppcversao}}{{{escapar(perfil.info.versao)}}}" "\n"
         rf"\newcommand{{\ppcgrau}}{{{escapar(curso.grau)}\xspace}}" "\n"
         rf"\newcommand{{\ppcmodalidade}}{{{escapar(curso.modalidade)}\xspace}}" "\n"
@@ -214,10 +223,21 @@ def gerar_arquivos_latex(
         rf"\newcommand{{\ppcunidadeacademica}}{{{escapar(instituicao.unidade_academica)}\xspace}}" "\n"
         rf"\newcommand{{\ppccampus}}{{{escapar(curso.campus)}\xspace}}" "\n"
         rf"\newcommand{{\ppcturno}}{{{escapar(curso.turno)}\xspace}}" "\n"
+        rf"\newcommand{{\ppcregimeacademico}}{{{escapar(curso.regime_academico)}\xspace}}" "\n"
+        rf"\newcommand{{\ppcpercentualmaximoead}}{{{escapar(str(perfil.curriculo.percentual_maximo_ead or ''))}\xspace}}" "\n"
     )
     escrever("curso_macros.tex", macros)
     escrever("frontmatter.tex", gerar_frontmatter(perfil))
-    escrever("bibliografia.bib", gerar_bibliografia_bib(referenciais.bibliografia))
+    escrever("bibliografia.bib", gerar_bibliografia_bib(referenciais.bibliografia, referenciais.legislacao))
+    links_legislacao = [norma for norma in referenciais.legislacao if norma.url]
+    if links_legislacao:
+        corpo_links = "\\begin{itemize}\n" + "".join(
+            rf"\\item \\href{{{norma.url}}}{{{escapar(norma.documento or norma.nome)}}}\n"
+            for norma in links_legislacao
+        ) + "\\end{itemize}\n"
+    else:
+        corpo_links = "% Nenhuma URL cadastrada na aba Legislacao da matriz.\n"
+    escrever("legislacao_links.tex", corpo_links)
     escrever("capitulos.tex", gerar_capitulos_tex(perfil.arquivos.capitulos))
 
     # --- Fluxo curricular e representação gráfica -------------------------
@@ -291,6 +311,51 @@ def gerar_arquivos_latex(
         tabela_carga_por_grupo(
             carga_por_area, "Carga Horária por Área de Formação", "carga_horaria_por_area", total_geral
         ),
+    )
+    rotulos_tipo = {
+        TipoComponente.DISCIPLINA: "Disciplinas",
+        TipoComponente.PROJETO_INTEGRADOR: "Projetos integradores",
+        TipoComponente.EXTENSAO: "Atividades curriculares de extensão",
+        TipoComponente.ESTAGIO: "Estágio supervisionado",
+        TipoComponente.TCC: "Trabalho de conclusão de curso",
+        TipoComponente.ATIVIDADE_COMPLEMENTAR: "Atividades acadêmicas complementares",
+        TipoComponente.CERTIFICACAO: "Certificações",
+        TipoComponente.OUTRO: "Outros componentes",
+    }
+    carga_por_tipo_gerada = {
+        rotulos_tipo[tipo]: carga_por_tipo(curriculo, tipo)
+        for tipo in rotulos_tipo
+        if carga_por_tipo(curriculo, tipo)
+    }
+    if optativa_minima:
+        carga_por_tipo_gerada["Disciplinas optativas (mínimo a integralizar)"] = optativa_minima
+    escrever(
+        "tab_carga_horaria_por_tipo.tex",
+        tabela_carga_por_grupo(
+            carga_por_tipo_gerada, "Carga Horária por Tipo de Componente", "carga_horaria_por_tipo", total_geral
+        ),
+    )
+
+    rotulos_tipo = {
+        TipoComponente.DISCIPLINA: "Disciplinas",
+        TipoComponente.PROJETO_INTEGRADOR: "Projetos integradores",
+        TipoComponente.EXTENSAO: "Atividades curriculares de extensão",
+        TipoComponente.ESTAGIO: "Estágio supervisionado",
+        TipoComponente.TCC: "Trabalho de conclusão de curso",
+        TipoComponente.ATIVIDADE_COMPLEMENTAR: "Atividades acadêmicas complementares",
+        TipoComponente.CERTIFICACAO: "Certificações",
+        TipoComponente.OUTRO: "Outros componentes",
+    }
+    carga_por_tipo_gerada = {
+        rotulos_tipo[tipo]: carga_por_tipo(curriculo, tipo)
+        for tipo in rotulos_tipo
+        if carga_por_tipo(curriculo, tipo)
+    }
+    if optativa_minima:
+        carga_por_tipo_gerada["Disciplinas optativas (mínimo a integralizar)"] = optativa_minima
+    escrever(
+        "tab_carga_horaria_por_tipo.tex",
+        tabela_carga_por_grupo(carga_por_tipo_gerada, "Carga Horária por Tipo de Componente", "carga_horaria_por_tipo", total_geral),
     )
 
     # --- Distribuição teórica/prática/EaD/extensão -------------------------

@@ -52,8 +52,17 @@ perfil.versao                               2026-1
 perfil.descricao                            ...
 perfil.extends                              (vazio)            # id de um perfil base do qual herdar tudo (opcional)
 
-curso.nome                                  ...
+curso.nome                                  ...                 # denominação regulatória (CNCST/MEC)
 curso.nome_curto                            ...
+curso.nome_mercadologico                    ...                 # nome de divulgação institucional (opcional)
+curso.enfase_curricular                     ...                 # linha formativa/ênfase (opcional)
+curso.titulacao_conferida                   ...                 # diploma/título conferido
+curso.tempo_minimo_integralizacao           ...                 # texto institucional, ex.: "6 semestres (3 anos)"
+curso.tempo_maximo_integralizacao           ...                 # texto institucional; deixe vazio se pendente
+curso.vagas_ofertadas                       ...                 # texto institucional; deixe vazio se pendente
+curso.eixo_tecnologico                      ...                 # classificação regulatória, se aplicável
+curso.area_tecnologica                      ...                 # classificação regulatória, se aplicável
+curso.codigo_cine                           ...                 # código CINE Brasil, se aplicável
 curso.sigla                                 ...
 curso.grau                                  Bacharelado
 curso.modalidade                            Presencial

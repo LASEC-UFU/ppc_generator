@@ -4,7 +4,7 @@ import openpyxl
 import pytest
 
 from ppcgen.excecoes import FormatoInvalido
-from ppcgen.leitores.excel import carregar_matriz, ler_configuracao_perfil
+from ppcgen.leitores.excel import _parse_prerequisitos, carregar_matriz, ler_configuracao_perfil
 
 
 def _matriz_minima(caminho):
@@ -142,6 +142,13 @@ def test_pre_requisitos_com_opcional_e_carga_horaria_minima(tmp_path):
     assert len(z1.correquisitos) == 1
     assert z1.correquisitos[0].codigo == "X3"
     assert z1.correquisitos[0].opcional is True
+
+
+@pytest.mark.parametrize("texto", ["1000 horas", "1800 hora", "1200h", ">= 900 H"])
+def test_pre_requisito_de_carga_horaria_aceita_formatos_humanos(texto):
+    requisito = _parse_prerequisitos(texto)[0]
+    assert requisito.codigo == ""
+    assert requisito.carga_horaria_minima is not None
 
 
 def test_componentes_de_catalogo_vazio_nao_vincula_nada(tmp_path):

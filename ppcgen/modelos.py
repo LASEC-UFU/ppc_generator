@@ -155,6 +155,8 @@ class ReferencialCurricular:
     documento: str = ""
     ano: int | None = None
     observacoes: str = ""
+    url: str = ""
+    chave_bibliografica: str = ""
 
 
 @dataclass
