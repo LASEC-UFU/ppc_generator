@@ -8,6 +8,7 @@ import json
 from datetime import datetime
 from pathlib import Path
 
+from ppcgen.geradores.html import escapar_html
 from ppcgen.modelos import ResultadoValidacao
 from ppcgen.validadores.fichas import SituacaoFichas
 
@@ -54,8 +55,7 @@ def resultado_para_dict(resultado: ResultadoValidacao, situacao_fichas: Situacao
     if situacao_fichas is not None:
         dados["fichas"] = {
             "status_por_componente": {
-                codigo: status.value
-                for codigo, status in situacao_fichas.status_por_componente.items()
+                codigo: status.value for codigo, status in situacao_fichas.status_por_componente.items()
             },
             "fichas_orfas": situacao_fichas.fichas_orfas,
         }
@@ -72,15 +72,15 @@ def gerar_relatorio_json(
 
 
 def _linha_html(m) -> str:
-    componente = m.componente or "-"
-    campo = m.campo or "-"
+    componente = escapar_html(m.componente or "-")
+    campo = escapar_html(m.campo or "-")
     return (
         f'<tr class="{m.severidade.value}">'
-        f"<td>{m.severidade.value.upper()}</td>"
+        f"<td>{escapar_html(m.severidade.value.upper())}</td>"
         f"<td><code>{componente}</code></td>"
-        f"<td><code>{m.codigo_regra}</code></td>"
+        f"<td><code>{escapar_html(m.codigo_regra)}</code></td>"
         f"<td>{campo}</td>"
-        f"<td>{m.mensagem}</td>"
+        f"<td>{escapar_html(m.mensagem)}</td>"
         f"</tr>"
     )
 
@@ -97,10 +97,10 @@ def gerar_relatorio_html(
     fichas_html = ""
     if situacao_fichas is not None:
         linhas_fichas = "\n".join(
-            f"<tr><td><code>{codigo}</code></td><td>{status.value}</td></tr>"
+            f"<tr><td><code>{escapar_html(codigo)}</code></td><td>{escapar_html(status.value)}</td></tr>"
             for codigo, status in sorted(situacao_fichas.status_por_componente.items())
         )
-        orfas_html = "".join(f"<li><code>{c}</code></li>" for c in situacao_fichas.fichas_orfas)
+        orfas_html = "".join(f"<li><code>{escapar_html(c)}</code></li>" for c in situacao_fichas.fichas_orfas)
         fichas_html = f"""
         <h2>Situação das fichas curriculares</h2>
         <table>
@@ -113,7 +113,7 @@ def gerar_relatorio_html(
     html = f"""<title>Relatório de Validação do PPC</title>
 <style>{_CSS}</style>
 <h1>Relatório de Validação Curricular</h1>
-<p>Gerado em {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
+<p>Gerado em {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}</p>
 <div class="resumo">
     <div class="card erro"><span class="n">{len(resultado.erros)}</span>erro(s)</div>
     <div class="card alerta"><span class="n">{len(resultado.alertas)}</span>alerta(s)</div>

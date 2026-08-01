@@ -2,9 +2,9 @@
 
 Nenhum destes modelos conhece regras de um curso específico (Engenharia de
 Computação, CST em Controle e Automação etc.) — os valores permitidos para
-núcleos, áreas, temas, conteúdos e competências vêm das abas de registro da
-matriz curricular (ver :mod:`ppcgen.leitores.excel`), e legislação vem de
-``perfil.yaml`` (ver :mod:`ppcgen.config`); nada é fixado aqui.
+núcleos, áreas, temas, conteúdos, competências, bibliografia e legislação
+vêm todos das abas de registro da matriz curricular (ver
+:mod:`ppcgen.leitores.excel`); nada é fixado aqui.
 
 Convenções:
 
@@ -196,21 +196,18 @@ class EntradaBibliografica:
 
     @property
     def id(self) -> str:
-        """Alias de ``chave`` — só para reaproveitar ``_mesclar_por_id``/
-        ``_merge`` (``ppcgen.cli``/``ppcgen.config``), que mesclam todo
-        catálogo por um atributo ``id`` comum."""
+        """Alias de ``chave`` para a mesclagem uniforme de catálogos por
+        identificador na cadeia de perfis."""
         return self.chave
 
 
 @dataclass
 class ReferenciaisCurso:
-    """Conjunto completo de referenciais configurados para o curso ativo.
-
-    ``nucleos``/``areas``/``temas_transversais``/``conteudos``/``competencias``/
-    ``bibliografia`` vêm das abas de registro da matriz curricular
-    (``ppcgen.leitores.excel``); ``legislacao`` vem diretamente de
-    ``perfil.yaml`` (``Perfil.legislacao``) — não lê mais arquivos YAML
-    separados em ``referenciais/``."""
+    """Conjunto completo de referenciais configurados para o curso ativo —
+    ``nucleos``/``areas``/``temas_transversais``/``conteudos``/
+    ``competencias``/``bibliografia``/``legislacao`` vêm todos das abas de
+    registro da matriz curricular (``ppcgen.leitores.excel``); nada lê
+    mais arquivos YAML separados em ``referenciais/``."""
 
     nucleos: list[NucleoCurricular] = field(default_factory=list)
     areas: list[AreaFormacao] = field(default_factory=list)

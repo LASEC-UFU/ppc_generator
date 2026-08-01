@@ -10,7 +10,6 @@ import shutil
 from pathlib import Path
 
 import openpyxl
-import yaml
 
 from ppcgen.excecoes import ConfiguracaoInvalida
 
@@ -32,9 +31,71 @@ _TEXTOS = (
 )
 
 
-def _criar_matriz_vazia(caminho: Path) -> None:
+def _linhas_perfil_padrao(perfil_id: str, nome: str) -> list[tuple[str, object]]:
+    """Linhas chave/valor padrão de um perfil novo pra aba ``Perfil`` —
+    mesmos defaults que antes viviam no template de ``perfil.yaml``."""
+
+    return [
+        ("perfil.id", perfil_id),
+        ("perfil.nome", nome),
+        ("perfil.status", "rascunho"),
+        ("perfil.versao", ""),
+        ("perfil.descricao", ""),
+        ("perfil.extends", None),
+        ("curso.nome", nome),
+        ("curso.nome_curto", ""),
+        ("curso.sigla", ""),
+        ("curso.grau", ""),
+        ("curso.modalidade", ""),
+        ("curso.turno", ""),
+        ("curso.regime_academico", "Semestral"),
+        ("curso.numero_periodos", 8),
+        ("curso.campus", ""),
+        ("curso.municipio", ""),
+        ("curso.estado", ""),
+        ("instituicao.nome", ""),
+        ("instituicao.sigla", ""),
+        ("instituicao.unidade_academica", ""),
+        ("curriculo.carga_horaria_total", None),
+        ("curriculo.carga_obrigatoria", None),
+        ("curriculo.carga_optativa_minima", None),
+        ("curriculo.carga_extensao", None),
+        ("curriculo.carga_aac", None),
+        ("curriculo.carga_estagio", None),
+        ("curriculo.carga_tcc", None),
+        ("curriculo.percentual_minimo_extensao", None),
+        ("curriculo.percentual_maximo_ead", None),
+        ("curriculo.carga_horaria_maxima_periodo", None),
+        ("curriculo.periodo_minimo_tcc", None),
+        ("curriculo.periodo_minimo_estagio", None),
+        ("arquivos.textos", "textos"),
+        ("arquivos.fichas", "fichas"),
+        ("arquivos.figuras", "figuras"),
+        ("arquivos.anexos", "anexos"),
+        ("arquivos.frontmatter", "frontmatter"),
+        ("arquivos.overrides", "overrides"),
+        ("geracao.template", "padrao"),
+        ("geracao.anexar_fichas", True),
+        ("geracao.anexar_resolucoes", True),
+        ("geracao.gerar_fluxo_curricular", True),
+        ("geracao.gerar_representacao_grafica", True),
+        ("geracao.gerar_relatorio_validacao", True),
+        ("geracao.compilar_pdf", True),
+        ("geracao.interromper_em_erro", True),
+        ("saida.nome_base", f"PPC_{perfil_id}"),
+        ("saida.gerar_corpo", True),
+        ("saida.gerar_completo", True),
+    ]
+
+
+def _criar_matriz_vazia(caminho: Path, perfil_id: str, nome: str) -> None:
     wb = openpyxl.Workbook()
     wb.remove(wb.active)
+
+    perfil_sheet = wb.create_sheet("Perfil")
+    perfil_sheet.append(["chave", "valor"])
+    for chave, valor in _linhas_perfil_padrao(perfil_id, nome):
+        perfil_sheet.append([chave, valor])
 
     componentes = wb.create_sheet("Componentes")
     componentes.append(
@@ -59,6 +120,7 @@ def _criar_matriz_vazia(caminho: Path) -> None:
                 "paginas", "url", "nota",
             ],
         ),
+        ("Legislacao", ["id", "nome", "tipo", "documento", "ano", "observacoes"]),
     ):
         ws = wb.create_sheet(aba)
         ws.append(cabecalho)
@@ -86,73 +148,7 @@ def criar_perfil(pasta_perfis: Path, perfil_id: str, nome: str) -> Path:
     for sub in _PASTAS_ANEXOS:
         (destino / "anexos" / sub).mkdir(parents=True)
 
-    perfil_yaml = {
-        "perfil": {
-            "id": perfil_id,
-            "nome": nome,
-            "status": "rascunho",
-            "versao": "",
-            "descricao": "",
-        },
-        "curso": {
-            "nome": nome,
-            "nome_curto": "",
-            "sigla": "",
-            "grau": "",
-            "modalidade": "",
-            "turno": "",
-            "regime_academico": "Semestral",
-            "numero_periodos": 8,
-            "campus": "",
-            "municipio": "",
-            "estado": "",
-        },
-        "instituicao": {"nome": "", "sigla": "", "unidade_academica": ""},
-        "curriculo": {
-            "carga_horaria_total": None,
-            "carga_obrigatoria": None,
-            "carga_optativa_minima": None,
-            "carga_extensao": None,
-            "carga_aac": None,
-            "carga_estagio": None,
-            "carga_tcc": None,
-            "percentual_minimo_extensao": None,
-            "percentual_maximo_ead": None,
-            "carga_horaria_maxima_periodo": None,
-            "periodo_minimo_tcc": None,
-            "periodo_minimo_estagio": None,
-        },
-        "arquivos": {
-            "matriz": "matriz_curricular.xlsx",
-            "textos": "textos",
-            "fichas": "fichas",
-            "figuras": "figuras",
-            "anexos": "anexos",
-            "frontmatter": "frontmatter",
-            "overrides": "overrides",
-        },
-        "geracao": {
-            "template": "padrao",
-            "anexar_fichas": True,
-            "anexar_resolucoes": True,
-            "gerar_fluxo_curricular": True,
-            "gerar_representacao_grafica": True,
-            "gerar_relatorio_validacao": True,
-            "compilar_pdf": True,
-            "interromper_em_erro": True,
-        },
-        "saida": {
-            "nome_base": f"PPC_{perfil_id}",
-            "gerar_corpo": True,
-            "gerar_completo": True,
-        },
-        "legislacao": [],
-    }
-    (destino / "perfil.yaml").write_text(
-        yaml.safe_dump(perfil_yaml, allow_unicode=True, sort_keys=False), encoding="utf-8"
-    )
-
-    _criar_matriz_vazia(destino / "matriz_curricular.xlsx")
+    _criar_matriz_vazia(destino / "matriz_curricular.xlsx", perfil_id, nome)
 
     for nome_arquivo in _TEXTOS:
         titulo = nome_arquivo.replace(".tex", "").replace("_", " ").title()
@@ -169,12 +165,14 @@ def criar_perfil(pasta_perfis: Path, perfil_id: str, nome: str) -> Path:
 
     (destino / "README.md").write_text(
         f"# Perfil: {perfil_id}\n\n{nome}\n\nStatus: rascunho — gerado por "
-        "`python -m ppcgen perfil-criar`. Preencha `perfil.yaml` (incluindo a "
-        "seção `legislacao:`), `matriz_curricular.xlsx` (componentes; as "
-        "abas Nucleos/Areas/Temas/Conteudos/Competencias, cada uma com sua "
-        "coluna `componentes` listando os códigos vinculados, separados por "
-        "`|`; e a aba Bibliografia, uma linha por referência — o `.bib` "
-        "compilado é sempre gerado a partir dela, nunca editado à mão) e "
+        "`python -m ppcgen perfil-criar`. Preencha `matriz_curricular.xlsx`: "
+        "a aba `Perfil` (info/curso/instituição/currículo/oferta/geração/"
+        "saída, uma linha chave/valor por campo); componentes; as abas "
+        "Nucleos/Areas/Temas/Conteudos/Competencias, cada uma com sua coluna "
+        "`componentes` listando os códigos vinculados, separados por `|`; a "
+        "aba Bibliografia, uma linha por referência — o `.bib` compilado é "
+        "sempre gerado a partir dela, nunca editado à mão; e a aba "
+        "Legislacao, uma linha por referencial legal. Preencha também "
         "`textos/` antes de validar.\n",
         encoding="utf-8",
     )
@@ -202,12 +200,28 @@ def clonar_perfil(
         ignore=shutil.ignore_patterns("__pycache__", "*.pyc", ".DS_Store"),
     )
 
-    caminho_yaml = destino / "perfil.yaml"
-    dados = yaml.safe_load(caminho_yaml.read_text(encoding="utf-8")) or {}
-    dados.setdefault("perfil", {})["id"] = destino_id
-    dados["perfil"]["origem_clonagem"] = origem_id
+    caminho_matriz = next(destino.glob("matriz_curricular.xls*"), None)
+    if caminho_matriz is None:
+        raise ConfiguracaoInvalida(f"Nenhum matriz_curricular.xlsm/.xlsx encontrado em {destino}.")
+
+    eh_xlsm = caminho_matriz.suffix.lower() == ".xlsm"
+    wb = openpyxl.load_workbook(caminho_matriz, keep_vba=eh_xlsm)
+    ws = wb["Perfil"]
+    linhas_por_chave = {
+        str(linha[0].value).strip(): linha[1] for linha in ws.iter_rows(min_row=2) if linha[0].value
+    }
+
+    def _definir(chave: str, valor: str) -> None:
+        if chave in linhas_por_chave:
+            linhas_por_chave[chave].value = valor
+        else:
+            ws.append([chave, valor])
+
+    _definir("perfil.id", destino_id)
+    _definir("perfil.origem_clonagem", origem_id)
     if versao is not None:
-        dados["perfil"]["versao"] = versao
-    caminho_yaml.write_text(yaml.safe_dump(dados, allow_unicode=True, sort_keys=False), encoding="utf-8")
+        _definir("perfil.versao", versao)
+
+    wb.save(caminho_matriz)
 
     return destino

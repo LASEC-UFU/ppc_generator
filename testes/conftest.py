@@ -65,8 +65,8 @@ def componente(
 
 def construir_perfil(tmp_path: Path | None = None, **overrides) -> Perfil:
     """Constrói um Perfil mínimo em memória para testes unitários — não lê
-    nenhum ``perfil.yaml`` do disco (a menos que o teste explicitamente
-    queira exercitar o carregamento, caso em que deve usar
+    nenhuma planilha do disco (a menos que o teste explicitamente queira
+    exercitar o carregamento, caso em que deve usar
     ``ppcgen.config.carregar_perfil`` diretamente sobre um fixture real)."""
 
     diretorio = tmp_path or Path(".")

@@ -1,10 +1,11 @@
 """Descoberta e registro de perfis de PPC (Seção 15).
 
 Um perfil é descoberto automaticamente pela presença de
-``dados/perfis/<id>/perfil.yaml``. O registro opcional ``dados/perfis.yaml``
-tem prioridade sobre a descoberta automática quando os dois divergem em
-``caminho`` ou ``ativo`` para o mesmo id — ver ``docs/PERFIS.md`` para a
-justificativa desta prioridade.
+``dados/perfis/<id>/matriz_curricular.xlsm`` ou ``.xlsx`` (aba ``Perfil``
+declarando ``perfil.id`` — não existe mais ``perfil.yaml``). O registro
+opcional ``dados/perfis.yaml`` tem prioridade sobre a descoberta automática
+quando os dois divergem em ``caminho``/``matriz``/``ativo`` para o mesmo id
+— ver ``docs/PERFIS.md`` para a justificativa desta prioridade.
 """
 
 from __future__ import annotations
@@ -14,7 +15,8 @@ from pathlib import Path
 
 import yaml
 
-from ppcgen.config import Perfil, carregar_perfil
+from ppcgen.config import NOMES_MATRIZ_PADRAO, Perfil, carregar_perfil
+from ppcgen.leitores.excel import ler_configuracao_perfil
 from ppcgen.utilitarios.caminhos import raiz_projeto
 
 
@@ -22,6 +24,7 @@ from ppcgen.utilitarios.caminhos import raiz_projeto
 class RefPerfil:
     id: str
     caminho: Path
+    matriz: str = "matriz_curricular.xlsx"
     ativo: bool = True
 
 
@@ -31,21 +34,29 @@ def _pasta_perfis(raiz_dados: Path | None = None) -> Path:
 
 def descobrir_perfis(raiz_dados: Path | None = None) -> dict[str, RefPerfil]:
     """Descoberta automática: qualquer subpasta de ``dados/perfis/`` com um
-    ``perfil.yaml`` válido."""
+    ``matriz_curricular.xlsm``/``.xlsx`` cuja aba ``Perfil`` declare um
+    ``perfil.id`` válido."""
 
     pasta = _pasta_perfis(raiz_dados)
     encontrados: dict[str, RefPerfil] = {}
     if not pasta.exists():
         return encontrados
     for candidato in sorted(pasta.iterdir()):
-        arquivo = candidato / "perfil.yaml"
-        if not arquivo.is_file():
+        nome_matriz = next(
+            (nome for nome in NOMES_MATRIZ_PADRAO if (candidato / nome).is_file()), None
+        )
+        if nome_matriz is None:
             continue
-        bruto = yaml.safe_load(arquivo.read_text(encoding="utf-8")) or {}
+        try:
+            bruto = ler_configuracao_perfil(candidato / nome_matriz)
+        except Exception:
+            continue
         perfil_id = (bruto.get("perfil") or {}).get("id")
         if not perfil_id:
             continue
-        encontrados[perfil_id] = RefPerfil(id=perfil_id, caminho=candidato, ativo=True)
+        encontrados[perfil_id] = RefPerfil(
+            id=perfil_id, caminho=candidato, matriz=nome_matriz, ativo=True
+        )
     return encontrados
 
 
@@ -59,6 +70,7 @@ def _ler_registro(raiz_dados: Path) -> dict[str, RefPerfil]:
         registro[item["id"]] = RefPerfil(
             id=item["id"],
             caminho=raiz_dados / item["caminho"],
+            matriz=item.get("matriz", "matriz_curricular.xlsx"),
             ativo=item.get("ativo", True),
         )
     return registro
@@ -98,4 +110,9 @@ def carregar(
     *, perfil_id: str | None = None, perfil_dir: str | Path | None = None, raiz_dados: Path | None = None
 ) -> Perfil:
     caminho = resolver_perfil_dir(perfil_id=perfil_id, perfil_dir=perfil_dir, raiz_dados=raiz_dados)
-    return carregar_perfil(caminho, raiz_dados=raiz_dados)
+    matriz = None
+    if perfil_id is not None:
+        ref = listar_referencias(raiz_dados).get(perfil_id)
+        if ref is not None:
+            matriz = ref.matriz
+    return carregar_perfil(caminho, raiz_dados=raiz_dados, matriz=matriz)

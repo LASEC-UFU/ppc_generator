@@ -1,10 +1,11 @@
-"""Carregamento de perfis de PPC (``perfil.yaml``).
+"""Carregamento de perfis de PPC (aba ``Perfil`` da matriz curricular).
 
 Um **perfil** é o conjunto completo e autocontido de dados necessários para
 gerar uma versão específica de um PPC (um curso, uma versão curricular, uma
 proposta alternativa...). Nada específico de um curso vive no código — tudo
-vem do `perfil.yaml` do perfil selecionado, opcionalmente combinado com um
-perfil base declarado em `extends:` (Seção 9).
+vem da aba ``Perfil`` de ``matriz_curricular.xlsx``/``.xlsm`` do perfil
+selecionado (não existe mais ``perfil.yaml``), opcionalmente combinado com
+um perfil base declarado em `extends:` (Seção 9).
 
 Prioridade de valores (Seção 9):
 
@@ -18,10 +19,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from pathlib import Path
 
-import yaml
-
 from ppcgen.excecoes import ConfiguracaoInvalida
-from ppcgen.modelos import ReferencialCurricular
+from ppcgen.leitores.excel import ler_configuracao_perfil
 from ppcgen.utilitarios.caminhos import raiz_projeto
 
 
@@ -142,11 +141,6 @@ class Perfil:
     saida: SaidaConfig
     diretorio: Path
     raiz_dados: Path
-    legislacao: list[ReferencialCurricular] = field(default_factory=list)
-    """Catálogo de referenciais legais deste perfil — substitui o antigo
-    ``referenciais/legislacao.yaml`` (e o ``heranca.legislacao`` que
-    apontava para arquivos compartilhados): tudo fica direto em
-    ``perfil.yaml`` agora, sem arquivo externo para editar em separado."""
     perfil_base: "Perfil | None" = None
     _bruto_efetivo: dict = field(default_factory=dict, repr=False)
 
@@ -160,8 +154,7 @@ class Perfil:
         raiz = self.diretorio.resolve()
         if raiz not in candidato.parents and candidato != raiz:
             raise ConfiguracaoInvalida(
-                f"Caminho '{relativo}' do perfil '{self.info.id}' escapa da sua própria "
-                "pasta (Seção 21)."
+                f"Caminho '{relativo}' do perfil '{self.info.id}' escapa da sua própria pasta (Seção 21)."
             )
         return self.diretorio / relativo
 
@@ -191,11 +184,18 @@ def _merge_dict(base: dict, sobre: dict) -> dict:
     return resultado
 
 
-def _ler_yaml(caminho: Path) -> dict:
-    if not caminho.exists():
-        raise ConfiguracaoInvalida(f"Arquivo compartilhado não encontrado: {caminho}")
-    with open(caminho, encoding="utf-8") as f:
-        return yaml.safe_load(f) or {}
+NOMES_MATRIZ_PADRAO = ("matriz_curricular.xlsm", "matriz_curricular.xlsx")
+
+
+def _localizar_matriz(pasta: Path) -> str | None:
+    """Autodetecta o nome do arquivo de matriz numa pasta de perfil, quando
+    não foi informado explicitamente (ex.: descoberta automática sem
+    registro em ``dados/perfis.yaml`` — Seção 15)."""
+
+    for nome in NOMES_MATRIZ_PADRAO:
+        if (pasta / nome).exists():
+            return nome
+    return None
 
 
 def _extrair_extra_instituicao(dados: dict) -> dict:
@@ -208,51 +208,53 @@ def _construir(cls, dados: dict):
     filtrado = {k: v for k, v in dados.items() if k in campos_validos}
     desconhecidos = set(dados) - campos_validos
     if desconhecidos:
-        raise ConfiguracaoInvalida(
-            f"Campo(s) desconhecido(s) em {cls.__name__}: {', '.join(sorted(desconhecidos))}"
-        )
+        raise ConfiguracaoInvalida(f"Campo(s) desconhecido(s) em {cls.__name__}: {', '.join(sorted(desconhecidos))}")
     return cls(**filtrado)
 
 
-def _construir_lista(cls, itens: list):
-    return [_construir(cls, item) for item in itens]
+_SECOES_PERFIL = frozenset({"perfil", "curso", "instituicao", "curriculo", "oferta", "arquivos", "geracao", "saida"})
 
 
-def _mesclar_por_id(base: list, atual: list) -> list:
-    """Entradas do perfil atual sobrescrevem as do perfil base (``extends``,
-    Seção 9) quando o ``id`` coincide; o restante é concatenado."""
-
-    por_id = {item.id: item for item in base}
-    for item in atual:
-        por_id[item.id] = item
-    return list(por_id.values())
+def _validar_secoes_configuracao(dados: dict, caminho_matriz: Path) -> None:
+    desconhecidas = set(dados) - _SECOES_PERFIL
+    if desconhecidas:
+        raise ConfiguracaoInvalida(
+            f"Seção(ões) desconhecida(s) na aba 'Perfil' de {caminho_matriz}: {', '.join(sorted(desconhecidas))}."
+        )
 
 
 def carregar_perfil(
     perfil_dir: str | Path,
     *,
     raiz_dados: Path | None = None,
+    matriz: str | None = None,
     _pilha: tuple[str, ...] = (),
 ) -> Perfil:
-    """Carrega um perfil a partir da sua pasta (``dados/perfis/<id>/``)."""
+    """Carrega um perfil a partir da sua pasta (``dados/perfis/<id>/`` ou
+    qualquer pasta registrada em ``dados/perfis.yaml``) — lê a aba
+    ``Perfil`` do arquivo de matriz (nome em ``matriz``, vindo do registro;
+    se omitido, autodetectado por ``_localizar_matriz``)."""
 
     perfil_dir = Path(perfil_dir)
     if not perfil_dir.is_absolute():
         perfil_dir = raiz_projeto() / perfil_dir
-    caminho_yaml = perfil_dir / "perfil.yaml"
-    if not caminho_yaml.exists():
-        raise ConfiguracaoInvalida(f"perfil.yaml não encontrado em {perfil_dir}")
 
-    bruto = _ler_yaml(caminho_yaml)
+    nome_matriz = matriz or _localizar_matriz(perfil_dir)
+    if nome_matriz is None:
+        raise ConfiguracaoInvalida(f"Nenhum matriz_curricular.xlsm/.xlsx encontrado em {perfil_dir}")
+    caminho_matriz = perfil_dir / nome_matriz
+    if not caminho_matriz.exists():
+        raise ConfiguracaoInvalida(f"Arquivo de matriz não encontrado: {caminho_matriz}")
+
+    bruto = ler_configuracao_perfil(caminho_matriz)
+    _validar_secoes_configuracao(bruto, caminho_matriz)
     info_bruta = bruto.get("perfil") or {}
     if "id" not in info_bruta:
-        raise ConfiguracaoInvalida(f"{caminho_yaml}: seção 'perfil' deve declarar um 'id'.")
+        raise ConfiguracaoInvalida(f"{caminho_matriz}: aba 'Perfil' deve declarar 'perfil.id'.")
     perfil_id = info_bruta["id"]
 
     if perfil_id in _pilha:
-        raise ConfiguracaoInvalida(
-            "Herança circular de perfis detectada: " + " -> ".join((*_pilha, perfil_id))
-        )
+        raise ConfiguracaoInvalida("Herança circular de perfis detectada: " + " -> ".join((*_pilha, perfil_id)))
 
     raiz_dados = raiz_dados or perfil_dir.parent.parent
 
@@ -275,10 +277,8 @@ def carregar_perfil(
     instituicao_dados = dict(efetivo.get("instituicao") or {})
     instituicao_extra = _extrair_extra_instituicao(instituicao_dados)
 
-    legislacao = _mesclar_por_id(
-        _construir_lista(ReferencialCurricular, base_efetivo.get("legislacao") or []),
-        _construir_lista(ReferencialCurricular, bruto.get("legislacao") or []),
-    )
+    arquivos = _construir(ArquivosConfig, efetivo.get("arquivos") or {})
+    arquivos.matriz = nome_matriz  # sempre o arquivo que acabou de ser lido, nunca vem da aba
 
     perfil = Perfil(
         info=_construir(InfoPerfil, info_bruta),
@@ -291,12 +291,11 @@ def carregar_perfil(
         ),
         curriculo=_construir(CurriculoConfig, efetivo.get("curriculo") or {}),
         oferta=_construir(OfertaConfig, efetivo.get("oferta") or {}),
-        arquivos=_construir(ArquivosConfig, efetivo.get("arquivos") or {}),
+        arquivos=arquivos,
         geracao=_construir(GeracaoConfig, efetivo.get("geracao") or {}),
         saida=_construir(SaidaConfig, efetivo.get("saida") or {}),
         diretorio=perfil_dir,
         raiz_dados=raiz_dados,
-        legislacao=legislacao,
         perfil_base=perfil_base,
         _bruto_efetivo=efetivo,
     )

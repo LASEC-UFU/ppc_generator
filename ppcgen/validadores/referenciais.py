@@ -21,8 +21,9 @@ from ppcgen.modelos import AlertaValidacao, Curriculo, ErroValidacao, Referencia
 
 def validar_referenciais(curriculo: Curriculo, referenciais: ReferenciaisCurso) -> ResultadoValidacao:
     resultado = ResultadoValidacao()
+    componentes_ativos = curriculo.ativos()
 
-    for c in curriculo.ativos():
+    for c in componentes_ativos:
         if c.nucleo is None:
             resultado.adicionar(
                 ErroValidacao(
@@ -64,9 +65,7 @@ def validar_referenciais(curriculo: Curriculo, referenciais: ReferenciaisCurso) 
     _checar_componentes_do_catalogo(referenciais.conteudos, "conteúdo", "CONTEUDO_COMPONENTE_INEXISTENTE")
     _checar_componentes_do_catalogo(referenciais.competencias, "competência", "COMPETENCIA_COMPONENTE_INEXISTENTE")
 
-    contagem_nucleos = Counter(
-        codigo for nucleo in referenciais.nucleos for codigo in nucleo.componentes
-    )
+    contagem_nucleos = Counter(codigo for nucleo in referenciais.nucleos for codigo in nucleo.componentes)
     for codigo, qtd in contagem_nucleos.items():
         if qtd > 1:
             nucleos_reivindicantes = [n.id for n in referenciais.nucleos if codigo in n.componentes]
@@ -79,11 +78,7 @@ def validar_referenciais(curriculo: Curriculo, referenciais: ReferenciaisCurso) 
                 )
             )
 
-    competencias_cobertas = {
-        competencia_id
-        for c in curriculo.ativos()
-        for competencia_id in c.competencias
-    }
+    competencias_cobertas = {competencia_id for c in componentes_ativos for competencia_id in c.competencias}
     for competencia in referenciais.competencias:
         if competencia.obrigatoria and competencia.id not in competencias_cobertas:
             resultado.adicionar(
@@ -94,9 +89,7 @@ def validar_referenciais(curriculo: Curriculo, referenciais: ReferenciaisCurso) 
                 )
             )
 
-    temas_cobertos = {
-        tema_id for c in curriculo.ativos() for tema_id in c.temas_transversais
-    }
+    temas_cobertos = {tema_id for c in componentes_ativos for tema_id in c.temas_transversais}
     for tema in referenciais.temas_transversais:
         if tema.status == "obrigatorio" and tema.id not in temas_cobertos:
             resultado.adicionar(
@@ -107,9 +100,7 @@ def validar_referenciais(curriculo: Curriculo, referenciais: ReferenciaisCurso) 
                 )
             )
 
-    conteudos_cobertos = {
-        conteudo_id for c in curriculo.ativos() for conteudo_id in c.conteudos
-    }
+    conteudos_cobertos = {conteudo_id for c in componentes_ativos for conteudo_id in c.conteudos}
     for conteudo in referenciais.conteudos:
         if conteudo.obrigatorio and conteudo.id not in conteudos_cobertos:
             resultado.adicionar(

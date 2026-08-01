@@ -3,8 +3,8 @@
 Centralizado aqui para não duplicar a mesma fórmula em módulos diferentes
 (Seção 29 — "não duplique lógica").
 
-A carga horária "oficial" do curso — usada para conferir contra
-``perfil.yaml`` e como denominador dos percentuais de EaD/extensão —
+A carga horária "oficial" do curso — usada para conferir contra a aba
+``Perfil`` da matriz e como denominador dos percentuais de EaD/extensão —
 **não** é a soma bruta de todos os componentes ativos: isso incluiria o pool
 inteiro de disciplinas optativas pré-aprovadas, das quais o estudante cursa
 apenas um subconjunto. A carga oficial é:

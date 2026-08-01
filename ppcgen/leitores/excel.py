@@ -6,7 +6,7 @@ Esquema de abas adotado (documentado em ``docs/DICIONARIO_DADOS.md``):
    optativos pré-aprovados, extensão, estágio, TCC, AAC...), diferenciados
    pelo campo ``tipo`` — não por prefixo/sufixo de código. Pré-requisitos e
    correquisitos são colunas desta própria aba (listas separadas por
-   vírgula) — ver ``_lista_ids``/``_parse_prerequisitos``/
+   ``|``) — ver ``_lista_ids_pipe``/``_parse_prerequisitos``/
    ``_parse_correquisitos`` abaixo. Núcleo, áreas, temas transversais,
    conteúdos e competências de cada componente **não** são colunas daqui —
    são derivados na direção inversa, a partir da coluna ``componentes`` de
@@ -26,7 +26,13 @@ Esquema de abas adotado (documentado em ``docs/DICIONARIO_DADOS.md``):
    autor, título, ano...) — ver ``ppcgen.geradores.bibliografia``, que a
    renderiza em BibTeX/biblatex válido no momento da geração; não existe
    ``.bib`` estático em ``dados/``.
-9. ``Certificacoes`` — opcional: certificacao_id -> codigo_componente (0+).
+9. ``Legislacao``    — catálogo de referenciais legais do curso (id, nome,
+   tipo, documento, ano, observações).
+10. ``Certificacoes`` — opcional: certificacao_id -> codigo_componente (0+).
+11. ``Perfil``        — chave/valor (``ler_configuracao_perfil`` abaixo):
+    info/curso/instituição/currículo/oferta/arquivos/geração/saída do
+    perfil — não existe mais ``perfil.yaml``, esta aba concentra toda a
+    configuração que não é curricular.
 
 Em cada aba de catálogo (3-7), ``componentes`` é uma célula com códigos de
 componente separados por ``|`` — os componentes vinculados àquele item. O
@@ -39,13 +45,10 @@ em ``componentes`` que não existe na aba ``Componentes`` não é erro do
 leitor (Seção 29 — nunca perder dado silenciosamente): fica preservado em
 ``<Catalogo>.componentes`` (bruto) para o validador reportar.
 
-O catálogo de legislação não vive na matriz — é ``perfil.legislacao``,
-direto em ``perfil.yaml`` (``ppcgen.config``), porque não é um dado
-curricular por componente. Não há mais aba ``Curso``: a versão curricular é
-``perfil.info.versao`` (Seção sobre fontes únicas em
-``docs/DICIONARIO_DADOS.md``) — outras abas que a planilha tenha (ex.: um
-fluxograma visual próprio de cada curso) não fazem parte deste esquema e
-não são lidas por este módulo.
+Não há mais aba ``Curso``: a versão curricular é ``perfil.info.versao``
+(Seção sobre fontes únicas em ``docs/DICIONARIO_DADOS.md``) — outras abas
+que a planilha tenha (ex.: um fluxograma visual próprio de cada curso) não
+fazem parte deste esquema e não são lidas por este módulo.
 """
 
 from __future__ import annotations
@@ -69,6 +72,7 @@ from ppcgen.modelos import (
     NucleoCurricular,
     PreRequisito,
     ReferenciaisCurso,
+    ReferencialCurricular,
     TemaTransversal,
     TipoComponente,
 )
@@ -82,6 +86,7 @@ ABAS_OPCIONAIS = (
     "Conteudos",
     "Competencias",
     "Bibliografia",
+    "Legislacao",
     "Certificacoes",
 )
 
@@ -149,26 +154,14 @@ def _tipo_componente(valor) -> TipoComponente:
         return TipoComponente(valor)
     except ValueError as exc:
         validos = ", ".join(t.value for t in TipoComponente)
-        raise FormatoInvalido(
-            f"Tipo de componente inválido: '{valor}'. Valores aceitos: {validos}"
-        ) from exc
-
-
-def _lista_ids(valor) -> list[str]:
-    """Split de uma célula com IDs separados por vírgula (usada para
-    pré-requisitos/correquisitos) — células vazias viram lista vazia,
-    nunca ``[""]``."""
-
-    texto = _str_ou_vazio(valor)
-    if not texto:
-        return []
-    return [item.strip() for item in texto.split(",") if item.strip()]
+        raise FormatoInvalido(f"Tipo de componente inválido: '{valor}'. Valores aceitos: {validos}") from exc
 
 
 def _lista_ids_pipe(valor) -> list[str]:
-    """Split de uma célula com códigos de componente separados por ``|``
-    (coluna ``componentes`` das abas de catálogo) — células vazias viram
-    lista vazia, nunca ``[""]``."""
+    """Split de uma célula com itens separados por ``|`` — usada tanto para
+    a coluna ``componentes`` das abas de catálogo quanto para
+    ``pre_requisitos``/``correquisitos`` da aba ``Componentes``. Células
+    vazias viram lista vazia, nunca ``[""]``."""
 
     texto = _str_ou_vazio(valor)
     if not texto:
@@ -189,7 +182,7 @@ def _extrair_opcional(item: str) -> tuple[str, bool]:
 
 def _parse_correquisitos(valor) -> list[Correquisito]:
     correquisitos = []
-    for item in _lista_ids(valor):
+    for item in _lista_ids_pipe(valor):
         codigo, opcional = _extrair_opcional(item)
         correquisitos.append(Correquisito(codigo=codigo, opcional=opcional))
     return correquisitos
@@ -200,15 +193,13 @@ def _parse_prerequisitos(valor) -> list[PreRequisito]:
     ou uma exigência de carga horária mínima acumulada, escrita
     ``>=NNNh`` (nunca um código mágico como ``"*"`` — ver
     ``ppcgen.validadores.prerequisitos``). Exemplo de célula:
-    ``CTR401, CTR203 (opcional), >=1200h``."""
+    ``CTR401|CTR203 (opcional)|>=1200h``."""
 
     pre_requisitos = []
-    for item in _lista_ids(valor):
+    for item in _lista_ids_pipe(valor):
         if item.replace(" ", "").upper().startswith(">="):
             carga_texto = item.split(">=", 1)[1].strip().rstrip("hH").strip()
-            pre_requisitos.append(
-                PreRequisito(codigo="", carga_horaria_minima=_int_ou_none(carga_texto))
-            )
+            pre_requisitos.append(PreRequisito(codigo="", carga_horaria_minima=_int_ou_none(carga_texto)))
             continue
         codigo, opcional = _extrair_opcional(item)
         pre_requisitos.append(PreRequisito(codigo=codigo, opcional=opcional))
@@ -216,12 +207,13 @@ def _parse_prerequisitos(valor) -> list[PreRequisito]:
 
 
 def carregar_registros_referenciais(wb) -> ReferenciaisCurso:
-    """Lê os catálogos de núcleos/áreas/temas/conteúdos/competências das
-    abas de registro da própria matriz (``Nucleos``/``Areas``/``Temas``/
-    ``Conteudos``/``Competencias``) — substitui os antigos
-    ``referenciais/*.yaml``. Retorna um :class:`ReferenciaisCurso` só com
-    esses cinco campos preenchidos; ``legislacao`` vem de ``perfil.yaml``,
-    não daqui. Não vincula aos componentes ainda — isso é
+    """Lê os catálogos de núcleos/áreas/temas/conteúdos/competências/
+    bibliografia/legislação das abas de registro da própria matriz
+    (``Nucleos``/``Areas``/``Temas``/``Conteudos``/``Competencias``/
+    ``Bibliografia``/``Legislacao``) — substitui os antigos
+    ``referenciais/*.yaml``. Retorna um :class:`ReferenciaisCurso` com
+    todos os campos preenchidos a partir da matriz — nada mais vem de
+    fora dela. Não vincula aos componentes ainda — isso é
     ``_aplicar_vinculos_catalogo``, chamada por ``carregar_matriz`` depois
     que a aba ``Componentes`` também estiver carregada."""
 
@@ -322,6 +314,21 @@ def carregar_registros_referenciais(wb) -> ReferenciaisCurso:
                     )
                 )
 
+    if "Legislacao" in wb.sheetnames:
+        for row in _linhas(wb["Legislacao"]):
+            id_ = _str_ou_vazio(row.get("id"))
+            if id_:
+                referenciais.legislacao.append(
+                    ReferencialCurricular(
+                        id=id_,
+                        nome=_str_ou_vazio(row.get("nome")),
+                        tipo=_str_ou_vazio(row.get("tipo")),
+                        documento=_str_ou_vazio(row.get("documento")),
+                        ano=_int_ou_none(row.get("ano")),
+                        observacoes=_str_ou_vazio(row.get("observacoes")),
+                    )
+                )
+
     return referenciais
 
 
@@ -389,14 +396,15 @@ def carregar_matriz(caminho: str | Path) -> tuple[Curriculo, ReferenciaisCurso, 
     avisos_leitura)``.
 
     ``Curriculo.versao`` vem em branco daqui — a versão curricular é
-    ``perfil.info.versao`` (já existe em ``perfil.yaml``; não duplicamos o
+    ``perfil.info.versao`` (já existe na aba ``Perfil``; não duplicamos o
     dado numa aba ``Curso`` separada). Quem chama com um ``Perfil`` em mãos
     deve fazer ``curriculo.versao = perfil.info.versao`` depois de carregar.
 
-    ``referenciais`` traz núcleos/áreas/temas/conteúdos/competências (das
-    abas de registro da própria matriz, já vinculados aos componentes) —
-    quem chama ainda precisa preencher ``legislacao`` a partir de
-    ``perfil.yaml``.
+    ``referenciais`` já vem completo — núcleos/áreas/temas/conteúdos/
+    competências (vinculados aos componentes) e bibliografia/legislação
+    (catálogos simples, sem vínculo por componente) — tudo das abas de
+    registro da própria matriz; nada precisa ser preenchido a partir de
+    fora dela depois.
 
     ``avisos_leitura`` registra situações que o leitor não deve "corrigir"
     silenciosamente (ex.: célula de status ativo/inativo em branco) — cabe ao
@@ -479,3 +487,73 @@ def carregar_matriz(caminho: str | Path) -> tuple[Curriculo, ReferenciaisCurso, 
         equivalencias=equivalencias,
     )
     return curriculo, referenciais, avisos
+
+
+def _valor_chave_valor(bruto):
+    """Coage o valor de uma célula da aba ``Perfil`` para o tipo Python mais
+    apropriado, sem coluna de tipo separada: número/booleano nativos do
+    Excel passam direto; texto ``TRUE``/``FALSE``/``VERDADEIRO``/``FALSO``
+    vira ``bool``; texto numérico vira ``int``/``float``; o resto fica
+    string. Célula vazia devolve ``None`` — quem chama descarta a chave
+    inteira nesse caso, deixando o default da dataclass valer."""
+
+    if bruto is None:
+        return None
+    if isinstance(bruto, bool):
+        return bruto
+    if isinstance(bruto, (int, float)):
+        return bruto
+    texto = str(bruto).strip()
+    if texto == "":
+        return None
+    if texto.upper() in {"TRUE", "VERDADEIRO"}:
+        return True
+    if texto.upper() in {"FALSE", "FALSO"}:
+        return False
+    try:
+        return int(texto)
+    except ValueError:
+        pass
+    try:
+        return float(texto)
+    except ValueError:
+        pass
+    return texto
+
+
+def ler_configuracao_perfil(caminho: str | Path) -> dict:
+    """Lê a aba ``Perfil`` (chave/valor, uma linha por campo, chave no
+    formato ``secao.campo`` — ex.: ``curso.numero_periodos``) e devolve um
+    dict aninhado por seção (``{"curso": {"numero_periodos": 8, ...}, ...}``)
+    — mesmo formato que o antigo ``perfil.yaml``, consumido por
+    ``ppcgen.config.carregar_perfil``. Célula ``valor`` em branco omite a
+    chave (o default da dataclass correspondente se aplica)."""
+
+    caminho = Path(caminho)
+    if not caminho.exists():
+        raise ArquivoNaoEncontrado(f"Matriz curricular não encontrada: {caminho}")
+
+    wb = openpyxl.load_workbook(caminho, data_only=True)
+    if "Perfil" not in wb.sheetnames:
+        raise FormatoInvalido(f"Aba obrigatória ausente na matriz: 'Perfil' (em {caminho})")
+
+    resultado: dict[str, dict] = {}
+    chaves_lidas: set[str] = set()
+    for numero_linha, row in enumerate(_linhas(wb["Perfil"]), start=2):
+        chave = _str_ou_vazio(row.get("chave"))
+        if not chave:
+            continue
+        if chave.count(".") != 1:
+            raise FormatoInvalido(
+                f"Chave inválida na aba 'Perfil', linha {numero_linha}: {chave!r}. "
+                "Use exatamente o formato 'secao.campo'."
+            )
+        if chave in chaves_lidas:
+            raise FormatoInvalido(f"Chave duplicada na aba 'Perfil', linha {numero_linha}: {chave!r}.")
+        chaves_lidas.add(chave)
+        secao, campo = chave.split(".", 1)
+        valor = _valor_chave_valor(row.get("valor"))
+        if valor is None:
+            continue
+        resultado.setdefault(secao, {})[campo] = valor
+    return resultado

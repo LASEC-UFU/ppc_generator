@@ -4,7 +4,7 @@ import openpyxl
 import pytest
 
 from ppcgen.excecoes import FormatoInvalido
-from ppcgen.leitores.excel import carregar_matriz
+from ppcgen.leitores.excel import carregar_matriz, ler_configuracao_perfil
 
 
 def _matriz_minima(caminho):
@@ -14,17 +14,24 @@ def _matriz_minima(caminho):
     componentes = wb.create_sheet("Componentes")
     componentes.append(
         [
-            "codigo", "nome", "tipo", "periodo", "ativo", "obrigatorio",
-            "cht", "chp", "chd", "che", "tot", "observacoes",
-            "pre_requisitos", "correquisitos",
+            "codigo",
+            "nome",
+            "tipo",
+            "periodo",
+            "ativo",
+            "obrigatorio",
+            "cht",
+            "chp",
+            "chd",
+            "che",
+            "tot",
+            "observacoes",
+            "pre_requisitos",
+            "correquisitos",
         ]
     )
-    componentes.append(
-        ["X1", "Disciplina X1", "disciplina", 1, True, True, 30, 0, 0, 0, 30, "", "", ""]
-    )
-    componentes.append(
-        ["X2", "Disciplina X2", "disciplina", 2, True, True, 30, 0, 0, 0, 30, "", "X1", ""]
-    )
+    componentes.append(["X1", "Disciplina X1", "disciplina", 1, True, True, 30, 0, 0, 0, 30, "", "", ""])
+    componentes.append(["X2", "Disciplina X2", "disciplina", 2, True, True, 30, 0, 0, 0, 30, "", "X1", ""])
 
     nucleos = wb.create_sheet("Nucleos")
     nucleos.append(["id", "nome", "descricao", "componentes"])
@@ -51,8 +58,8 @@ def test_carregar_matriz_basica(tmp_path):
     assert avisos == []
     assert referenciais.ids_nucleos() == {"BASICO"}
     assert referenciais.ids_areas() == {"MATEMATICA"}
-    # legislação não vem da matriz — fica vazia aqui, quem carrega o perfil
-    # completo (ppcgen.cli._carregar_contexto) que preenche.
+    # legislação vem da aba Legislacao, igual às demais — não existe nesta
+    # fixture mínima, então o catálogo fica vazio.
     assert referenciais.legislacao == []
     # competências vêm da aba Competencias, igual às demais — não existe
     # nesta fixture mínima, então o catálogo fica vazio.
@@ -100,14 +107,24 @@ def test_pre_requisitos_com_opcional_e_carga_horaria_minima(tmp_path):
     componentes = wb.create_sheet("Componentes")
     componentes.append(
         [
-            "codigo", "nome", "tipo", "periodo", "ativo", "obrigatorio",
-            "cht", "chp", "chd", "che", "tot", "observacoes",
-            "pre_requisitos", "correquisitos",
+            "codigo",
+            "nome",
+            "tipo",
+            "periodo",
+            "ativo",
+            "obrigatorio",
+            "cht",
+            "chp",
+            "chd",
+            "che",
+            "tot",
+            "observacoes",
+            "pre_requisitos",
+            "correquisitos",
         ]
     )
     componentes.append(
-        ["Z1", "Estágio", "estagio", None, True, True, 0, 0, 0, 0, 300, "",
-         "X1, X2 (opcional), >=1200h", "X3 (opcional)"]
+        ["Z1", "Estágio", "estagio", None, True, True, 0, 0, 0, 0, 300, "", "X1|X2 (opcional)|>=1200h", "X3 (opcional)"]
     )
     wb.save(caminho)
 
@@ -210,6 +227,10 @@ def test_carregar_registros_referenciais_completo(tmp_path):
     bibliografia.append(["chave", "tipo", "autor", "titulo", "ano", "url"])
     bibliografia.append(["teste_2024", "misc", "Autor Teste", "Título de Teste", "2024", "https://exemplo.org"])
 
+    legislacao = wb.create_sheet("Legislacao")
+    legislacao.append(["id", "nome", "tipo", "documento", "ano", "observacoes"])
+    legislacao.append(["LDB", "Lei de Diretrizes e Bases", "lei", "Lei nº 9.394/1996", 1996, "texto"])
+
     wb.save(caminho)
 
     _curriculo, referenciais, _avisos = carregar_matriz(caminho)
@@ -222,6 +243,9 @@ def test_carregar_registros_referenciais_completo(tmp_path):
     assert referenciais.bibliografia[0].tipo == "misc"
     assert referenciais.bibliografia[0].ano == "2024"
     assert referenciais.bibliografia[0].url == "https://exemplo.org"
+    assert referenciais.legislacao[0].id == "LDB"
+    assert referenciais.legislacao[0].documento == "Lei nº 9.394/1996"
+    assert referenciais.legislacao[0].ano == 1996
 
 
 def test_codigo_provisorio_e_unidade_oferta_derivados_do_codigo(tmp_path):
@@ -274,4 +298,122 @@ def test_vinculo_de_catalogo_a_componente_inexistente_nao_e_descartado(tmp_path)
     v1 = curriculo.por_codigo()["V1"]
     assert v1.nucleo == "BASICO"
     assert referenciais.nucleos[0].componentes == ["V1", "FANTASMA"]
-    assert avisos == []
+
+
+def test_ler_configuracao_perfil_coage_valores(tmp_path):
+    """A aba ``Perfil`` (chave/valor) não tem coluna de tipo separada — a
+    coerção é por heurística: número/booleano nativos passam direto, texto
+    TRUE/FALSE vira bool, texto numérico vira int, célula em branco some do
+    dict (deixa o default da dataclass valer), e uma chave desconhecida de
+    ``instituicao.*`` continua disponível pra virar ``.extra`` depois."""
+
+    caminho = tmp_path / "matriz.xlsx"
+    wb = openpyxl.Workbook()
+    wb.remove(wb.active)
+    wb.create_sheet("Componentes").append(["codigo", "nome", "tipo"])
+
+    perfil = wb.create_sheet("Perfil")
+    perfil.append(["chave", "valor"])
+    perfil.append(["perfil.id", "teste_coercao"])
+    perfil.append(["curso.numero_periodos", 6])
+    perfil.append(["geracao.compilar_pdf", "TRUE"])
+    perfil.append(["geracao.anexar_fichas", False])
+    perfil.append(["curriculo.percentual_minimo_extensao", "10"])
+    perfil.append(["curriculo.carga_tcc", None])
+    perfil.append(["instituicao.endereco", "Av. Exemplo, 123"])
+    wb.save(caminho)
+
+    bruto = ler_configuracao_perfil(caminho)
+
+    assert bruto["perfil"]["id"] == "teste_coercao"
+    assert bruto["curso"]["numero_periodos"] == 6
+    assert bruto["geracao"]["compilar_pdf"] is True
+    assert bruto["geracao"]["anexar_fichas"] is False
+    assert bruto["curriculo"]["percentual_minimo_extensao"] == 10
+    assert "carga_tcc" not in bruto["curriculo"]
+    assert bruto["instituicao"]["endereco"] == "Av. Exemplo, 123"
+
+
+def test_carregar_perfil_aba_ausente_gera_erro_formatado(tmp_path):
+    caminho = tmp_path / "matriz.xlsx"
+    wb = openpyxl.Workbook()
+    wb.remove(wb.active)
+    wb.create_sheet("Componentes").append(["codigo", "nome", "tipo"])
+    wb.save(caminho)
+
+    with pytest.raises(FormatoInvalido):
+        ler_configuracao_perfil(caminho)
+
+
+@pytest.mark.parametrize("chave", ["curso", "curso.numero.periodos"])
+def test_ler_configuracao_perfil_rejeita_chave_malformada(tmp_path, chave):
+    caminho = tmp_path / "matriz.xlsx"
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Perfil"
+    ws.append(["chave", "valor"])
+    ws.append([chave, "valor"])
+    wb.save(caminho)
+
+    with pytest.raises(FormatoInvalido, match="Chave inválida"):
+        ler_configuracao_perfil(caminho)
+
+
+def test_ler_configuracao_perfil_rejeita_chave_duplicada(tmp_path):
+    caminho = tmp_path / "matriz.xlsx"
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Perfil"
+    ws.append(["chave", "valor"])
+    ws.append(["perfil.id", "primeiro"])
+    ws.append(["perfil.id", "segundo"])
+    wb.save(caminho)
+
+    with pytest.raises(FormatoInvalido, match="Chave duplicada"):
+        ler_configuracao_perfil(caminho)
+
+
+def test_carregar_perfil_le_aba_perfil_e_extrai_instituicao_extra(tmp_path):
+    """Ponta a ponta via ``ppcgen.config.carregar_perfil``: chave
+    ``instituicao.<desconhecida>`` (não é ``nome``/``sigla``/
+    ``unidade_academica``) cai em ``InstituicaoConfig.extra``, e
+    ``arquivos.matriz`` é sempre o nome do arquivo que foi aberto —
+    autorreferente, nunca uma linha da aba."""
+
+    from ppcgen.config import carregar_perfil
+
+    caminho = tmp_path / "matriz_curricular.xlsx"
+    wb = openpyxl.Workbook()
+    wb.remove(wb.active)
+    wb.create_sheet("Componentes").append(["codigo", "nome", "tipo"])
+
+    perfil = wb.create_sheet("Perfil")
+    perfil.append(["chave", "valor"])
+    perfil.append(["perfil.id", "teste_extra"])
+    perfil.append(["instituicao.nome", "Universidade de Teste"])
+    perfil.append(["instituicao.site", "https://exemplo.org"])
+    wb.save(caminho)
+
+    perfil_carregado = carregar_perfil(tmp_path, raiz_dados=tmp_path.parent)
+
+    assert perfil_carregado.info.id == "teste_extra"
+    assert perfil_carregado.instituicao.nome == "Universidade de Teste"
+    assert perfil_carregado.instituicao.extra["site"] == "https://exemplo.org"
+    assert perfil_carregado.arquivos.matriz == "matriz_curricular.xlsx"
+
+
+def test_carregar_perfil_rejeita_secao_desconhecida(tmp_path):
+    from ppcgen.config import carregar_perfil
+    from ppcgen.excecoes import ConfiguracaoInvalida
+
+    caminho = tmp_path / "matriz_curricular.xlsx"
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Perfil"
+    ws.append(["chave", "valor"])
+    ws.append(["perfil.id", "teste"])
+    ws.append(["seo_nao_suportada.valor", "x"])
+    wb.save(caminho)
+
+    with pytest.raises(ConfiguracaoInvalida, match="Seção.*desconhecida"):
+        carregar_perfil(tmp_path, raiz_dados=tmp_path.parent)

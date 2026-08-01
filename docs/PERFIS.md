@@ -8,10 +8,12 @@ diferente do mesmo curso, ou uma proposta alternativa em avaliação. Cada
 perfil vive na sua própria pasta (normalmente `dados/perfis/<id>/`, mas o
 caminho pode ser qualquer um — ver "Descoberta de perfis" abaixo) e não
 depende de nada fora dela, exceto o que ele referenciar explicitamente em
-`extends:` (herda de outro perfil inteiro) — ver a seção `perfil.yaml`
-abaixo. Não existe mecanismo de dados compartilhados entre perfis: cada um
-carrega seus próprios dados institucionais, autoridades, imagens e
-bibliografia.
+`extends:` (herda de outro perfil inteiro) — ver a seção "Aba `Perfil`"
+abaixo. Não existe `perfil.yaml`: toda a configuração do perfil vive na
+aba `Perfil` da própria `matriz_curricular.xlsx`/`.xlsm`, junto com os
+dados curriculares. Não existe mecanismo de dados compartilhados entre
+perfis: cada um carrega seus próprios dados institucionais, autoridades,
+imagens e bibliografia.
 
 O sistema **nunca** assume um perfil padrão. Todo comando que opera sobre
 um perfil exige `--perfil <id>` ou `--perfil-dir <caminho>` explicitamente
@@ -22,8 +24,9 @@ testes ou geração oficial.
 ## Identificador do perfil
 
 Por padrão, o `id` é o nome da pasta em `dados/perfis/` e também o campo
-`perfil.id` dentro do `perfil.yaml` — os dois precisam ser iguais (a menos
-que o perfil esteja registrado explicitamente em `dados/perfis.yaml`, ver
+`perfil.id` dentro da aba `Perfil` da matriz — os dois precisam ser iguais
+(a menos que o perfil esteja registrado explicitamente em
+`dados/perfis.yaml`, ver
 "Descoberta de perfis" abaixo, caso em que o `id` só precisa bater com o
 que está no registro). Formato exigido
 (validado como `PERFIL-000` se violado): letras minúsculas, dígitos e `_`
@@ -34,89 +37,76 @@ comparação), que `ppcgen limpar --todos` ignora de propósito por não
 começar com o nome de um perfil real. Convenção usada pelo perfil deste
 repositório: `<curso>_<versao>`, ex. `tecnologo_automacao_2027_1`.
 
-## `perfil.yaml`: as seções
+## Aba `Perfil`: as chaves
 
-```yaml
-perfil:
-  id: engenharia_computacao_2026_1
-  nome: "Engenharia de Computação com Ênfase em Inteligência Artificial Aplicada"
-  status: vigente          # rascunho | proposta | vigente | descontinuado
-  versao: "2026-1"
-  descricao: "..."
-  extends: null             # id de um perfil base do qual herdar tudo (opcional)
+Chave/valor, uma linha por campo (`chave` no formato `secao.campo`,
+`valor` o conteúdo) — schema completo em `docs/DICIONARIO_DADOS.md`.
+Equivalente ao antigo `perfil.yaml`, mesma organização em seções:
 
-curso:
-  nome: ...
-  nome_curto: ...
-  sigla: ...
-  grau: Bacharelado
-  modalidade: Presencial
-  turno: Vespertino
-  regime_academico: Semestral
-  numero_periodos: 8
-  campus: ...
-  municipio: ...
-  estado: ...
+```
+chave                                       valor
+perfil.id                                   engenharia_computacao_2026_1
+perfil.nome                                 Engenharia de Computação com Ênfase em IA Aplicada
+perfil.status                               vigente            # rascunho | proposta | vigente | descontinuado
+perfil.versao                               2026-1
+perfil.descricao                            ...
+perfil.extends                              (vazio)            # id de um perfil base do qual herdar tudo (opcional)
 
-curriculo:
-  carga_horaria_total: 3450
-  carga_optativa_minima: 90
-  carga_extensao: 345
-  carga_aac: 90
-  percentual_minimo_extensao: 10      # pontos percentuais (0-100), não fração
-  percentual_maximo_ead: 20
+curso.nome                                  ...
+curso.nome_curto                            ...
+curso.sigla                                 ...
+curso.grau                                  Bacharelado
+curso.modalidade                            Presencial
+curso.turno                                 Vespertino
+curso.regime_academico                      Semestral
+curso.numero_periodos                       8
+curso.campus                                ...
+curso.municipio                             ...
+curso.estado                                ...
 
-oferta:                      # formato de oferta do curso — todos os campos
-                              # abaixo são opcionais, valores abaixo são o padrão
-  formato: presencial         # presencial | semipresencial | distancia —
-                               # decisão explícita, nunca inferida do percentual
-                               # de EaD; ver percentual_maximo_ead acima
-  possui_carga_ead: false
-  norma_federal: ""           # ex.: "Decreto nº 12.456/2025; Portaria MEC nº 378/2025"
-  norma_institucional: null   # ato da UFU (CONGRAD) que respalda a oferta parcial
-                               # de EaD deste curso especificamente — null enquanto
-                               # não houver ato publicado
-  status_validacao_institucional: pendente   # pendente | confirmado
+curriculo.carga_horaria_total               3450
+curriculo.carga_optativa_minima             90
+curriculo.carga_extensao                    345
+curriculo.carga_aac                         90
+curriculo.percentual_minimo_extensao        10                 # pontos percentuais (0-100), não fração
+curriculo.percentual_maximo_ead             20
 
-arquivos:                    # todos opcionais — valores abaixo são o padrão
-  matriz: matriz_curricular.xlsx
-  textos: textos
-  fichas: fichas
-  figuras: figuras
-  anexos: anexos
-  frontmatter: frontmatter
-  overrides: overrides
+oferta.formato                              presencial         # presencial | semipresencial | distancia —
+                                                                # decisão explícita, nunca inferida do percentual
+                                                                # de EaD; ver percentual_maximo_ead acima
+oferta.possui_carga_ead                     FALSE
+oferta.norma_federal                        (ex.: "Decreto nº 12.456/2025; Portaria MEC nº 378/2025")
+oferta.norma_institucional                  (vazio)            # ato da UFU (CONGRAD) que respalda a oferta parcial
+                                                                # de EaD deste curso especificamente — vazio enquanto
+                                                                # não houver ato publicado
+oferta.status_validacao_institucional       pendente           # pendente | confirmado
 
-geracao:
-  anexar_fichas: true
-  anexar_resolucoes: true
-  compilar_pdf: true
-  interromper_em_erro: true  # false só com justificativa documentada em
-                              # comentário no próprio perfil.yaml
+arquivos.textos                             textos             # todas opcionais — valores acima são o padrão
+arquivos.fichas                             fichas
+arquivos.figuras                            figuras
+arquivos.anexos                             anexos
+arquivos.frontmatter                        frontmatter
+arquivos.overrides                          overrides
 
-saida:
-  nome_base: PPC
+geracao.anexar_fichas                       TRUE
+geracao.anexar_resolucoes                   TRUE
+geracao.compilar_pdf                        TRUE
+geracao.interromper_em_erro                 TRUE               # FALSE só com justificativa documentada em
+                                                                # observação na própria planilha
 
-# Catálogo de referenciais legais deste perfil (substitui o antigo
-# referenciais/legislacao.yaml e o antigo heranca.legislacao — cada
-# perfil declara sua própria lista completa, sem arquivo externo).
-legislacao:
-  - id: MEC_CNE_CES_7_2018
-    nome: Diretrizes para a extensão na Educação Superior
-    tipo: resolucao
-    documento: Resolução CNE/CES nº 7, de 18 de dezembro de 2018
-    ano: 2018
-    observacoes: ...
+saida.nome_base                             PPC
 ```
 
-Campos desconhecidos em qualquer seção fazem o carregamento falhar com
-`ConfiguracaoInvalida` (erro de digitação nunca é ignorado silenciosamente).
-Não existe mais pasta `referenciais/` em nenhum perfil — núcleos, áreas,
-temas transversais, conteúdos curriculares e competências são abas de
-registro da própria `matriz_curricular.xlsx`
-(`Nucleos`/`Areas`/`Temas`/`Conteudos`/`Competencias`, ver
-`docs/DICIONARIO_DADOS.md`); só legislação é a lista acima, direto em
-`perfil.yaml`.
+(Não existe linha `arquivos.matriz` — o nome do arquivo é sempre o que
+acabou de ser aberto pra ler esta própria aba, nunca configurável de
+dentro dela; ver "Descoberta de perfis" abaixo sobre `matriz:` no
+registro.) Campos desconhecidos em qualquer seção fazem o carregamento
+falhar com `ConfiguracaoInvalida` (erro de digitação nunca é ignorado
+silenciosamente). Não existe mais pasta `referenciais/` em nenhum perfil —
+núcleos, áreas, temas transversais, conteúdos curriculares, competências e
+legislação são abas de registro da própria `matriz_curricular.xlsx`
+(`Nucleos`/`Areas`/`Temas`/`Conteudos`/`Competencias`/`Legislacao`, ver
+`docs/DICIONARIO_DADOS.md`) — nenhuma dessas listas vive na aba `Perfil`.
 
 ## Status
 
@@ -153,25 +143,30 @@ perfil — ver `docs/CRIAR_PERFIL.md` e o próprio `Makefile`).
 ## Descoberta de perfis
 
 Por padrão, todo diretório em `dados/perfis/` que contenha um
-`perfil.yaml` válido é descoberto automaticamente (`ppcgen/perfis.py`) —
-não é preciso registrar um perfil em nenhum lugar central para que ele
+`matriz_curricular.xlsm` ou `.xlsx` (nessa ordem) com uma aba `Perfil`
+declarando `perfil.id` é descoberto automaticamente (`ppcgen/perfis.py`)
+— não é preciso registrar um perfil em nenhum lugar central para que ele
 apareça em `python -m ppcgen perfis` ou seja incluído nos comandos em
 lote.
 
 Um `dados/perfis.yaml` opcional pode sobrepor a descoberta automática, para
-listar perfis fora de `dados/perfis/` ou fixar uma ordem de exibição — não
-é necessário no uso comum. Exemplo real deste repositório: cada perfil vive
-direto em `dados/<id>/` (sem a pasta intermediária `dados/perfis/`), então
-`dados/perfis.yaml` registra cada um explicitamente:
+listar perfis fora de `dados/perfis/`, fixar uma ordem de exibição, ou
+declarar explicitamente o nome do arquivo de matriz quando ele não é
+`matriz_curricular.xlsx`/`.xlsm` — não é necessário no uso comum. Exemplo
+real deste repositório: cada perfil vive direto em `dados/<id>/` (sem a
+pasta intermediária `dados/perfis/`), então `dados/perfis.yaml` registra
+cada um explicitamente:
 
 ```yaml
 perfis:
   - id: tecnologo_automacao_2027_1
     caminho: "tecnologo_automacao_2027_1"
+    matriz: "matriz_curricular.xlsm"
     ativo: true
 ```
 
-(`caminho` é relativo a `dados/`.) Isso preserva `--perfil
+(`caminho` é relativo a `dados/`; `matriz` é opcional, padrão
+`matriz_curricular.xlsx`.) Isso preserva `--perfil
 tecnologo_automacao_2027_1` funcionando normalmente em todos os comandos —
 um segundo projeto independente entraria como
 `dados/engenharia_automacao_2027_1/` mais uma entrada nova aqui.

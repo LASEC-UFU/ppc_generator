@@ -187,9 +187,9 @@ def gerar_arquivos_latex(
     nomes_por_codigo = {c.codigo: c.nome for c in curriculo.componentes}
 
     # --- Macros de identificação do curso (Seção 14) -----------------------
-    # Centraliza nome/versão/instituição em um único lugar gerado a partir de
-    # perfil.yaml — os textos do perfil usam estas macros em vez de repetir
-    # o nome do curso literalmente.
+    # Centraliza nome/versão/instituição em um único lugar gerado a partir da
+    # aba Perfil da matriz — os textos do perfil usam estas macros em vez de
+    # repetir o nome do curso literalmente.
     curso = perfil.curso
     instituicao = perfil.instituicao
     macros = (

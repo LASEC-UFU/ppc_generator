@@ -16,38 +16,37 @@ python -m ppcgen perfil-criar --id engenharia_software_2027_1 --nome "Engenharia
 ```
 
 Isso cria `dados/perfis/engenharia_software_2027_1/` com toda a árvore
-padrão de um perfil já no lugar: `perfil.yaml` mínimo (já com `legislacao:
-[]`), `matriz_curricular.xlsx` só com cabeçalhos (incluindo as abas de
-registro `Nucleos`/`Areas`/`Temas`/`Conteudos`/`Competencias`/
-`Bibliografia`, todas vazias), os 12 `textos/*.tex` com um `\chapter{}`
-placeholder cada, `frontmatter/*.yaml` vazios, e as subpastas de
-`fichas/`/`anexos/`/`overrides/`. O perfil já é estruturalmente válido
-neste ponto (`perfil-validar` passa), só sem conteúdo real.
+padrão de um perfil já no lugar: `matriz_curricular.xlsx` com a aba
+`Perfil` preenchida com os defaults (`id`/`nome` já vêm do comando; o
+resto fica em branco) e as abas de registro `Nucleos`/`Areas`/`Temas`/
+`Conteudos`/`Competencias`/`Bibliografia`/`Legislacao` só com cabeçalhos,
+os 12 `textos/*.tex` com um `\chapter{}` placeholder cada,
+`frontmatter/*.yaml` vazios, e as subpastas de `fichas/`/`anexos/`/
+`overrides/`. O perfil já é estruturalmente válido neste ponto
+(`perfil-validar` passa), só sem conteúdo real.
 
-## 3. Preencher `perfil.yaml`
+## 3. Preencher a aba `Perfil`
 
-Ver `docs/PERFIS.md` para o significado de cada campo. No mínimo, decida:
+Ver `docs/PERFIS.md` para o significado de cada chave. No mínimo, decida:
 
-- `curso.numero_periodos` e as cargas horárias esperadas em `curriculo:`
-  (você vai conferir depois que a matriz bate com esses números — é assim
-  que `CARGA_TOTAL_DIVERGENTE` funciona).
-- Preencha `instituicao:` com todos os dados institucionais (nome, sigla,
-  unidade acadêmica e os campos extras que o perfil precisar — endereço,
-  site, telefone... — ver `ppcgen.config.InstituicaoConfig.extra`). Não há
-  mecanismo de compartilhamento entre perfis: se outro perfil já tem os
-  mesmos dados, copie o bloco `instituicao:` dele.
-- Preencha `legislacao:` (lista de referenciais legais deste curso) — não
-  há mais arquivo externo para isso, é tudo aqui (ver
-  `docs/DICIONARIO_DADOS.md` para os campos de cada entrada). Competências
-  não ficam em `perfil.yaml` — são a aba `Competencias` da matriz (próximo
-  passo), pode ficar vazia se o curso não rastreia competências
-  individualmente.
+- `curso.numero_periodos` e as cargas horárias esperadas em
+  `curriculo.*` (você vai conferir depois que a matriz bate com esses
+  números — é assim que `CARGA_TOTAL_DIVERGENTE` funciona).
+- Preencha `instituicao.*` com todos os dados institucionais (nome,
+  sigla, unidade acadêmica e os campos extras que o perfil precisar —
+  endereço, site, telefone... — ver `ppcgen.config.InstituicaoConfig.extra`,
+  uma linha `instituicao.<campo>` por chave livre). Não há mecanismo de
+  compartilhamento entre perfis: se outro perfil já tem os mesmos dados,
+  copie as linhas `instituicao.*` dele.
+- Nem legislação nem competências ficam na aba `Perfil` — são as abas
+  `Legislacao` e `Competencias` (próximo passo), podem ficar vazias se o
+  curso não rastreia esses referenciais individualmente.
 
 ## 4. Preencher a matriz curricular
 
 Edite `matriz_curricular.xlsx`. Aba obrigatória: `Componentes`. Opcionais:
 `Equivalencias`, `Nucleos`, `Areas`, `Temas`, `Conteudos`, `Competencias`,
-`Bibliografia`, `Certificacoes` — schema completo em
+`Bibliografia`, `Legislacao`, `Certificacoes` — schema completo em
 `docs/DICIONARIO_DADOS.md`. Pontos que costumam pegar quem preenche pela
 primeira vez:
 
@@ -58,8 +57,8 @@ primeira vez:
   edita o item de catálogo e lista nele os componentes que o cobrem, não
   o contrário.
 - **Pré-requisitos e correquisitos de um componente são colunas da
-  própria aba `Componentes`** (listas separadas por vírgula — ex.:
-  `CTR401, CTR203 (opcional), >=1200h` na coluna `pre_requisitos`).
+  própria aba `Componentes`** (listas separadas por `|` — ex.:
+  `CTR401|CTR203 (opcional)|>=1200h` na coluna `pre_requisitos`).
 - **Optativa não é uma aba** — é um componente com `tipo=carga_optativa`
   na aba `Componentes`.
 - **`tipo`, não `obrigatorio`, decide o que conta no total oficial do
@@ -94,7 +93,7 @@ Capítulos obrigatórios (validados por `PERFIL-003`): `identificacao`,
 
 Macros disponíveis sem precisar `\input` nada: `\ppccurso`,
 `\ppccursocurto`, `\ppcinstituicao`, `\ppcunidadeacademica` — definidas a
-partir de `perfil.yaml` em `ppcgen.geradores.latex` (arquivo
+partir da aba `Perfil` em `ppcgen.geradores.latex` (arquivo
 `curso_macros.tex`, gerado automaticamente).
 
 ## 7. Frontmatter
@@ -137,8 +136,8 @@ Erros (`ERRO`) interrompem a geração por padrão
 (`geracao.interromper_em_erro: true`); alertas (`ALERTA`) não impedem a
 geração, mas ficam registrados em
 `saida/<id>/relatorios/validacao.{html,json}` — nunca corrija um alerta
-"escondendo" o dado, sempre corrigindo a fonte (matriz/`perfil.yaml`) ou
-documentando por que ele é esperado.
+"escondendo" o dado, sempre corrigindo a fonte (a matriz, incluindo a aba
+`Perfil`) ou documentando por que ele é esperado.
 
 ## 10. Customizações de layout (raramente necessário)
 

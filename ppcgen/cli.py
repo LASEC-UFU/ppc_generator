@@ -124,12 +124,6 @@ def _carregar_contexto(perfil: Perfil) -> tuple[Curriculo, ReferenciaisCurso, li
             _curriculo_base, referenciais_base, _avisos_base = carregar_matriz(caminho_matriz_base)
             referenciais = _mesclar_referenciais(referenciais_base, referenciais)
 
-    # legislação vem direto de perfil.yaml (já mesclada com o perfil base,
-    # se houver, em ``ppcgen.config.carregar_perfil``) — não de nenhum
-    # arquivo separado. Competências vêm da matriz, igual a
-    # núcleos/áreas/temas/conteúdos (``carregar_matriz`` acima).
-    referenciais.legislacao = list(perfil.legislacao)
-
     return curriculo, referenciais, avisos
 
 
@@ -383,7 +377,7 @@ def cmd_perfis(_args: argparse.Namespace) -> int:
     linhas = []
     for ref in referencias.values():
         try:
-            perfil = perfis_mod.carregar_perfil(ref.caminho)
+            perfil = perfis_mod.carregar_perfil(ref.caminho, matriz=ref.matriz)
             valido = not validar_perfil(perfil).tem_erro
             linhas.append(
                 (perfil.info.id, perfil.curso.nome, perfil.info.versao, perfil.info.status, str(ref.caminho), valido)
@@ -452,7 +446,7 @@ def _perfis_para_lote(status: str | None) -> list[Perfil]:
     for ref in referencias.values():
         if not ref.ativo:
             continue
-        perfil = perfis_mod.carregar_perfil(ref.caminho)
+        perfil = perfis_mod.carregar_perfil(ref.caminho, matriz=ref.matriz)
         if status is not None and perfil.info.status != status:
             continue
         perfis.append(perfil)

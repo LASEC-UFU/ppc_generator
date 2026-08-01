@@ -13,6 +13,7 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from pathlib import Path
 
+from ppcgen.geradores.html import escapar_html
 from ppcgen.modelos import ComponenteCurricular, Curriculo
 
 
@@ -68,6 +69,8 @@ def comparar_curriculos(anterior: Curriculo, atual: Curriculo) -> RelatorioCompa
     codigos_anteriores = set(por_codigo_anterior)
     codigos_atuais = set(por_codigo_atual)
 
+    ativos_anteriores = anterior.ativos()
+    ativos_atuais = atual.ativos()
     relatorio = RelatorioComparacao(
         versao_anterior=anterior.versao,
         versao_atual=atual.versao,
@@ -85,25 +88,19 @@ def comparar_curriculos(anterior: Curriculo, atual: Curriculo) -> RelatorioCompa
             valor_antigo = _valor_campo(antigo, campo)
             valor_novo = _valor_campo(novo, campo)
             if valor_antigo != valor_novo:
-                relatorio.alterados.append(
-                    DiferencaComponente(codigo, campo, valor_antigo, valor_novo)
-                )
+                relatorio.alterados.append(DiferencaComponente(codigo, campo, valor_antigo, valor_novo))
 
     from ppcgen.modelos import TipoComponente
 
     relatorio.carga_extensao_anterior = sum(
-        c.carga_total for c in anterior.ativos() if c.tipo == TipoComponente.EXTENSAO
+        c.carga_total for c in ativos_anteriores if c.tipo == TipoComponente.EXTENSAO
     )
-    relatorio.carga_extensao_atual = sum(
-        c.carga_total for c in atual.ativos() if c.tipo == TipoComponente.EXTENSAO
-    )
-    relatorio.carga_ead_anterior = sum((c.carga_horaria.ead or 0) for c in anterior.ativos())
-    relatorio.carga_ead_atual = sum((c.carga_horaria.ead or 0) for c in atual.ativos())
+    relatorio.carga_extensao_atual = sum(c.carga_total for c in ativos_atuais if c.tipo == TipoComponente.EXTENSAO)
+    relatorio.carga_ead_anterior = sum((c.carga_horaria.ead or 0) for c in ativos_anteriores)
+    relatorio.carga_ead_atual = sum((c.carga_horaria.ead or 0) for c in ativos_atuais)
 
-    competencias_anteriores = {
-        competencia for c in anterior.ativos() for competencia in c.competencias
-    }
-    competencias_atuais = {competencia for c in atual.ativos() for competencia in c.competencias}
+    competencias_anteriores = {competencia for c in ativos_anteriores for competencia in c.competencias}
+    competencias_atuais = {competencia for c in ativos_atuais for competencia in c.competencias}
     relatorio.competencias_perdidas = sorted(competencias_anteriores - competencias_atuais)
     relatorio.competencias_ganhas = sorted(competencias_atuais - competencias_anteriores)
 
@@ -127,13 +124,20 @@ def gerar_relatorio_comparacao_json(relatorio: RelatorioComparacao, caminho: Pat
 def gerar_relatorio_comparacao_html(relatorio: RelatorioComparacao, caminho: Path) -> None:
     caminho.parent.mkdir(parents=True, exist_ok=True)
 
-    linhas_incluidos = "".join(f"<li><code>{c}</code></li>" for c in relatorio.incluidos) or "<li>nenhum</li>"
-    linhas_removidos = "".join(f"<li><code>{c}</code></li>" for c in relatorio.removidos) or "<li>nenhum</li>"
-    linhas_alterados = "".join(
-        f"<tr><td><code>{d.codigo}</code></td><td>{d.campo}</td>"
-        f"<td>{d.valor_anterior}</td><td>{d.valor_atual}</td></tr>"
-        for d in relatorio.alterados
-    ) or '<tr><td colspan="4">nenhuma alteração</td></tr>'
+    linhas_incluidos = (
+        "".join(f"<li><code>{escapar_html(c)}</code></li>" for c in relatorio.incluidos) or "<li>nenhum</li>"
+    )
+    linhas_removidos = (
+        "".join(f"<li><code>{escapar_html(c)}</code></li>" for c in relatorio.removidos) or "<li>nenhum</li>"
+    )
+    linhas_alterados = (
+        "".join(
+            f"<tr><td><code>{escapar_html(d.codigo)}</code></td><td>{escapar_html(d.campo)}</td>"
+            f"<td>{escapar_html(d.valor_anterior)}</td><td>{escapar_html(d.valor_atual)}</td></tr>"
+            for d in relatorio.alterados
+        )
+        or '<tr><td colspan="4">nenhuma alteração</td></tr>'
+    )
 
     html = f"""<title>Comparação entre Versões Curriculares</title>
 <style>
@@ -144,7 +148,7 @@ th {{ background: #222; color: white; }}
 .resumo {{ display: flex; gap: 1rem; margin: 1rem 0; }}
 .card {{ border-radius: .5rem; padding: .75rem 1rem; background: #2b6ec9; color: white; }}
 </style>
-<h1>Comparação Curricular: {relatorio.versao_anterior} → {relatorio.versao_atual}</h1>
+<h1>Comparação Curricular: {escapar_html(relatorio.versao_anterior)} → {escapar_html(relatorio.versao_atual)}</h1>
 <div class="resumo">
     <div class="card">Carga total: {relatorio.carga_total_anterior}h → {relatorio.carga_total_atual}h</div>
     <div class="card">Extensão: {relatorio.carga_extensao_anterior}h → {relatorio.carga_extensao_atual}h</div>
@@ -160,8 +164,8 @@ th {{ background: #222; color: white; }}
 {linhas_alterados}
 </table>
 <h2>Impacto sobre competências</h2>
-<p>Perdidas: {", ".join(relatorio.competencias_perdidas) or "nenhuma"}</p>
-<p>Ganhas: {", ".join(relatorio.competencias_ganhas) or "nenhuma"}</p>
+<p>Perdidas: {escapar_html(", ".join(relatorio.competencias_perdidas) or "nenhuma")}</p>
+<p>Ganhas: {escapar_html(", ".join(relatorio.competencias_ganhas) or "nenhuma")}</p>
 """
     with open(caminho, "w", encoding="utf-8") as f:
         f.write(html)

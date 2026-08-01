@@ -61,7 +61,7 @@ def validar_cargas(curriculo: Curriculo, perfil: Perfil) -> ResultadoValidacao:
             ErroValidacao(
                 "CARGA_TOTAL_CURSO_DIVERGENTE",
                 f"carga horária total calculada a partir da matriz ({total_calculado}h) "
-                f"difere da configurada em perfil.yaml ({cfg.carga_horaria_total}h).",
+                f"difere da configurada na aba Perfil ({cfg.carga_horaria_total}h).",
             )
         )
 
@@ -88,7 +88,7 @@ def validar_cargas(curriculo: Curriculo, perfil: Perfil) -> ResultadoValidacao:
                 AlertaValidacao(
                     "CARGA_TIPO_DIVERGENTE",
                     f"carga de {rotulo} na matriz ({soma}h) difere da configurada "
-                    f"em curso.yaml ({minimo}h).",
+                    f"na aba Perfil ({minimo}h).",
                 )
             )
 

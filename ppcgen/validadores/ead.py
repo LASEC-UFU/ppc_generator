@@ -1,15 +1,15 @@
 """Validação do percentual máximo de EaD (Seção 9). O limite não é assumido
-pelo código — vem de ``perfil.yaml`` (``curriculo.percentual_maximo_ead``,
+pelo código — vem da aba ``Perfil`` (``curriculo.percentual_maximo_ead``,
 em pontos percentuais 0-100), que por sua vez deve refletir a legislação
-vigente configurada em ``perfil.legislacao`` (``perfil.yaml``).
+vigente registrada na aba ``Legislacao`` da matriz.
 
 Cobre dois tipos de verificação, independentes entre si:
 
 1. o percentual de EaD *realizado* na matriz não pode ultrapassar o
-   configurado (comparação matriz x ``perfil.yaml``, como antes);
+   configurado (comparação matriz x aba ``Perfil``, como antes);
 2. o percentual *configurado* não pode ultrapassar o teto legal do
    formato de oferta declarado em ``oferta.formato`` (Decreto nº
-   12.456/2025 — comparação ``perfil.yaml`` x lei, independente da
+   12.456/2025 — comparação aba ``Perfil`` x lei, independente da
    matriz). ``oferta.formato`` nunca é inferido do percentual — é sempre
    uma decisão explícita do perfil (Seção 6).
 """

@@ -17,6 +17,13 @@ perfil-validar` (isoladamente) ou implicitamente em `validar`/`completo`.
 Verifica que o perfil está minimamente bem-formado — não olha o conteúdo
 da matriz, só a presença/coerência dos arquivos declarados.
 
+Na aba `Perfil`, cada chave preenchida deve ter exatamente o formato
+`secao.campo`, sem duplicatas. Seções diferentes de `perfil`, `curso`,
+`instituicao`, `curriculo`, `oferta`, `arquivos`, `geracao` e `saida` são
+rejeitadas no carregamento, para que erros de digitação não sejam ignorados.
+Campos adicionais em `instituicao.*` continuam aceitos e ficam disponíveis em
+`instituicao.extra` para os templates.
+
 | Código | Severidade | Condição |
 |---|---|---|
 | `PERFIL-000` | ERRO | `perfil.id` não bate com `^[a-z0-9_]+$`, ou começa com `00` (prefixo reservado para material de referência em `saida/`, ex. `saida/00old/`) |
@@ -55,7 +62,7 @@ da matriz, só a presença/coerência dos arquivos declarados.
 | `CARGA_TOTAL_INCONSISTENTE` | ERRO | `TOT ≠ CHT+CHP+CHD+CHE` quando todas as parcelas estão informadas |
 | `CARGA_TOTAL_CURSO_DIVERGENTE` | ERRO | carga oficial calculada (ver `ppcgen/calculo.py`) ≠ `curriculo.carga_horaria_total` configurado |
 | `POOL_OPTATIVAS_INSUFICIENTE` | ERRO | soma dos componentes `tipo=carga_optativa` < `curriculo.carga_optativa_minima` |
-| `CARGA_TIPO_DIVERGENTE` | ALERTA | soma de AAC/estágio/TCC na matriz ≠ configurado em `perfil.yaml` |
+| `CARGA_TIPO_DIVERGENTE` | ALERTA | soma de AAC/estágio/TCC na matriz ≠ configurado na aba `Perfil` |
 | `CARGA_MAXIMA_PERIODO_EXCEDIDA` | ERRO | soma de um período > `curriculo.carga_horaria_maxima_periodo` |
 
 ## Extensão (`ppcgen.validadores.extensao`)
@@ -76,9 +83,9 @@ da matriz, só a presença/coerência dos arquivos declarados.
 `EAD_ACIMA_DO_MAXIMO` só executa se `curriculo.percentual_maximo_ead`
 estiver configurado (`None` = regra desativada, nunca assumida); o mesmo
 vale para `EXTENSAO_ABAIXO_DO_MINIMO` acima. `EAD_ACIMA_DO_TETO_LEGAL_FORMATO`
-e `OFERTA_FORMATO_DESCONHECIDO` não dependem da matriz — comparam
-`perfil.yaml` diretamente contra a lei, então rodam mesmo sem nenhum
-componente cadastrado. O Decreto nº 12.456/2025 também define pisos de
+e `OFERTA_FORMATO_DESCONHECIDO` não dependem dos componentes da matriz —
+comparam a aba `Perfil` diretamente contra a lei, então rodam mesmo sem
+nenhum componente cadastrado. O Decreto nº 12.456/2025 também define pisos de
 atividade síncrona mediada por componente que este projeto ainda não
 modela (não há campo de carga síncrona/assíncrona na matriz) — só o teto
 presencial/EaD agregado é verificado.
@@ -87,7 +94,7 @@ presencial/EaD agregado é verificado.
 
 Lidos da coluna `pre_requisitos`/`correquisitos` da aba `Componentes`
 (sintaxe em `docs/DICIONARIO_DADOS.md`) — célula
-`CTR401, CTR203 (opcional), >=1200h` vira três `PreRequisito`.
+`CTR401|CTR203 (opcional)|>=1200h` vira três `PreRequisito`.
 
 | Código | Severidade | Condição |
 |---|---|---|

@@ -47,9 +47,9 @@ Um script de migração deve:
 - extrair catálogos hardcoded do gerador antigo (ex.: listas de conteúdo
   fixas no código-fonte de um gerador anterior) para as abas de registro
   da matriz (`Nucleos`/`Areas`/`Temas`/`Conteudos`/`Competencias`,
-  populando a coluna `componentes` de cada uma) ou para `legislacao:` em
-  `perfil.yaml`, conforme o caso — ver `docs/DICIONARIO_DADOS.md` —
-  documentando de onde vieram, nunca inventando ids novos silenciosamente;
+  populando a coluna `componentes` de cada uma, ou `Legislacao`, conforme
+  o caso) — ver `docs/DICIONARIO_DADOS.md` — documentando de onde vieram,
+  nunca inventando ids novos silenciosamente;
 - copiar fichas curriculares para as subpastas por tipo, usando o leitor
   real de fichas (`ppcgen.leitores.fichas.carregar_fichas`) para casar
   cada arquivo com um componente da matriz — fichas não reconhecidas vão
@@ -120,10 +120,10 @@ usado para descobrir o bug.
 Um perfil migrado de dados reais tipicamente chega com alguns erros
 genuínos pré-existentes nos dados de origem (como o `FEELT!PP`
 autorreferenciado acima) que não bloqueiam o uso prático do PPC enquanto
-uma decisão acadêmica não é tomada. Nesse caso, `perfil.yaml` pode setar
-`geracao.interromper_em_erro: false` — mas sempre com um comentário no
-próprio YAML explicando qual erro é tolerado e por quê, nunca como forma
-de silenciar validação de verdade.
+uma decisão acadêmica não é tomada. Nesse caso, a aba `Perfil` pode setar
+`geracao.interromper_em_erro` como `FALSE` — mas sempre com uma
+observação na própria planilha explicando qual erro é tolerado e por quê,
+nunca como forma de silenciar validação de verdade.
 
 ### 6. Comparando com o resultado antigo
 
