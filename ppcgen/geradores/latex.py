@@ -45,6 +45,17 @@ def _ler_yaml_opcional(caminho: Path | None) -> dict:
     return yaml.safe_load(caminho.read_text(encoding="utf-8")) or {}
 
 
+def gerar_capitulos_tex(capitulos: list[str]) -> str:
+    """Gera um ``\\input{textos/<nome>}`` por item de ``perfil.arquivos.capitulos``,
+    na ordem declarada — ``templates/latex/Main.tex`` faz um único
+    ``\\input{gerado/capitulos}`` no lugar da lista fixa que existia antes
+    (a lista/ordem agora é decisão do perfil, aba ``Perfil``)."""
+
+    if not capitulos:
+        return "% Nenhum capítulo declarado em arquivos.capitulos na aba Perfil.\n"
+    return "".join(rf"\input{{textos/{nome}}}" "\n" for nome in capitulos)
+
+
 def gerar_frontmatter(perfil: Perfil) -> str:
     """Gera a capa e a folha de rosto (autoridades/comissão) a partir de
     ``frontmatter/{capa,autoridades,comissao}.yaml`` do perfil (com fallback
@@ -207,6 +218,7 @@ def gerar_arquivos_latex(
     escrever("curso_macros.tex", macros)
     escrever("frontmatter.tex", gerar_frontmatter(perfil))
     escrever("bibliografia.bib", gerar_bibliografia_bib(referenciais.bibliografia))
+    escrever("capitulos.tex", gerar_capitulos_tex(perfil.arquivos.capitulos))
 
     # --- Fluxo curricular e representação gráfica -------------------------
     escrever("tab_fluxo_curricular.tex", gerar_tabela_fluxo(curriculo, perfil, nomes_por_codigo))

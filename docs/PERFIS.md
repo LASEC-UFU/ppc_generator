@@ -87,6 +87,9 @@ arquivos.figuras                            figuras
 arquivos.anexos                             anexos
 arquivos.frontmatter                        frontmatter
 arquivos.overrides                          overrides
+arquivos.capitulos                          identificacao|apresentacao|...  # lista/ordem dos capítulos do PDF,
+                                                                # itens separados por `|`, sem `.tex` — vazio cai
+                                                                # nos 12 padrão (CAPITULOS_PADRAO)
 
 geracao.anexar_fichas                       TRUE
 geracao.anexar_resolucoes                   TRUE

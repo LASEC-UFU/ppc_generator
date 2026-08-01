@@ -85,11 +85,16 @@ nomes de arquivo gerados em `docs/DICIONARIO_DADOS.md` ou inspecionando
 `ppcgen/geradores/latex.py`). Use o perfil `controle_automacao_2027_1`
 como referência de quais `\input{gerado/tab_*}`/`\IfFileExists{...}` usar.
 
-Capítulos obrigatórios (validados por `PERFIL-003`): `identificacao`,
-`apresentacao`, `justificativa`, `principios`, `perfil_egresso`,
-`objetivos`, `estrutura_curricular`, `diretrizes_pedagogicas`,
-`avaliacao`, `atendimento_estudante`, `acompanhamento_egresso`,
-`consideracoes_finais`.
+Capítulos obrigatórios (validados por `PERFIL-003`), na ordem em que
+entram no PDF: `identificacao`, `apresentacao`, `justificativa`,
+`principios`, `perfil_egresso`, `objetivos`, `estrutura_curricular`,
+`diretrizes_pedagogicas`, `avaliacao`, `atendimento_estudante`,
+`acompanhamento_egresso`, `consideracoes_finais` — essa é a lista padrão
+(`ppcgen.config.CAPITULOS_PADRAO`), usada quando `arquivos.capitulos` não
+está preenchido na aba `Perfil`. Pra mudar o conjunto ou a ordem só
+**deste** curso, preencha `arquivos.capitulos` com sua própria lista
+(itens separados por `|`, sem `.tex`) — `PERFIL-003` e a montagem do PDF
+passam a seguir exatamente o que estiver lá.
 
 Macros disponíveis sem precisar `\input` nada: `\ppccurso`,
 `\ppccursocurto`, `\ppcinstituicao`, `\ppcunidadeacademica` — definidas a

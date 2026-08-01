@@ -48,10 +48,10 @@ por nome); `curriculo.carga_horaria_total`/`carga_obrigatoria`/
 `carga_horaria_maxima_periodo`/`periodo_minimo_tcc`/
 `periodo_minimo_estagio`; `oferta.formato`/`possui_carga_ead`/
 `norma_federal`/`norma_institucional`/`status_validacao_institucional`;
-`arquivos.textos`/`fichas`/`figuras`/`anexos`/`frontmatter`/`overrides`
-(não existe linha `arquivos.matriz` — o nome do arquivo de matriz é
-sempre o arquivo que acabou de ser aberto para ler esta própria aba,
-nunca configurável de dentro dela); `geracao.template`/`anexar_fichas`/
+`arquivos.textos`/`fichas`/`figuras`/`anexos`/`frontmatter`/`overrides`/
+`capitulos` (não existe linha `arquivos.matriz` — o nome do arquivo de
+matriz é sempre o arquivo que acabou de ser aberto para ler esta própria
+aba, nunca configurável de dentro dela); `geracao.template`/`anexar_fichas`/
 `anexar_resolucoes`/`gerar_fluxo_curricular`/
 `gerar_representacao_grafica`/`gerar_relatorio_validacao`/
 `compilar_pdf`/`interromper_em_erro`; `saida.nome_base`/`gerar_corpo`/
@@ -61,7 +61,14 @@ Célula `valor` em branco omite aquele campo — o default da dataclass
 correspondente se aplica (idêntico a omitir a chave no antigo YAML). Sem
 coluna de tipo separada: número/booleano nativos do Excel passam direto;
 texto `TRUE`/`FALSE`/`VERDADEIRO`/`FALSO` (case-insensitive) vira `bool`;
-texto numérico vira `int`/`float`; o resto fica string.
+texto numérico vira `int`/`float`; o resto fica string — exceto
+`arquivos.capitulos`, o único campo de lista: itens separados por `|`
+(mesmo formato de `componentes`/`pre_requisitos` nas outras abas), sem a
+extensão `.tex`, um `\input{textos/<nome>}` por item **na ordem em que
+aparecem na célula** — essa é a lista/ordem dos capítulos do corpo do PPC
+(substitui a lista antes fixa em `templates/latex/Main.tex`); célula
+vazia ou linha ausente cai no default de 12 capítulos padrão
+(`ppcgen.config.CAPITULOS_PADRAO`).
 
 ### Aba `Componentes`
 

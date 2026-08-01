@@ -11,24 +11,11 @@ from pathlib import Path
 
 import openpyxl
 
+from ppcgen.config import CAPITULOS_PADRAO
 from ppcgen.excecoes import ConfiguracaoInvalida
 
 _PASTAS_FICHAS = ("obrigatorias", "optativas", "extensao", "tcc", "estagio", "complementares")
 _PASTAS_ANEXOS = ("resolucoes", "pareceres", "outros")
-_TEXTOS = (
-    "identificacao.tex",
-    "apresentacao.tex",
-    "justificativa.tex",
-    "principios.tex",
-    "perfil_egresso.tex",
-    "objetivos.tex",
-    "estrutura_curricular.tex",
-    "diretrizes_pedagogicas.tex",
-    "avaliacao.tex",
-    "atendimento_estudante.tex",
-    "acompanhamento_egresso.tex",
-    "consideracoes_finais.tex",
-)
 
 
 def _linhas_perfil_padrao(perfil_id: str, nome: str) -> list[tuple[str, object]]:
@@ -74,6 +61,7 @@ def _linhas_perfil_padrao(perfil_id: str, nome: str) -> list[tuple[str, object]]
         ("arquivos.anexos", "anexos"),
         ("arquivos.frontmatter", "frontmatter"),
         ("arquivos.overrides", "overrides"),
+        ("arquivos.capitulos", "|".join(CAPITULOS_PADRAO)),
         ("geracao.template", "padrao"),
         ("geracao.anexar_fichas", True),
         ("geracao.anexar_resolucoes", True),
@@ -150,9 +138,9 @@ def criar_perfil(pasta_perfis: Path, perfil_id: str, nome: str) -> Path:
 
     _criar_matriz_vazia(destino / "matriz_curricular.xlsx", perfil_id, nome)
 
-    for nome_arquivo in _TEXTOS:
-        titulo = nome_arquivo.replace(".tex", "").replace("_", " ").title()
-        (destino / "textos" / nome_arquivo).write_text(
+    for nome_capitulo in CAPITULOS_PADRAO:
+        titulo = nome_capitulo.replace("_", " ").title()
+        (destino / "textos" / f"{nome_capitulo}.tex").write_text(
             f"% TODO: escrever o capítulo '{titulo}'.\n", encoding="utf-8"
         )
 

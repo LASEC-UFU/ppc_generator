@@ -99,6 +99,26 @@ class OfertaConfig:
     ``norma_institucional`` não estiver preenchida com um ato publicado."""
 
 
+CAPITULOS_PADRAO: tuple[str, ...] = (
+    "identificacao",
+    "apresentacao",
+    "justificativa",
+    "principios",
+    "perfil_egresso",
+    "objetivos",
+    "estrutura_curricular",
+    "diretrizes_pedagogicas",
+    "avaliacao",
+    "atendimento_estudante",
+    "acompanhamento_egresso",
+    "consideracoes_finais",
+)
+"""Nomes (sem ``.tex``) dos capítulos do corpo do PPC, na ordem em que
+entram no PDF — único lugar canônico dessa lista; ``ArquivosConfig.capitulos``
+usa isto como default quando o perfil não declara ``arquivos.capitulos``
+na aba ``Perfil``."""
+
+
 @dataclass
 class ArquivosConfig:
     matriz: str = "matriz_curricular.xlsx"
@@ -108,6 +128,12 @@ class ArquivosConfig:
     anexos: str = "anexos"
     frontmatter: str = "frontmatter"
     overrides: str = "overrides"
+    capitulos: list[str] = field(default_factory=lambda: list(CAPITULOS_PADRAO))
+    """Nomes dos capítulos (sem ``.tex``, relativos a ``textos/``) e a
+    ordem em que ``\\input`` entram no PDF — consumido por
+    ``ppcgen.geradores.latex.gerar_capitulos_tex`` (gera ``gerado/capitulos.tex``,
+    referenciado por ``templates/latex/Main.tex``) e por
+    ``ppcgen.validadores.perfil`` (``PERFIL-003``)."""
 
 
 @dataclass
@@ -205,7 +231,16 @@ def _extrair_extra_instituicao(dados: dict) -> dict:
 
 def _construir(cls, dados: dict):
     campos_validos = set(cls.__dataclass_fields__)
-    filtrado = {k: v for k, v in dados.items() if k in campos_validos}
+    filtrado = {}
+    for chave, valor in dados.items():
+        if chave not in campos_validos:
+            continue
+        campo = cls.__dataclass_fields__[chave]
+        if campo.type == "list[str]" and isinstance(valor, str):
+            # Célula única da aba `Perfil` com itens separados por `|` —
+            # mesmo formato de `componentes`/`pre_requisitos` na matriz.
+            valor = [item.strip() for item in valor.split("|") if item.strip()]
+        filtrado[chave] = valor
     desconhecidos = set(dados) - campos_validos
     if desconhecidos:
         raise ConfiguracaoInvalida(f"Campo(s) desconhecido(s) em {cls.__name__}: {', '.join(sorted(desconhecidos))}")

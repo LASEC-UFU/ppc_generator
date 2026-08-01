@@ -334,6 +334,41 @@ def test_ler_configuracao_perfil_coage_valores(tmp_path):
     assert bruto["instituicao"]["endereco"] == "Av. Exemplo, 123"
 
 
+def test_carregar_perfil_le_arquivos_capitulos_customizado(tmp_path):
+    """``arquivos.capitulos`` é o único campo de lista da aba ``Perfil`` —
+    célula com itens separados por ``|`` vira ``list[str]``, na ordem
+    declarada; sem a linha, cai no default (``CAPITULOS_PADRAO``)."""
+
+    from ppcgen.config import CAPITULOS_PADRAO, carregar_perfil
+
+    caminho = tmp_path / "matriz_curricular.xlsx"
+    wb = openpyxl.Workbook()
+    wb.remove(wb.active)
+    wb.create_sheet("Componentes").append(["codigo", "nome", "tipo"])
+
+    perfil = wb.create_sheet("Perfil")
+    perfil.append(["chave", "valor"])
+    perfil.append(["perfil.id", "teste_capitulos"])
+    perfil.append(["arquivos.capitulos", "introducao|conclusao"])
+    wb.save(caminho)
+
+    perfil_carregado = carregar_perfil(tmp_path, raiz_dados=tmp_path.parent)
+    assert perfil_carregado.arquivos.capitulos == ["introducao", "conclusao"]
+
+    caminho_sem_linha = tmp_path / "outro" / "matriz_curricular.xlsx"
+    caminho_sem_linha.parent.mkdir()
+    wb2 = openpyxl.Workbook()
+    wb2.remove(wb2.active)
+    wb2.create_sheet("Componentes").append(["codigo", "nome", "tipo"])
+    perfil2 = wb2.create_sheet("Perfil")
+    perfil2.append(["chave", "valor"])
+    perfil2.append(["perfil.id", "teste_capitulos_default"])
+    wb2.save(caminho_sem_linha)
+
+    perfil_default = carregar_perfil(caminho_sem_linha.parent, raiz_dados=tmp_path.parent)
+    assert perfil_default.arquivos.capitulos == list(CAPITULOS_PADRAO)
+
+
 def test_carregar_perfil_aba_ausente_gera_erro_formatado(tmp_path):
     caminho = tmp_path / "matriz.xlsx"
     wb = openpyxl.Workbook()

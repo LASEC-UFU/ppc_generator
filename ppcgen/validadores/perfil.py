@@ -15,21 +15,6 @@ from ppcgen.modelos import AlertaValidacao, ErroValidacao, ResultadoValidacao
 
 _ID_VALIDO = re.compile(r"^[a-z0-9_]+$")
 
-_TEXTOS_OBRIGATORIOS = (
-    "identificacao.tex",
-    "apresentacao.tex",
-    "justificativa.tex",
-    "principios.tex",
-    "perfil_egresso.tex",
-    "objetivos.tex",
-    "estrutura_curricular.tex",
-    "diretrizes_pedagogicas.tex",
-    "avaliacao.tex",
-    "atendimento_estudante.tex",
-    "acompanhamento_egresso.tex",
-    "consideracoes_finais.tex",
-)
-
 _PASTAS_FICHAS = ("obrigatorias", "optativas", "extensao", "tcc", "estagio", "complementares")
 
 
@@ -73,7 +58,8 @@ def validar_perfil(perfil: Perfil) -> ResultadoValidacao:
                 )
             )
 
-    for nome_arquivo in _TEXTOS_OBRIGATORIOS:
+    for nome_capitulo in perfil.arquivos.capitulos:
+        nome_arquivo = f"{nome_capitulo}.tex"
         caminho = perfil.resolver_arquivo(f"{perfil.arquivos.textos}/{nome_arquivo}")
         if caminho is None:
             resultado.adicionar(
