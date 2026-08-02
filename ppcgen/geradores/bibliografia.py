@@ -4,9 +4,19 @@ curricular (Seção 3) — nunca um ``.bib`` estático em ``dados/``: o único
 por ``ppcgen.geradores.latex.gerar_arquivos_latex``.
 
 ``ppcgen.utilitarios.latex.escapar`` é reaproveitado para os campos que o
-BibTeX/biblatex tipografa (título, nota, autor...) — nunca em ``url``, que
-vai dentro de ``\\url{...}`` (verbatim: ``%``/``_``/``&`` não precisam de
-escape ali, e escapá-los quebraria o link).
+BibTeX/biblatex tipografa (título, nota, autor...) — nunca em ``url``: o
+campo ``url`` do biblatex é declarado ``verbatim`` no datamodel padrão, e
+biber o escreve no ``.bbl`` com o mecanismo ``\\verb{url}...\\endverb``
+(catcodes trocados antes da leitura, terminador ``\\endverb`` — não chaves),
+imune a ``%``/``_``/``&``. Não reconstruir isso manualmente com
+``\\url{...}`` dentro de outro campo comum (ex.: ``howpublished``): esse
+``\\url{}`` fica aninhado no argumento de ``\\field{...}{...}``, que já foi
+tokenizado com os catcodes normais antes do ``\\url`` conseguir proteger
+qualquer coisa — um ``%`` cru na URL (comum em URLs com acentos
+percent-encoded, ex. ``%C3%A7``) já vira comentário do LaTeX e trunca o
+campo, quebrando a compilação. Emitir sempre o campo ``url`` nativo e deixar
+o estilo bibliográfico (``style=numeric`` em ``Main.tex``) renderizar
+"Disponível em: ..." sozinho via ``brazilian.lbx``.
 """
 
 from __future__ import annotations
@@ -49,8 +59,9 @@ def _entrada_para_bib(entrada: EntradaBibliografica) -> str:
             linhas.append(_campo(nome_bibtex, escapar(valor)))
 
     if entrada.url:
-        # \url{} é verbatim (pacote url/hyperref) — não escapar o conteúdo.
-        linhas.append(_campo("howpublished", "Disponível em: \\url{" + entrada.url + "}"))
+        # Campo verbatim do biblatex — ver docstring do módulo. Não escapar
+        # nem embrulhar em \url{} manualmente aqui.
+        linhas.append(_campo("url", entrada.url))
     if entrada.nota:
         linhas.append(_campo("note", escapar(entrada.nota)))
 
