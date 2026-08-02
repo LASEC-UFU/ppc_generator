@@ -68,7 +68,6 @@ def _linhas_perfil_padrao(perfil_id: str, nome: str) -> list[tuple[str, object]]
         ("arquivos.fichas", "fichas"),
         ("arquivos.figuras", "figuras"),
         ("arquivos.anexos", "anexos"),
-        ("arquivos.frontmatter", "frontmatter"),
         ("arquivos.overrides", "overrides"),
         ("arquivos.capitulos", "|".join(CAPITULOS_PADRAO)),
         ("geracao.template", "padrao"),
@@ -118,6 +117,8 @@ def _criar_matriz_vazia(caminho: Path, perfil_id: str, nome: str) -> None:
             ],
         ),
         ("Legislacao", ["id", "nome", "tipo", "documento", "ano", "observacoes", "url", "chave_bibliografica"]),
+        ("Autoridades", ["cargo", "nome", "observacoes"]),
+        ("Comissao", ["membro"]),
     ):
         ws = wb.create_sheet(aba)
         ws.append(cabecalho)
@@ -135,7 +136,6 @@ def criar_perfil(pasta_perfis: Path, perfil_id: str, nome: str) -> Path:
 
     destino.mkdir(parents=True)
     (destino / "textos").mkdir()
-    (destino / "frontmatter").mkdir()
     (destino / "figuras" / "imagens_capitulos").mkdir(parents=True)
     (destino / "figuras" / "diagramas").mkdir(parents=True)
     (destino / "overrides" / "latex").mkdir(parents=True)
@@ -153,24 +153,19 @@ def criar_perfil(pasta_perfis: Path, perfil_id: str, nome: str) -> Path:
             f"% TODO: escrever o capítulo '{titulo}'.\n", encoding="utf-8"
         )
 
-    (destino / "frontmatter" / "capa.yaml").write_text("capa:\n  ano: null\n", encoding="utf-8")
-    (destino / "frontmatter" / "autoridades.yaml").write_text("autoridades: []\n", encoding="utf-8")
-    (destino / "frontmatter" / "comissao.yaml").write_text(
-        "comissao:\n  titulo: \"Equipe de elaboração deste Projeto Pedagógico\"\n  membros: []\n",
-        encoding="utf-8",
-    )
-
     (destino / "README.md").write_text(
         f"# Perfil: {perfil_id}\n\n{nome}\n\nStatus: rascunho — gerado por "
         "`python -m ppcgen perfil-criar`. Preencha `matriz_curricular.xlsx`: "
-        "a aba `Perfil` (info/curso/instituição/currículo/oferta/geração/"
-        "saída, uma linha chave/valor por campo); componentes; as abas "
-        "Nucleos/Areas/Temas/Conteudos/Competencias, cada uma com sua coluna "
-        "`componentes` listando os códigos vinculados, separados por `|`; a "
-        "aba Bibliografia, uma linha por referência — o `.bib` compilado é "
-        "sempre gerado a partir dela, nunca editado à mão; e a aba "
-        "Legislacao, uma linha por referencial legal. Preencha também "
-        "`textos/` antes de validar.\n",
+        "a aba `Perfil` (info/curso/instituição/currículo/oferta/capa/"
+        "comissão/geração/saída, uma linha chave/valor por campo); "
+        "componentes; as abas Nucleos/Areas/Temas/Conteudos/Competencias, "
+        "cada uma com sua coluna `componentes` listando os códigos "
+        "vinculados, separados por `|`; a aba Bibliografia, uma linha por "
+        "referência — o `.bib` compilado é sempre gerado a partir dela, "
+        "nunca editado à mão; a aba Legislacao, uma linha por referencial "
+        "legal; e as abas Autoridades/Comissao, com os nomes reais de quem "
+        "coordena o curso e integra a comissão de elaboração deste PPC "
+        "(nunca placeholder). Preencha também `textos/` antes de validar.\n",
         encoding="utf-8",
     )
 

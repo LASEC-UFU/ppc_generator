@@ -29,10 +29,17 @@ Esquema de abas adotado (documentado em ``docs/DICIONARIO_DADOS.md``):
 9. ``Legislacao``    — catálogo de referenciais legais do curso (id, nome,
    tipo, documento, ano, observações).
 10. ``Certificacoes`` — opcional: certificacao_id -> codigo_componente (0+).
-11. ``Perfil``        — chave/valor (``ler_configuracao_perfil`` abaixo):
-    info/curso/instituição/currículo/oferta/arquivos/geração/saída do
-    perfil — não existe mais ``perfil.yaml``, esta aba concentra toda a
-    configuração que não é curricular.
+11. ``Autoridades``   — opcional: folha de rosto do PPC (reitor, vice-reitor,
+    coordenador do curso...) — cargo, nome, observações, na ordem em que
+    aparecem na planilha.
+12. ``Comissao``      — opcional: membros da comissão de elaboração deste
+    PPC (uma coluna ``membro``, texto livre, na ordem de exibição); o
+    título da comissão é ``comissao.titulo`` na aba ``Perfil``, não vive
+    aqui.
+13. ``Perfil``        — chave/valor (``ler_configuracao_perfil`` abaixo):
+    info/curso/instituição/currículo/oferta/capa/comissão/arquivos/geração/
+    saída do perfil — não existe mais ``perfil.yaml``, esta aba concentra
+    toda a configuração que não é curricular.
 
 Em cada aba de catálogo (3-7), ``componentes`` é uma célula com códigos de
 componente separados por ``|`` — os componentes vinculados àquele item. O
@@ -61,6 +68,7 @@ import openpyxl
 from ppcgen.excecoes import ArquivoNaoEncontrado, FormatoInvalido
 from ppcgen.modelos import (
     AreaFormacao,
+    Autoridade,
     CargaHoraria,
     Competencia,
     ComponenteCurricular,
@@ -88,6 +96,8 @@ ABAS_OPCIONAIS = (
     "Bibliografia",
     "Legislacao",
     "Certificacoes",
+    "Autoridades",
+    "Comissao",
 )
 
 _SUFIXO_OPCIONAL = "(opcional)"
@@ -330,6 +340,24 @@ def carregar_registros_referenciais(wb) -> ReferenciaisCurso:
                         chave_bibliografica=_str_ou_vazio(row.get("chave_bibliografica")),
                     )
                 )
+
+    if "Autoridades" in wb.sheetnames:
+        for row in _linhas(wb["Autoridades"]):
+            cargo = _str_ou_vazio(row.get("cargo"))
+            if cargo:
+                referenciais.autoridades.append(
+                    Autoridade(
+                        cargo=cargo,
+                        nome=_str_ou_vazio(row.get("nome")),
+                        observacoes=_str_ou_vazio(row.get("observacoes")),
+                    )
+                )
+
+    if "Comissao" in wb.sheetnames:
+        for row in _linhas(wb["Comissao"]):
+            membro = _str_ou_vazio(row.get("membro"))
+            if membro:
+                referenciais.comissao_membros.append(membro)
 
     return referenciais
 

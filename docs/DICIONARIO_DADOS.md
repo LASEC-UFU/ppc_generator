@@ -26,8 +26,9 @@ aba `Componentes`.
 ### Aba `Perfil`
 
 Chave/valor — uma linha por campo de configuração do perfil (não
-curricular): identificação, curso, instituição, currículo, oferta,
-arquivos, geração e saída. Substitui inteiramente o antigo `perfil.yaml`.
+curricular): identificação, curso, instituição, currículo, oferta, capa,
+comissão de elaboração, arquivos, geração e saída. Substitui inteiramente
+o antigo `perfil.yaml`.
 
 | Coluna | Descrição |
 |---|---|
@@ -51,7 +52,12 @@ por nome); `curriculo.carga_horaria_total`/`carga_obrigatoria`/
 `carga_horaria_maxima_periodo`/`periodo_minimo_tcc`/
 `periodo_minimo_estagio`; `oferta.formato`/`possui_carga_ead`/
 `norma_federal`/`norma_institucional`/`status_validacao_institucional`;
-`arquivos.textos`/`fichas`/`figuras`/`anexos`/`frontmatter`/`overrides`/
+`capa.ano`/`logo_curso` (`logo_curso` é o caminho, relativo à pasta do
+perfil, de uma logomarca própria do curso — ex.: `figuras/logo.png`;
+vazio omite a imagem na capa, distinto do logo institucional da UFU, fixo
+no template); `comissao.titulo` (título da caixa de créditos na folha de
+rosto — os nomes dos membros vêm da aba `Comissao`, ver abaixo);
+`arquivos.textos`/`fichas`/`figuras`/`anexos`/`overrides`/
 `capitulos` (não existe linha `arquivos.matriz` — o nome do arquivo de
 matriz é sempre o arquivo que acabou de ser aberto para ler esta própria
 aba, nunca configurável de dentro dela); `geracao.template`/`anexar_fichas`/
@@ -280,12 +286,17 @@ ela já estiver cadastrada naquela aba.
 
 Texto UTF-8 normal, sem escapes de LaTeX (nada de `{\c c}`/`\~a`) — o
 gerador aplica o escape necessário automaticamente, exceto em `url`, que
-vai dentro de `\url{...}` (verbatim, não precisa e não deve ser escapado).
-`autor` e `titulo` viram os campos BibTeX `author`/`title`; os demais campos
-têm o mesmo nome em português e em BibTeX (`endereco`→`address`,
+vira o campo nativo `url` do biblatex (tipo `verbatim` no datamodel padrão
+— biber o escreve no `.bbl` com `\verb{url}...\endverb`, imune a
+`%`/`_`/`&`; não precisa e não deve ser escapado, e não deve ser
+reconstruído manualmente com `\url{...}` dentro de outro campo comum —
+ver a docstring de `ppcgen.geradores.bibliografia` para o motivo). `autor`
+e `titulo` viram os campos BibTeX `author`/`title`; os demais campos têm o
+mesmo nome em português e em BibTeX (`endereco`→`address`,
 `editora`→`publisher` etc. — ver `ppcgen.geradores.bibliografia` para o
-mapeamento completo); `url` + o texto fixo "Disponível em:" viram o campo
-`howpublished`.
+mapeamento completo). O estilo bibliográfico (`style=numeric` em
+`Main.tex`) exibe o campo `url` automaticamente como "Disponível em: ..."
+via a localização `brazilian.lbx`.
 
 ### Aba `Legislacao`
 
@@ -307,6 +318,41 @@ Se `perfil.extends` aponta para um perfil base, as listas de `legislacao`
 de ambos são mescladas por `id` (o perfil atual sobrescreve o base em caso
 de colisão) — ver Seção 9 de `docs/PERFIS.md`.
 
+### Aba `Autoridades` (opcional)
+
+Folha de rosto do PPC — reitor, vice-reitor, pró-reitores, direção da
+unidade, coordenação do curso etc. Uma linha por autoridade, **na ordem em
+que devem aparecer** na folha de rosto (não há coluna de ordenação — a
+ordem é a das linhas na planilha).
+
+| Campo | Tipo | Obrigatório | Exemplo |
+|---|---|---|---|
+| `cargo` | texto | sim | `Coordenador(a) do Curso de Tecnologia em Automação Industrial` |
+| `nome` | texto | não | `Prof. Dr. Fulano de Tal` |
+| `observacoes` | texto | não | ex.: aviso de nome ainda pendente de confirmação |
+
+Se `perfil.extends` aponta para um perfil base, as listas são mescladas
+por `cargo` (o perfil atual sobrescreve o base em caso de colisão) — mesma
+regra dos demais catálogos (Seção 9 de `docs/PERFIS.md`); útil para vários
+cursos da mesma instituição herdarem reitor/vice-reitor de um perfil base
+comum e só declararem a própria coordenação.
+
+### Aba `Comissao` (opcional)
+
+Membros da comissão de elaboração deste PPC (o título da caixa de
+créditos é `comissao.titulo`, na aba `Perfil`, não aqui). Uma linha por
+membro, texto livre, na ordem de exibição.
+
+| Campo | Tipo | Obrigatório | Exemplo |
+|---|---|---|---|
+| `membro` | texto | sim | `Prof. Dr. Fulano de Tal -- presidente da Comissão` |
+
+Diferente dos demais catálogos, a lista **não** é mesclada item a item
+entre perfil atual e base quando há `extends`: um perfil que declara sua
+própria aba `Comissao` substitui a comissão inteira do base (não faz
+sentido combinar comissões de propostas diferentes por item) — se a aba
+estiver vazia/ausente, herda a lista completa do base.
+
 ### Aba `Certificacoes` (opcional)
 
 Só é lida se existir. `certificacao_id`, `nome`, `codigo_componente` (uma
@@ -324,6 +370,7 @@ Não existe mais `perfil.yaml` — ver "Aba `Perfil`" acima. Ver
 `docs/PERFIS.md` para a lista comentada de todas as seções e
 `ppcgen/config.py` para a lista definitiva de campos de cada uma
 (`InfoPerfil`, `CursoConfig`, `InstituicaoConfig`, `CurriculoConfig`,
-`OfertaConfig`, `ArquivosConfig`, `GeracaoConfig`, `SaidaConfig`) — os
+`OfertaConfig`, `CapaConfig`, `ComissaoConfig`, `ArquivosConfig`,
+`GeracaoConfig`, `SaidaConfig`) — os
 nomes dos campos na aba são idênticos aos atributos das dataclasses, e um
 campo desconhecido causa erro imediato ao carregar (`ConfiguracaoInvalida`).

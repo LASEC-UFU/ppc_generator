@@ -11,8 +11,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import yaml
-
 from ppcgen.calculo import carga_horaria_oficial, carga_por_tipo, componentes_oficiais
 from ppcgen.config import Perfil
 from ppcgen.geradores.bibliografia import gerar_bibliografia_bib
@@ -39,12 +37,6 @@ def _escrever(pasta: Path, nome_arquivo: str, corpo: str, fonte: str, versao: st
     return caminho
 
 
-def _ler_yaml_opcional(caminho: Path | None) -> dict:
-    if caminho is None or not caminho.exists():
-        return {}
-    return yaml.safe_load(caminho.read_text(encoding="utf-8")) or {}
-
-
 def gerar_capitulos_tex(capitulos: list[str]) -> str:
     """Gera um ``\\input{textos/<nome>}`` por item de ``perfil.arquivos.capitulos``,
     na ordem declarada — ``templates/latex/Main.tex`` faz um único
@@ -56,37 +48,32 @@ def gerar_capitulos_tex(capitulos: list[str]) -> str:
     return "".join(rf"\input{{textos/{nome}}}" "\n" for nome in capitulos)
 
 
-def gerar_frontmatter(perfil: Perfil) -> str:
+def gerar_frontmatter(perfil: Perfil, referenciais: ReferenciaisCurso) -> str:
     """Gera a capa e a folha de rosto (autoridades/comissão) a partir de
-    ``frontmatter/{capa,autoridades,comissao}.yaml`` do perfil (com fallback
-    para o perfil base, via ``extends``), sem exigir que o perfil escreva
-    LaTeX à mão para isso — ``frontmatter/folha_rosto.tex`` continua
-    disponível para conteúdo adicional livre (ver templates/latex/Main.tex).
+    ``perfil.capa``/``perfil.comissao`` (aba ``Perfil``) e
+    ``referenciais.autoridades``/``referenciais.comissao_membros`` (abas
+    ``Autoridades``/``Comissao``) — nenhum LaTeX manual é necessário para
+    isso.
 
     O layout replica o do template original (capa com faixa/logo
     institucional em margens reduzidas, rodapé com a unidade acadêmica e
     contato).
     """
 
-    pasta_front = perfil.arquivos.frontmatter
-    capa = _ler_yaml_opcional(perfil.resolver_arquivo(f"{pasta_front}/capa.yaml")).get("capa", {})
-    autoridades_perfil = _ler_yaml_opcional(
-        perfil.resolver_arquivo(f"{pasta_front}/autoridades.yaml")
-    ).get("autoridades", [])
-    comissao = _ler_yaml_opcional(perfil.resolver_arquivo(f"{pasta_front}/comissao.yaml")).get(
-        "comissao", {}
-    )
+    capa = perfil.capa
+    autoridades_perfil = referenciais.autoridades
+    membros_comissao = referenciais.comissao_membros
 
     logo_tex = ""
-    if capa.get("logo_curso"):
+    if capa.logo_curso:
         logo_tex = rf"""
 \begin{{figure}}[H]
 \centering
 \vspace{{0.5cm}}
-\includegraphics[width=0.4\linewidth]{{{capa['logo_curso']}}}
+\includegraphics[width=0.4\linewidth]{{{capa.logo_curso}}}
 \end{{figure}}"""
 
-    ano = capa.get("ano", "")
+    ano = capa.ano or ""
     extra = perfil.instituicao.extra
     orgao_superior = extra.get("orgao_superior", "")
     unidade_sigla = extra.get("unidade_sigla", "")
@@ -113,18 +100,17 @@ def gerar_frontmatter(perfil: Perfil) -> str:
 \end{{center}}"""
 
     linhas_autoridades = "\\\\\n".join(
-        rf"\textsc{{\tiny {escapar(a['cargo'])}}} \\ \hspace*{{5mm}} \textbf{{{escapar(a['nome'])}}}"
+        rf"\textsc{{\tiny {escapar(a.cargo)}}} \\ \hspace*{{5mm}} \textbf{{{escapar(a.nome)}}}"
         for a in autoridades_perfil
     )
 
-    membros_comissao = comissao.get("membros", [])
     itens_comissao = "\n".join(
         rf"    \item {escapar(m)}{';' if i < len(membros_comissao) - 1 else '.'}"
         for i, m in enumerate(membros_comissao)
     )
     bloco_comissao = ""
     if itens_comissao:
-        titulo_comissao = escapar(comissao.get("titulo", "Equipe de elaboração deste Projeto Pedagógico"))
+        titulo_comissao = escapar(perfil.comissao.titulo)
         bloco_comissao = rf"""
 \textbf{{{titulo_comissao}:}}
 \begin{{itemize}}
@@ -227,7 +213,7 @@ def gerar_arquivos_latex(
         rf"\newcommand{{\ppcpercentualmaximoead}}{{{escapar(str(perfil.curriculo.percentual_maximo_ead or ''))}\xspace}}" "\n"
     )
     escrever("curso_macros.tex", macros)
-    escrever("frontmatter.tex", gerar_frontmatter(perfil))
+    escrever("frontmatter.tex", gerar_frontmatter(perfil, referenciais))
     escrever("bibliografia.bib", gerar_bibliografia_bib(referenciais.bibliografia, referenciais.legislacao))
     links_legislacao = [norma for norma in referenciais.legislacao if norma.url]
     if links_legislacao:

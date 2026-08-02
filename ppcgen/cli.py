@@ -146,6 +146,11 @@ def _mesclar_referenciais(base: ReferenciaisCurso, atual: ReferenciaisCurso) -> 
         legislacao=_merge(base.legislacao, atual.legislacao),
         temas_transversais=_merge(base.temas_transversais, atual.temas_transversais),
         bibliografia=_merge(base.bibliografia, atual.bibliografia),
+        autoridades=_merge(base.autoridades, atual.autoridades),
+        # Lista de texto livre, sem id por item — não faz sentido merge por
+        # item aqui (ver _merge acima): o perfil atual substitui a comissão
+        # inteira do base quando declara a sua própria.
+        comissao_membros=atual.comissao_membros or base.comissao_membros,
     )
 
 

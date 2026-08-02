@@ -238,6 +238,16 @@ def test_carregar_registros_referenciais_completo(tmp_path):
     legislacao.append(["id", "nome", "tipo", "documento", "ano", "observacoes"])
     legislacao.append(["LDB", "Lei de Diretrizes e Bases", "lei", "Lei nº 9.394/1996", 1996, "texto"])
 
+    autoridades = wb.create_sheet("Autoridades")
+    autoridades.append(["cargo", "nome", "observacoes"])
+    autoridades.append(["Reitor", "Fulano de Tal", ""])
+    autoridades.append(["Coordenador(a) do Curso", "[a confirmar]", "PENDENTE: nome a confirmar"])
+
+    comissao = wb.create_sheet("Comissao")
+    comissao.append(["membro"])
+    comissao.append(["Prof. Dr. Fulano -- presidente"])
+    comissao.append(["Divisão de Projetos Pedagógicos"])
+
     wb.save(caminho)
 
     _curriculo, referenciais, _avisos = carregar_matriz(caminho)
@@ -253,6 +263,25 @@ def test_carregar_registros_referenciais_completo(tmp_path):
     assert referenciais.legislacao[0].id == "LDB"
     assert referenciais.legislacao[0].documento == "Lei nº 9.394/1996"
     assert referenciais.legislacao[0].ano == 1996
+    assert [a.cargo for a in referenciais.autoridades] == ["Reitor", "Coordenador(a) do Curso"]
+    assert referenciais.autoridades[0].nome == "Fulano de Tal"
+    assert referenciais.autoridades[1].observacoes == "PENDENTE: nome a confirmar"
+    assert referenciais.comissao_membros == [
+        "Prof. Dr. Fulano -- presidente",
+        "Divisão de Projetos Pedagógicos",
+    ]
+
+
+def test_autoridades_e_comissao_ausentes_ficam_vazias(tmp_path):
+    """As duas abas são opcionais (Seção 9) — matriz sem elas não deve
+    quebrar nem inventar dado."""
+
+    caminho = tmp_path / "matriz.xlsx"
+    _matriz_minima(caminho)
+
+    _curriculo, referenciais, _avisos = carregar_matriz(caminho)
+    assert referenciais.autoridades == []
+    assert referenciais.comissao_membros == []
 
 
 def test_codigo_provisorio_e_unidade_oferta_derivados_do_codigo(tmp_path):

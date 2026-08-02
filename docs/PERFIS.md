@@ -90,11 +90,17 @@ oferta.norma_institucional                  (vazio)            # ato da UFU (CON
                                                                 # não houver ato publicado
 oferta.status_validacao_institucional       pendente           # pendente | confirmado
 
+capa.ano                                    2026
+capa.logo_curso                             (vazio)            # caminho relativo à pasta do perfil, ex.:
+                                                                # "figuras/logo.png" — vazio omite a imagem na capa
+comissao.titulo                             Equipe de elaboração deste Projeto Pedagógico
+                                                                # os nomes dos membros vêm da aba `Comissao`,
+                                                                # não daqui — ver docs/DICIONARIO_DADOS.md
+
 arquivos.textos                             textos             # todas opcionais — valores acima são o padrão
 arquivos.fichas                             fichas
 arquivos.figuras                            figuras
 arquivos.anexos                             anexos
-arquivos.frontmatter                        frontmatter
 arquivos.overrides                          overrides
 arquivos.capitulos                          identificacao|apresentacao|...  # lista/ordem dos capítulos do PDF,
                                                                 # itens separados por `|`, sem `.tex` — vazio cai

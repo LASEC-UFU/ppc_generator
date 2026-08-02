@@ -19,11 +19,11 @@ Isso cria `dados/perfis/engenharia_software_2027_1/` com toda a árvore
 padrão de um perfil já no lugar: `matriz_curricular.xlsx` com a aba
 `Perfil` preenchida com os defaults (`id`/`nome` já vêm do comando; o
 resto fica em branco) e as abas de registro `Nucleos`/`Areas`/`Temas`/
-`Conteudos`/`Competencias`/`Bibliografia`/`Legislacao` só com cabeçalhos,
-os 12 `textos/*.tex` com um `\chapter{}` placeholder cada,
-`frontmatter/*.yaml` vazios, e as subpastas de `fichas/`/`anexos/`/
-`overrides/`. O perfil já é estruturalmente válido neste ponto
-(`perfil-validar` passa), só sem conteúdo real.
+`Conteudos`/`Competencias`/`Bibliografia`/`Legislacao`/`Autoridades`/
+`Comissao` só com cabeçalhos, os 12 `textos/*.tex` com um `\chapter{}`
+placeholder cada, e as subpastas de `fichas/`/`anexos/`/`overrides/`. O
+perfil já é estruturalmente
+válido neste ponto (`perfil-validar` passa), só sem conteúdo real.
 
 ## 3. Preencher a aba `Perfil`
 
@@ -103,12 +103,20 @@ partir da aba `Perfil` em `ppcgen.geradores.latex` (arquivo
 
 ## 7. Frontmatter
 
-`frontmatter/capa.yaml` (título, `logo_curso: figuras/<seu-logo>.png`),
-`frontmatter/autoridades.yaml` e `frontmatter/comissao.yaml` (nomes reais
-de quem coordena o curso e integra a comissão de elaboração — nunca
-placeholder). `frontmatter/folha_rosto.tex` é opcional: só crie se o
-layout padrão gerado por `ppcgen.geradores.latex.gerar_frontmatter` não
-for suficiente.
+Capa e folha de rosto vêm inteiramente da própria `matriz_curricular.xlsx`
+— nenhum YAML separado (ver `docs/DICIONARIO_DADOS.md`):
+
+- Aba `Perfil`: `capa.ano`, `capa.logo_curso` (caminho para uma logomarca
+  própria do curso, ex. `figuras/logo.png` — deixe vazio se não houver
+  uma aprovada ainda) e `comissao.titulo` (título da caixa de créditos).
+- Aba `Autoridades`: uma linha por autoridade (`cargo`/`nome`, na ordem de
+  exibição) — nomes reais de quem coordena o curso, nunca placeholder.
+- Aba `Comissao`: uma linha por membro (`membro`, texto livre) da comissão
+  de elaboração deste PPC.
+
+Não é preciso escrever LaTeX à mão para nada disso — o layout é sempre
+gerado por `ppcgen.geradores.latex.gerar_frontmatter` a partir da
+planilha.
 
 ## 8. Fichas curriculares
 

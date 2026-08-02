@@ -8,6 +8,8 @@ import pytest
 
 from ppcgen.config import (
     ArquivosConfig,
+    CapaConfig,
+    ComissaoConfig,
     CurriculoConfig,
     CursoConfig,
     GeracaoConfig,
@@ -76,6 +78,8 @@ def construir_perfil(tmp_path: Path | None = None, **overrides) -> Perfil:
         "instituicao": InstituicaoConfig(),
         "curriculo": CurriculoConfig(),
         "oferta": OfertaConfig(),
+        "capa": CapaConfig(),
+        "comissao": ComissaoConfig(),
         "arquivos": ArquivosConfig(),
         "geracao": GeracaoConfig(),
         "saida": SaidaConfig(),

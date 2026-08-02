@@ -95,6 +95,23 @@ class CurriculoConfig:
 
 
 @dataclass
+class CapaConfig:
+    ano: int | None = None
+    logo_curso: str = ""
+    """Caminho (relativo à pasta do perfil, ex. ``figuras/logo.png``) da
+    logomarca própria do curso exibida na capa — vazio omite a imagem
+    (nem toda proposta tem uma logomarca aprovada ainda). Distinto do logo
+    institucional da UFU, fixo no template e sempre exibido."""
+
+
+@dataclass
+class ComissaoConfig:
+    titulo: str = "Equipe de elaboração deste Projeto Pedagógico"
+    """Título da caixa de créditos na folha de rosto — os nomes dos
+    membros vêm da aba ``Comissao`` (coluna ``membro``), não daqui."""
+
+
+@dataclass
 class OfertaConfig:
     """Formato de oferta do curso (Decreto nº 12.456/2025) — decisão
     explícita do perfil, nunca inferida automaticamente do percentual de
@@ -140,7 +157,6 @@ class ArquivosConfig:
     fichas: str = "fichas"
     figuras: str = "figuras"
     anexos: str = "anexos"
-    frontmatter: str = "frontmatter"
     overrides: str = "overrides"
     capitulos: list[str] = field(default_factory=lambda: list(CAPITULOS_PADRAO))
     """Nomes dos capítulos (sem ``.tex``, relativos a ``textos/``) e a
@@ -176,6 +192,8 @@ class Perfil:
     instituicao: InstituicaoConfig
     curriculo: CurriculoConfig
     oferta: OfertaConfig
+    capa: CapaConfig
+    comissao: ComissaoConfig
     arquivos: ArquivosConfig
     geracao: GeracaoConfig
     saida: SaidaConfig
@@ -261,7 +279,9 @@ def _construir(cls, dados: dict):
     return cls(**filtrado)
 
 
-_SECOES_PERFIL = frozenset({"perfil", "curso", "instituicao", "curriculo", "oferta", "arquivos", "geracao", "saida"})
+_SECOES_PERFIL = frozenset(
+    {"perfil", "curso", "instituicao", "curriculo", "oferta", "capa", "comissao", "arquivos", "geracao", "saida"}
+)
 
 
 def _validar_secoes_configuracao(dados: dict, caminho_matriz: Path) -> None:
@@ -340,6 +360,8 @@ def carregar_perfil(
         ),
         curriculo=_construir(CurriculoConfig, efetivo.get("curriculo") or {}),
         oferta=_construir(OfertaConfig, efetivo.get("oferta") or {}),
+        capa=_construir(CapaConfig, efetivo.get("capa") or {}),
+        comissao=_construir(ComissaoConfig, efetivo.get("comissao") or {}),
         arquivos=arquivos,
         geracao=_construir(GeracaoConfig, efetivo.get("geracao") or {}),
         saida=_construir(SaidaConfig, efetivo.get("saida") or {}),

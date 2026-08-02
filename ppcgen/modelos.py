@@ -204,12 +204,30 @@ class EntradaBibliografica:
 
 
 @dataclass
+class Autoridade:
+    """Uma linha da folha de rosto do PPC (reitor, vice-reitor, coordenador
+    do curso...) — vem da aba ``Autoridades`` da matriz curricular, na
+    ordem em que aparecem na planilha."""
+
+    cargo: str
+    nome: str
+    observacoes: str = ""
+
+    @property
+    def id(self) -> str:
+        """Alias de ``cargo`` para a mesclagem uniforme de catálogos por
+        identificador na cadeia de perfis (``cli._mesclar_referenciais``)."""
+        return self.cargo
+
+
+@dataclass
 class ReferenciaisCurso:
     """Conjunto completo de referenciais configurados para o curso ativo —
     ``nucleos``/``areas``/``temas_transversais``/``conteudos``/
-    ``competencias``/``bibliografia``/``legislacao`` vêm todos das abas de
-    registro da matriz curricular (``ppcgen.leitores.excel``); nada lê
-    mais arquivos YAML separados em ``referenciais/``."""
+    ``competencias``/``bibliografia``/``legislacao``/``autoridades``/
+    ``comissao_membros`` vêm todos das abas de registro da matriz
+    curricular (``ppcgen.leitores.excel``); nada lê mais arquivos YAML
+    separados."""
 
     nucleos: list[NucleoCurricular] = field(default_factory=list)
     areas: list[AreaFormacao] = field(default_factory=list)
@@ -217,6 +235,8 @@ class ReferenciaisCurso:
     conteudos: list[Conteudo] = field(default_factory=list)
     legislacao: list[ReferencialCurricular] = field(default_factory=list)
     temas_transversais: list[TemaTransversal] = field(default_factory=list)
+    autoridades: list[Autoridade] = field(default_factory=list)
+    comissao_membros: list[str] = field(default_factory=list)
     bibliografia: list[EntradaBibliografica] = field(default_factory=list)
 
     def ids_nucleos(self) -> set[str]:

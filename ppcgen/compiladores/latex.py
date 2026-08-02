@@ -27,7 +27,7 @@ def _copiar_arvore(origem: Path, destino: Path) -> None:
 def montar_arvore_latex(perfil: Perfil, pasta_destino: Path) -> Path:
     """Monta, em ``pasta_destino``, uma árvore LaTeX autocontida e pronta
     para compilar: templates genéricos (``templates/latex/``) + conteúdo do
-    perfil (``textos/``, ``frontmatter/``, ``figuras/``), resolvido através
+    perfil (``textos/``, ``figuras/``), resolvido através
     da cadeia de herança (``extends``), com os ``overrides/`` do perfil
     aplicados por cima (Seção 6/9). A bibliografia não é copiada aqui — é
     gerada a partir da aba ``Bibliografia`` da matriz por
@@ -56,10 +56,6 @@ def montar_arvore_latex(perfil: Perfil, pasta_destino: Path) -> Path:
     for p in reversed(cadeia):
         _copiar_arvore(p.diretorio / p.arquivos.textos, pasta_destino / "textos")
         _copiar_arvore(p.diretorio / p.arquivos.figuras, pasta_destino / "figuras")
-        folha_rosto = p.diretorio / p.arquivos.frontmatter / "folha_rosto.tex"
-        if folha_rosto.exists():
-            (pasta_destino / "frontmatter").mkdir(parents=True, exist_ok=True)
-            shutil.copyfile(folha_rosto, pasta_destino / "frontmatter" / "folha_rosto.tex")
 
     # 4) Overrides do perfil (prioridade máxima — Seção 9).
     _copiar_arvore(perfil.diretorio / perfil.arquivos.overrides / "latex", pasta_destino)
