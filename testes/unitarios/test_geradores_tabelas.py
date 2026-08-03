@@ -40,9 +40,7 @@ def test_montar_grupos_fluxo_agrupa_por_periodo_e_tipo():
     componentes = [
         componente("A1", periodo=1),
         componente("A2", periodo=2),
-        componente(
-            "OPT1", periodo=None, tipo=TipoComponente.CARGA_OPTATIVA, obrigatorio=False
-        ),
+        componente("OPT1", periodo=None, tipo=TipoComponente.CARGA_OPTATIVA),
         componente("TCC1", periodo=None, tipo=TipoComponente.TCC),
     ]
     curriculo = Curriculo(versao="t", componentes=componentes)

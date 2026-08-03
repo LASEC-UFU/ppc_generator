@@ -293,7 +293,6 @@ class ComponenteCurricular:
     carga_horaria: CargaHoraria = field(default_factory=CargaHoraria)
     periodo: int | None = None
     ativo: bool = True
-    obrigatorio: bool = False
     nucleo: str | None = None
     areas: list[str] = field(default_factory=list)
     competencias: list[str] = field(default_factory=list)
@@ -306,6 +305,15 @@ class ComponenteCurricular:
     @property
     def carga_total(self) -> int:
         return self.carga_horaria.total or 0
+
+    @property
+    def obrigatorio(self) -> bool:
+        """Não é um dado a preencher na planilha: um componente é
+        obrigatório sse não pertence ao pool de optativas
+        (``tipo != carga_optativa``) — ver ``ppcgen.calculo`` para o porquê
+        de a carga oficial do curso já usar ``tipo`` como critério, nunca um
+        campo paralelo."""
+        return self.tipo != TipoComponente.CARGA_OPTATIVA
 
     @property
     def codigo_provisorio(self) -> bool:

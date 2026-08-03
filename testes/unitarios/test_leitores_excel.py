@@ -19,7 +19,6 @@ def _matriz_minima(caminho):
             "tipo",
             "periodo",
             "ativo",
-            "obrigatorio",
             "cht",
             "chp",
             "chd",
@@ -30,8 +29,8 @@ def _matriz_minima(caminho):
             "correquisitos",
         ]
     )
-    componentes.append(["X1", "Disciplina X1", "disciplina", 1, True, True, 30, 0, 0, 0, 30, "", "", ""])
-    componentes.append(["X2", "Disciplina X2", "disciplina", 2, True, True, 30, 0, 0, 0, 30, "", "X1", ""])
+    componentes.append(["X1", "Disciplina X1", "disciplina", 1, True, 30, 0, 0, 0, 30, "", "", ""])
+    componentes.append(["X2", "Disciplina X2", "disciplina", 2, True, 30, 0, 0, 0, 30, "", "X1", ""])
 
     nucleos = wb.create_sheet("Nucleos")
     nucleos.append(["id", "nome", "descricao", "componentes"])
@@ -81,9 +80,9 @@ def test_carregar_matriz_avisa_ativo_em_branco(tmp_path):
     wb.remove(wb.active)
     componentes = wb.create_sheet("Componentes")
     componentes.append(
-        ["codigo", "nome", "tipo", "periodo", "ativo", "obrigatorio", "cht", "chp", "chd", "che", "tot", "observacoes"]
+        ["codigo", "nome", "tipo", "periodo", "ativo", "cht", "chp", "chd", "che", "tot", "observacoes"]
     )
-    componentes.append(["Y1", "Disciplina Y1", "disciplina", 1, None, True, 30, 0, 0, 0, 30, ""])
+    componentes.append(["Y1", "Disciplina Y1", "disciplina", 1, None, 30, 0, 0, 0, 30, ""])
     wb.save(caminho)
 
     _curriculo, _referenciais, avisos = carregar_matriz(caminho)
@@ -112,7 +111,6 @@ def test_pre_requisitos_com_opcional_e_carga_horaria_minima(tmp_path):
             "tipo",
             "periodo",
             "ativo",
-            "obrigatorio",
             "cht",
             "chp",
             "chd",
@@ -124,7 +122,7 @@ def test_pre_requisitos_com_opcional_e_carga_horaria_minima(tmp_path):
         ]
     )
     componentes.append(
-        ["Z1", "Estágio", "estagio", None, True, True, 0, 0, 0, 0, 300, "", "X1|X2 (opcional)|>=1200h", "X3 (opcional)"]
+        ["Z1", "Estágio", "estagio", None, True, 0, 0, 0, 0, 300, "", "X1|X2 (opcional)|>=1200h", "X3 (opcional)"]
     )
     wb.save(caminho)
 

@@ -61,10 +61,11 @@ primeira vez:
   `CTR401|CTR203 (opcional)|>=1200h` na coluna `pre_requisitos`).
 - **Optativa não é uma aba** — é um componente com `tipo=carga_optativa`
   na aba `Componentes`.
-- **`tipo`, não `obrigatorio`, decide o que conta no total oficial do
-  curso.** Um componente de extensão com `obrigatorio=FALSE` ainda soma
-  no total se `tipo=extensao` (ver `ppcgen/calculo.py`) — `obrigatorio`
-  serve só para a tabela "Componentes Curriculares Obrigatórios".
+- **Não existe coluna `obrigatorio`** — um componente é obrigatório sse
+  `tipo != carga_optativa` (`ComponenteCurricular.obrigatorio` é uma
+  propriedade derivada, não um dado a preencher); é também esse o
+  critério que decide o que conta no total oficial do curso (ver
+  `ppcgen/calculo.py`).
 - Deixe `ativo` **explícito** (`TRUE`/`FALSE`) em vez de em branco — célula
   vazia gera um aviso (`LEITURA_DADO_OMITIDO`) mesmo assumindo `TRUE`.
 - Todo código listado em `componentes` de `Nucleos`/`Areas`/`Temas`/

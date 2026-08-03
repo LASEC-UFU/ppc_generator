@@ -12,9 +12,9 @@ def test_carga_horaria_oficial_exclui_pool_de_optativas_nao_escolhidas():
     )
     componentes = [
         componente("A1", cht=100, tot=100),  # obrigatória
-        componente("OPT1", tipo=TipoComponente.CARGA_OPTATIVA, obrigatorio=False, periodo=None, cht=60, tot=60),
-        componente("OPT2", tipo=TipoComponente.CARGA_OPTATIVA, obrigatorio=False, periodo=None, cht=60, tot=60),
-        componente("OPT3", tipo=TipoComponente.CARGA_OPTATIVA, obrigatorio=False, periodo=None, cht=60, tot=60),
+        componente("OPT1", tipo=TipoComponente.CARGA_OPTATIVA, periodo=None, cht=60, tot=60),
+        componente("OPT2", tipo=TipoComponente.CARGA_OPTATIVA, periodo=None, cht=60, tot=60),
+        componente("OPT3", tipo=TipoComponente.CARGA_OPTATIVA, periodo=None, cht=60, tot=60),
     ]
     curriculo = Curriculo(versao="t", componentes=componentes)
 

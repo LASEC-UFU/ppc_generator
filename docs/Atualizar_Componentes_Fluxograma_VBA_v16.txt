@@ -1,7 +1,7 @@
 ﻿Option Explicit
 
 ' =============================================================================
-' SINCRONIZAÇÃO: FLUXOGRAMA -> COMPONENTES — VERSÃO 15
+' SINCRONIZAÇÃO: FLUXOGRAMA -> COMPONENTES — VERSÃO 16
 '
 ' Formato do título de cada bloco:
 '       ID
@@ -31,17 +31,22 @@
 '   - exigências como "100 horas" são preservadas literalmente na saída.
 '
 ' Campos sincronizados:
-'   codigo, nome, periodo, cht, chd, chp, che, tot, tipo, obrigatorio,
+'   codigo, nome, periodo, cht, chd, chp, che, tot, tipo,
 '   ativo, pre_requisitos e correquisitos.
 '
+' Não existe mais coluna "obrigatorio" na aba Componentes (Seção 9): um
+' componente é obrigatório sse tipo <> carga_optativa — critério único,
+' sem campo paralelo para divergir dele. Por isso, a partir desta versão,
+' o campo tipo passa a ser determinado pelo macrobloco de origem, não só
+' pelo nome do componente:
+'   - macrobloco superior: tipo = DeterminarTipo(nome) (extensao,
+'     atividade_complementar, estagio, projeto ou disciplina, por
+'     palavra-chave no nome);
+'   - macrobloco inferior (optativas): tipo = "carga_optativa" sempre,
+'     independente do nome.
 ' Todo componente encontrado no Fluxograma recebe ativo = VERDADEIRO.
-' No campo obrigatorio, todo componente encontrado recebe explicitamente:
-'   - VERDADEIRO para o macrobloco superior;
-'   - FALSO para o macrobloco inferior de optativas.
-' Componentes existentes apenas na aba Componentes mantêm os valores atuais
-' de ativo e obrigatorio, pois não são processados pela sincronização.
-' Para componentes presentes no Fluxograma, obrigatorio é gravado e validado
-' como valor lógico real, inclusive quando muda de VERDADEIRO para FALSO.
+' Componentes existentes apenas na aba Componentes mantêm os valores
+' atuais de ativo e tipo, pois não são processados pela sincronização.
 '
 ' O ID do bloco é usado somente internamente para interpretar as relações
 ' desenhadas no Fluxograma. Ele não é gravado nem exigido na aba Componentes.
@@ -58,7 +63,7 @@
 '
 ' Para executar por um botão criado manualmente:
 '   Texto sugerido do botão: Atualizar Componentes
-'   Macro a atribuir:         AtualizarComponentes
+'   Macro a atribuir:        btnAtualizarComponentes
 ' =============================================================================
 
 Private Const ABA_FLUXOGRAMA As String = "Fluxograma"
@@ -119,7 +124,7 @@ End Function
 ' -----------------------------------------------------------------------------
 ' MACRO PRINCIPAL
 ' -----------------------------------------------------------------------------
-Public Sub AtualizarComponentes()
+Public Sub btnAtualizarComponentes()
 
     Dim wsFlux As Worksheet
     Dim wsComp As Worksheet
@@ -601,8 +606,17 @@ Private Sub LerBlocosDoFluxograma( _
                 dados.Add "codigo", codigo
                 dados.Add "nome", nome
                 dados.Add "periodo", periodo
-                dados.Add "tipo", DeterminarTipo(nome)
-                dados.Add "obrigatorio", CBool(obrigatorio)
+
+                If obrigatorio Then
+                    dados.Add "tipo", DeterminarTipo(nome)
+                Else
+                    ' Macrobloco inferior (optativas): tipo é sempre
+                    ' carga_optativa, independente do nome — não existe
+                    ' mais coluna "obrigatorio" para marcar isso à parte
+                    ' (Seção 9).
+                    dados.Add "tipo", "carga_optativa"
+                End If
+
                 dados.Add "ativo", True
                 dados.Add "linha_nome", linhaNome
                 dados.Add "coluna_base", colunaBase
@@ -1442,7 +1456,6 @@ Private Sub ValidarCabecalhosObrigatorios( _
         "che", _
         "tot", _
         "tipo", _
-        "obrigatorio", _
         "ativo", _
         "pre_requisitos", _
         "correquisitos")
@@ -1523,7 +1536,7 @@ Private Function SincronizarCamposDoComponente( _
     Dim campo As Variant
     Dim total As Long
 
-    ' Os campos lógicos obrigatorio e ativo são tratados separadamente.
+    ' O campo lógico ativo é tratado separadamente (AtualizarCampoLogico).
     ' Isso evita que textos, fórmulas ou formatos anteriores façam o Excel
     ' considerar VERDADEIRO e FALSO como valores equivalentes.
     campos = Array( _
@@ -1547,13 +1560,6 @@ Private Function SincronizarCamposDoComponente( _
 
     Next campo
 
-    total = total + AtualizarCampoLogicoObrigatorio( _
-        ws.Cells( _
-            linhaDestino, _
-            cabecalhos.Item("obrigatorio")), _
-        CBool(dados.Item("obrigatorio")), _
-        CStr(dados.Item("codigo")))
-
     total = total + AtualizarCampoLogico( _
         ws.Cells( _
             linhaDestino, _
@@ -1563,19 +1569,6 @@ Private Function SincronizarCamposDoComponente( _
         CStr(dados.Item("codigo")))
 
     SincronizarCamposDoComponente = total
-
-End Function
-
-Private Function AtualizarCampoLogicoObrigatorio( _
-    ByVal destino As Range, _
-    ByVal novoValor As Boolean, _
-    ByVal codigo As String) As Long
-
-    AtualizarCampoLogicoObrigatorio = AtualizarCampoLogico( _
-        destino, _
-        novoValor, _
-        "obrigatorio", _
-        codigo)
 
 End Function
 

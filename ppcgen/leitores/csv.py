@@ -184,7 +184,6 @@ def carregar_csv_legado(caminho: str | Path) -> ResultadoImportacaoCSV:
                     ),
                     periodo=periodo,
                     ativo=ativo,
-                    obrigatorio=_bool(linha.get("OBR", "")),
                     nucleo=nucleo,
                     areas=areas,
                     temas_transversais=temas_transversais,

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from ppcgen.geradores.comparacao import comparar_curriculos
-from ppcgen.modelos import Curriculo
+from ppcgen.modelos import Curriculo, TipoComponente
 from testes.conftest import componente
 
 
@@ -23,12 +23,18 @@ def test_componente_alterado_detecta_mudanca_de_carga():
     assert "carga_total" in campos_alterados
 
 
-def test_mudanca_de_obrigatorio_para_optativo_e_detectada():
-    anterior = Curriculo(versao="2025-1", componentes=[componente("A1", obrigatorio=True)])
-    atual = Curriculo(versao="2026-1", componentes=[componente("A1", obrigatorio=False)])
+def test_mudanca_de_obrigatoria_para_optativa_e_detectada_via_tipo():
+    """``obrigatorio`` é derivado de ``tipo`` (não é mais um campo próprio) —
+    a mudança relevante para comparação é a de ``tipo`` para/de
+    ``carga_optativa``."""
+
+    anterior = Curriculo(versao="2025-1", componentes=[componente("A1", tipo=TipoComponente.DISCIPLINA)])
+    atual = Curriculo(versao="2026-1", componentes=[componente("A1", tipo=TipoComponente.CARGA_OPTATIVA)])
 
     relatorio = comparar_curriculos(anterior, atual)
-    assert any(d.campo == "obrigatorio" for d in relatorio.alterados)
+    diferenca = next(d for d in relatorio.alterados if d.campo == "tipo")
+    assert diferenca.valor_anterior == "disciplina"
+    assert diferenca.valor_atual == "carga_optativa"
 
 
 def test_impacto_sobre_competencias():

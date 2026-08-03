@@ -91,13 +91,12 @@ integrador, estágio, TCC, atividade complementar, optativa...).
 | `tipo` | texto (enum) | sim | `disciplina`, `projeto_integrador`, `extensao`, `estagio`, `tcc`, `atividade_complementar`, `carga_optativa`, `certificacao`, `outro` | `disciplina` | leitor rejeita valor fora do enum (`FormatoInvalido`) |
 | `periodo` | inteiro ou vazio | condicional | `1`..`numero_periodos` | `4` | `PERIODO_FORA_DO_INTERVALO`, `COMPONENTE_OBRIGATORIO_SEM_PERIODO` |
 | `ativo` | booleano | sim (recomendado explícito) | `TRUE`/`FALSE` | `TRUE` | célula em branco gera aviso `LEITURA_DADO_OMITIDO` (assume `TRUE`) |
-| `obrigatorio` | booleano | sim | `TRUE`/`FALSE` | `TRUE` | combinado com `tipo=carga_optativa` gera `CLASSIFICACAO_CONTRADITORIA` |
 | `cht` | inteiro ou vazio | não | ≥ 0 | `45` | `CARGA_NEGATIVA`, soma entra em `CARGA_TOTAL_INCONSISTENTE` |
 | `chp` | inteiro ou vazio | não | ≥ 0 | `15` | idem |
 | `chd` | inteiro ou vazio | não | ≥ 0 | `0` | idem; soma entra no percentual de EaD |
 | `che` | inteiro ou vazio | não | ≥ 0 | `0` | idem; soma entra no percentual de extensão |
 | `tot` | inteiro ou vazio | sim (recomendado) | ≥ 0 | `60` | deve ser igual a `cht+chp+chd+che` quando todas informadas |
-| `observacoes` | texto | não | — | — | usado como "justificativa" para downgrade de `CLASSIFICACAO_CONTRADITORIA` |
+| `observacoes` | texto | não | — | — | texto livre, sem papel em nenhuma validação |
 | `pre_requisitos` | texto (lista, itens separados por `\|`) | não | ver sintaxe abaixo | `CTR401\|CTR203 (opcional)\|>=1200h` | `PREREQUISITO_INEXISTENTE`, `PREREQUISITO_AUTORREFERENCIA`, `PREREQUISITO_PERIODO_INVALIDO`, `CICLO_PREREQUISITOS` |
 | `correquisitos` | texto (lista, itens separados por `\|`) | não | ver sintaxe abaixo | `CTR305\|CTR306 (opcional)` | `CORREQUISITO_INEXISTENTE`, `CORREQUISITO_AUTORREFERENCIA`, `CORREQUISITO_PERIODO_DIVERGENTE` |
 
@@ -106,12 +105,12 @@ aqui — um componente ativo sem núcleo/área vinculado por nenhuma aba de
 catálogo gera `COMPONENTE_SEM_NUCLEO`/`COMPONENTE_SEM_AREA` (ver "Padrão
 `componentes`" abaixo).
 
-#### Campos derivados de `codigo` (não são colunas da planilha)
+#### Campos derivados (não são colunas da planilha)
 
-`codigo_provisorio` e `unidade_oferta` (`ComponenteCurricular`, `ppcgen/modelos.py`)
-não são preenchidos na matriz — são calculados a partir do próprio `codigo`
-sempre que o componente é carregado, para não ter dois dados divergindo
-(código e uma coluna que deveria refletir o código):
+`codigo_provisorio`, `unidade_oferta` e `obrigatorio`
+(`ComponenteCurricular`, `ppcgen/modelos.py`) não são preenchidos na
+matriz — são propriedades calculadas sempre que o componente é
+carregado, para não ter dois dados divergindo:
 
 - `unidade_oferta`: prefixo de `codigo` até o primeiro dígito ou `!`
   (não incluídos) — `FAMAT31011` → `FAMAT`, `FEELT!TDCA` → `FEELT`.
@@ -119,6 +118,12 @@ sempre que o componente é carregado, para não ter dois dados divergindo
   disciplinas propostas sem código oficial/SIGAA ainda atribuído),
   `False` caso contrário. Continua gerando `CODIGO_PROVISORIO` (ver
   `docs/VALIDACOES.md`).
+- `obrigatorio`: `True` sse `tipo != carga_optativa` — não existe mais
+  como coluna própria (nem o campo, nem a contradição possível entre os
+  dois); é exatamente esse critério, por `tipo`, que já decidia o que
+  conta na carga horária oficial do curso (`ppcgen/calculo.py`) e agora
+  também decide o rótulo "Obrigatória"/"Optativa" no fluxograma e a
+  população da tabela "Componentes Curriculares Obrigatórios" no PDF.
 
 #### Sintaxe de `pre_requisitos`/`correquisitos`
 

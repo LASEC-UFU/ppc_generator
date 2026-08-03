@@ -50,9 +50,7 @@ Campos adicionais em `instituicao.*` continuam aceitos e ficam disponíveis em
 
 | Código | Severidade | Condição |
 |---|---|---|
-| `COMPONENTE_OBRIGATORIO_SEM_PERIODO` | ERRO | obrigatório, ativo, tipo que deveria ter período fixo (disciplina/projeto integrador/extensão/certificação), mas `periodo` vazio |
-| `COMPONENTE_INATIVO_OBRIGATORIO` | ALERTA | `ativo=FALSE` e `obrigatorio=TRUE` ao mesmo tempo |
-| `CLASSIFICACAO_CONTRADITORIA` | ERRO (ALERTA se `observacoes` preenchido) | `tipo=carga_optativa` e `obrigatorio=TRUE` |
+| `COMPONENTE_OBRIGATORIO_SEM_PERIODO` | ERRO | ativo, tipo que deveria ter período fixo (disciplina/projeto integrador/extensão/certificação — ou seja, `obrigatorio` derivado é `True`), mas `periodo` vazio |
 
 ## Carga horária (`ppcgen.validadores.cargas`)
 

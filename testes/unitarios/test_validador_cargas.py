@@ -45,9 +45,7 @@ def test_pool_optativas_insuficiente():
         curso=CursoConfig(numero_periodos=1),
         curriculo=CurriculoConfig(carga_optativa_minima=200),
     )
-    optativa = componente(
-        "OPT1", tipo=TipoComponente.CARGA_OPTATIVA, obrigatorio=False, periodo=None, cht=60, tot=60
-    )
+    optativa = componente("OPT1", tipo=TipoComponente.CARGA_OPTATIVA, periodo=None, cht=60, tot=60)
     curriculo = Curriculo(versao="t", componentes=[optativa])
     resultado = validar_cargas(curriculo, perfil)
     assert any(m.codigo_regra == "POOL_OPTATIVAS_INSUFICIENTE" for m in resultado.erros)

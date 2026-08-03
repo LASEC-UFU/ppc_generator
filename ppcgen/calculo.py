@@ -11,15 +11,14 @@ apenas um subconjunto. A carga oficial é:
 
     soma(componentes ativos com tipo != carga_optativa) + carga_optativa_minima
 
-Note que o filtro é por **tipo** (``carga_optativa``), não pelo campo
-``obrigatorio`` — um componente de extensão ou de atividade complementar
-pode legitimamente ter ``obrigatorio=False`` na fonte de dados (ele não é
-"uma disciplina obrigatória") e, ainda assim, ser de cumprimento mandatório
-para todo estudante, contando no total do curso (Seção 5: o comportamento
-depende do tipo do componente, não de convenções paralelas). Foi exatamente
-essa distinção que a migração do curso de Engenharia de Computação expôs:
-os componentes de extensão do CSV legado têm ``OBR=False``, mas somam no
-total histórico de 3450h.
+O filtro é por **tipo** (``carga_optativa``) — não existe mais um campo
+``obrigatorio`` independente na fonte de dados:
+``ComponenteCurricular.obrigatorio`` (``ppcgen/modelos.py``) é uma
+propriedade derivada, sempre igual a ``tipo != carga_optativa``, então não
+há como um componente divergir dos dois critérios (isso já foi um bug real
+deste projeto — ver ``docs/MIGRAR_PERFIL.md`` — quando um campo
+``obrigatorio`` próprio, mantido à parte do ``tipo``, podia ficar
+inconsistente com ele).
 
 ``Curriculo.carga_horaria_total()`` (em :mod:`ppcgen.modelos`) continua
 disponível para quando a soma bruta de tudo o que está *ativo* é realmente o

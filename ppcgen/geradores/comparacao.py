@@ -44,10 +44,10 @@ class RelatorioComparacao:
 
 _CAMPOS_COMPARADOS = (
     "nome",
+    "tipo",
     "periodo",
     "nucleo",
     "areas",
-    "obrigatorio",
     "ativo",
 )
 
@@ -55,6 +55,8 @@ _CAMPOS_COMPARADOS = (
 def _valor_campo(componente: ComponenteCurricular, campo: str):
     if campo == "carga_total":
         return componente.carga_total
+    if campo == "tipo":
+        return componente.tipo.value
     if campo == "pre_requisitos":
         return sorted(p.codigo for p in componente.pre_requisitos)
     if campo == "correquisitos":

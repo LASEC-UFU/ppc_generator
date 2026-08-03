@@ -42,38 +42,12 @@ def validar_estrutura(curriculo: Curriculo, perfil: Perfil) -> ResultadoValidaca
     resultado = ResultadoValidacao()
 
     for c in curriculo.componentes:
-        if (
-            c.ativo
-            and c.obrigatorio
-            and c.periodo is None
-            and c.tipo not in _TIPOS_SEM_PERIODO_FIXO
-        ):
+        if c.ativo and c.periodo is None and c.tipo not in _TIPOS_SEM_PERIODO_FIXO:
             resultado.adicionar(
                 ErroValidacao(
                     "COMPONENTE_OBRIGATORIO_SEM_PERIODO",
                     f"componente obrigatório '{c.codigo}' (tipo {c.tipo.value}) não tem "
                     "período definido.",
-                    componente=c.codigo,
-                )
-            )
-
-        if not c.ativo and c.obrigatorio:
-            resultado.adicionar(
-                AlertaValidacao(
-                    "COMPONENTE_INATIVO_OBRIGATORIO",
-                    f"componente '{c.codigo}' está inativo mas ainda marcado como "
-                    "obrigatório — confirme se deveria ter sido substituído/removido.",
-                    componente=c.codigo,
-                )
-            )
-
-        if c.tipo == TipoComponente.CARGA_OPTATIVA and c.obrigatorio:
-            severidade = AlertaValidacao if c.observacoes.strip() else ErroValidacao
-            resultado.adicionar(
-                severidade(
-                    "CLASSIFICACAO_CONTRADITORIA",
-                    f"componente '{c.codigo}' é do tipo optativa (carga_optativa) mas "
-                    "está marcado como obrigatório.",
                     componente=c.codigo,
                 )
             )

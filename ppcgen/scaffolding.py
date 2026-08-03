@@ -96,7 +96,7 @@ def _criar_matriz_vazia(caminho: Path, perfil_id: str, nome: str) -> None:
     componentes = wb.create_sheet("Componentes")
     componentes.append(
         [
-            "codigo", "nome", "tipo", "periodo", "ativo", "obrigatorio",
+            "codigo", "nome", "tipo", "periodo", "ativo",
             "cht", "chp", "chd", "che", "tot", "observacoes",
             "pre_requisitos", "correquisitos",
         ]
