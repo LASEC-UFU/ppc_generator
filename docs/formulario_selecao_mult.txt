@@ -14,6 +14,12 @@ Option Explicit
 '   - Pesquise e marque vários nomes.
 '   - O campo recebe os códigos separados por |.
 '   - Códigos que já estavam no campo aparecem previamente marcados.
+'   - Códigos já usados em OUTRA linha da mesma coluna aparecem com o
+'     prefixo "[ID]" no nome, ID = o conteúdo da coluna "id" dessa outra
+'     linha (ex.: "[BASICO]", "[TECNOLOGICO]" na aba Nucleos) — cai no
+'     número da linha se a aba não tiver coluna "id" (aviso, não
+'     impedimento — a mesma linha pode ter motivo legítimo para repetir,
+'     cabe a quem preenche decidir).
 ' =============================================================================
 
 Private Const NOME_FORMULARIO As String = "frmSelecionarComponentes"
@@ -55,7 +61,8 @@ Public Sub InstalarFormularioComponentes()
     ' com escala de tela alta.
     Set controle = formulario.Controls.Add("Forms.Label.1", "lblInstrucao", True)
     With controle
-        .Caption = "Selecione os componentes. O nome é exibido e o código será gravado na célula."
+        .Caption = "Selecione os componentes. O nome é exibido e o código será gravado na célula. " & _
+                   "Itens com ""[ID]"" (ex.: [BASICO]) já estão em outra linha desta coluna."
         .Left = 18
         .Top = 15
         .Width = 710
@@ -261,6 +268,93 @@ Private Function LocalizarLinhaCabecalhoFormulario(ByVal alvo As Range) As Long
 End Function
 
 ' -----------------------------------------------------------------------------
+' CÓDIGOS JÁ USADOS EM OUTRAS LINHAS DA MESMA COLUNA "componentes"
+' -----------------------------------------------------------------------------
+' Cada linha da coluna "componentes" (uma linha por núcleo/área/tema/conteúdo/
+' competência) é independente das demais — um mesmo código pode legitimamente
+' pertencer a mais de uma linha em abas diferentes (um componente tem um único
+' núcleo, mas pode ter várias áreas, por exemplo), mas dentro da MESMA coluna,
+' repetir um código em duas linhas costuma ser engano (ex.: mesmo componente
+' em dois núcleos — ver NUCLEO_MULTIPLO_PARA_COMPONENTE no validador Python).
+' Esta função devolve, para cada código já usado em QUALQUER outra linha da
+' mesma coluna da célula de destino atual, o "id" dessa outra linha (a
+' coluna "id" da aba — ex.: "BASICO"/"TECNOLOGICO" em Nucleos — a primeira
+' ocorrência encontrada, se houver mais de uma; se a aba não tiver coluna
+' "id", cai no número da linha) — para o formulário sinalizar antes de
+' confirmar, mostrando "[BASICO]" etc., nunca corrige nem impede a seleção,
+' só avisa (Seção 29: nunca esconder um dado/decisão do usuário).
+Public Function ObterCodigosUsadosEmOutrasLinhasFormulario() As Object
+    Dim alvo As Range
+    Dim ws As Worksheet
+    Dim coluna As Long
+    Dim colunaId As Long
+    Dim linhaCabecalho As Long
+    Dim ultimaLinha As Long
+    Dim linha As Long
+    Dim partes As Variant
+    Dim parte As Variant
+    Dim codigo As String
+    Dim identificadorLinha As String
+    Dim usados As Object
+
+    Set usados = CreateObject("Scripting.Dictionary")
+    usados.CompareMode = vbTextCompare
+
+    Set alvo = gCelulaDestinoFormulario
+    If alvo Is Nothing Then GoTo Terminar
+
+    Set ws = alvo.Worksheet
+    coluna = alvo.Column
+    linhaCabecalho = LocalizarLinhaCabecalhoFormulario(alvo)
+    If linhaCabecalho = 0 Then GoTo Terminar
+
+    colunaId = LocalizarColunaIdFormulario(ws, linhaCabecalho)
+
+    ultimaLinha = ws.Cells(ws.Rows.Count, coluna).End(xlUp).Row
+
+    For linha = linhaCabecalho + 1 To ultimaLinha
+        If linha <> alvo.Row Then
+            identificadorLinha = vbNullString
+            If colunaId > 0 Then
+                identificadorLinha = Trim$(CStr(ws.Cells(linha, colunaId).Value2))
+            End If
+            If identificadorLinha = vbNullString Then
+                identificadorLinha = CStr(linha)
+            End If
+
+            partes = Split(CStr(ws.Cells(linha, coluna).Value2), "|")
+            For Each parte In partes
+                codigo = Trim$(CStr(parte))
+                If codigo <> vbNullString Then
+                    If Not usados.Exists(codigo) Then
+                        usados.Add codigo, identificadorLinha
+                    End If
+                End If
+            Next parte
+        End If
+    Next linha
+
+Terminar:
+    Set ObterCodigosUsadosEmOutrasLinhasFormulario = usados
+End Function
+
+Private Function LocalizarColunaIdFormulario(ByVal ws As Worksheet, ByVal linhaCabecalho As Long) As Long
+    Dim primeiraColuna As Long
+    Dim ultimaColuna As Long
+    Dim coluna As Long
+
+    primeiraColuna = ws.UsedRange.Column
+    ultimaColuna = ws.UsedRange.Column + ws.UsedRange.Columns.Count - 1
+
+    For coluna = primeiraColuna To ultimaColuna
+        If NormalizarCabecalhoFormulario(ws.Cells(linhaCabecalho, coluna).Value2) = "id" Then
+            LocalizarColunaIdFormulario = coluna
+            Exit Function
+        End If
+    Next coluna
+End Function
+
+' -----------------------------------------------------------------------------
 ' FONTE DOS COMPONENTES
 ' -----------------------------------------------------------------------------
 Public Function CarregarComponentesFormulario( _
@@ -443,6 +537,7 @@ Private Function CodigoFormulario() As String
     texto = texto & "Private mNomes() As String" & vbCrLf
     texto = texto & "Private mTotal As Long" & vbCrLf
     texto = texto & "Private mSelecionados As Object" & vbCrLf
+    texto = texto & "Private mUsadosEmOutrasLinhas As Object" & vbCrLf
     texto = texto & "Private mCarregando As Boolean" & vbCrLf
     texto = texto & "" & vbCrLf
     texto = texto & "Private Sub UserForm_Initialize()" & vbCrLf
@@ -453,6 +548,7 @@ Private Function CodigoFormulario() As String
     texto = texto & "" & vbCrLf
     texto = texto & "    CarregarSelecaoAtual" & vbCrLf
     texto = texto & "    mTotal = modFormularioComponentes.CarregarComponentesFormulario(mCodigos, mNomes)" & vbCrLf
+    texto = texto & "    Set mUsadosEmOutrasLinhas = modFormularioComponentes.ObterCodigosUsadosEmOutrasLinhasFormulario()" & vbCrLf
     texto = texto & "    IncluirCodigosNaoLocalizados" & vbCrLf
     texto = texto & "    OrdenarComponentesPorNome" & vbCrLf
     texto = texto & "    AtualizarLista" & vbCrLf
@@ -543,6 +639,7 @@ Private Function CodigoFormulario() As String
     texto = texto & "    Dim i As Long" & vbCrLf
     texto = texto & "    Dim indice As Long" & vbCrLf
     texto = texto & "    Dim textoPesquisa As String" & vbCrLf
+    texto = texto & "    Dim nomeExibido As String" & vbCrLf
     texto = texto & "" & vbCrLf
     texto = texto & "    If Not mCarregando Then CapturarSelecoesVisiveis" & vbCrLf
     texto = texto & "" & vbCrLf
@@ -556,7 +653,15 @@ Private Function CodigoFormulario() As String
     texto = texto & "            mNomes(i) & "" "" & mCodigos(i))" & vbCrLf
     texto = texto & "" & vbCrLf
     texto = texto & "        If filtro = vbNullString Or InStr(1, textoPesquisa, filtro, vbTextCompare) > 0 Then" & vbCrLf
-    texto = texto & "            Me.lstComponentes.AddItem mNomes(i)" & vbCrLf
+    texto = texto & "            nomeExibido = mNomes(i)" & vbCrLf
+    texto = texto & "            If Not mUsadosEmOutrasLinhas Is Nothing Then" & vbCrLf
+    texto = texto & "                If mUsadosEmOutrasLinhas.Exists(mCodigos(i)) Then" & vbCrLf
+    texto = texto & "                    nomeExibido = ""["" & _" & vbCrLf
+    texto = texto & "                        CStr(mUsadosEmOutrasLinhas.Item(mCodigos(i))) & ""] "" & nomeExibido" & vbCrLf
+    texto = texto & "                End If" & vbCrLf
+    texto = texto & "            End If" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "            Me.lstComponentes.AddItem nomeExibido" & vbCrLf
     texto = texto & "            indice = Me.lstComponentes.ListCount - 1" & vbCrLf
     texto = texto & "            Me.lstComponentes.List(indice, 1) = mCodigos(i)" & vbCrLf
     texto = texto & "            Me.lstComponentes.Selected(indice) = mSelecionados.Exists(mCodigos(i))" & vbCrLf
