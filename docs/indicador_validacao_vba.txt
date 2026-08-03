@@ -1,0 +1,310 @@
+Option Explicit
+
+' =============================================================================
+' INDICADOR DE VERIFICAÇÃO DE REGRAS (LÂMPADA VERDE/VERMELHA)
+'
+' Instalação:
+'   1. Importe este módulo no VBA (ou cole o conteúdo em um módulo padrão novo).
+'   2. Execute InstalarIndicadorRegras uma única vez — cria, na aba Perfil, o
+'      rótulo, a lâmpada, o texto de status e o botão "Verificar regras".
+'      Pode ser executada de novo a qualquer momento (reinstala sem duplicar
+'      nada).
+'
+' Uso:
+'   Clique no botão "Verificar regras" sempre que quiser conferir se todos
+'   os componentes ativos atendem às regras de validação do Python. A
+'   verificação:
+'     1. salva a planilha — o validador lê o arquivo do disco, não o que
+'        está em memória no Excel, então uma edição ainda não salva não
+'        entra na conferência;
+'     2. roda "python -m ppcgen validar --perfil <id>" — usa o próprio
+'        validador do pacote ppcgen, o mesmo do terminal; as regras não são
+'        reimplementadas em VBA de propósito, para nunca divergir do
+'        validador oficial (ver ppcgen/calculo.py, Seção 29 — "não duplique
+'        lógica");
+'     3. lê saida/<id>/relatorios/validacao.json e atualiza a lâmpada:
+'          verde    = 0 erro(s) nas regras do Python;
+'          vermelho = 1 ou mais erro(s);
+'          cinza    = falha ao verificar (mensagem de erro no texto ao lado
+'                     e em uma caixa de diálogo).
+'   O texto ao lado da lâmpada sempre mostra a contagem de erros E de
+'   alertas, mesmo quando a lâmpada está verde — alertas não deixam a
+'   lâmpada vermelha, mas nunca ficam escondidos.
+'
+' Requer 'python' no PATH do Windows e o pacote ppcgen instalado nesse mesmo
+' Python (o mesmo ambiente usado para rodar "python -m ppcgen" no terminal).
+' Não depende do diretório de trabalho: a raiz do repositório é localizada a
+' partir do caminho desta planilha, subindo pastas até achar pyproject.toml
+' ou .git — mesma lógica de ppcgen.utilitarios.caminhos.raiz_projeto.
+' =============================================================================
+
+Private Const ABA_STATUS As String = "Perfil"
+Private Const CELULA_ROTULO As String = "D1"
+Private Const CELULA_LAMPADA As String = "D2"
+Private Const CELULA_DETALHE As String = "E2"
+Private Const CELULA_BOTAO_ANCORA As String = "D4"
+Private Const NOME_BOTAO_VERIFICAR As String = "btnVerificarRegras"
+Private Const CARACTERE_LAMPADA As Long = 9679 ' ● (BLACK CIRCLE)
+
+' -----------------------------------------------------------------------------
+' INSTALAÇÃO
+' -----------------------------------------------------------------------------
+Public Sub InstalarIndicadorRegras()
+    Dim ws As Worksheet
+    Dim botao As Button
+
+    On Error GoTo TratarErro
+
+    Set ws = ThisWorkbook.Worksheets(ABA_STATUS)
+
+    With ws.Range(CELULA_ROTULO)
+        .Value = "Verificação de regras (Python)"
+        .Font.Name = "Segoe UI"
+        .Font.Size = 10
+        .Font.Bold = True
+    End With
+
+    With ws.Range(CELULA_LAMPADA)
+        .Value = ChrW(CARACTERE_LAMPADA)
+        .Font.Name = "Segoe UI Symbol"
+        .Font.Size = 28
+        .Font.Color = RGB(158, 158, 158)
+        .HorizontalAlignment = xlCenter
+        .VerticalAlignment = xlCenter
+    End With
+
+    With ws.Range(CELULA_DETALHE)
+        .Value = "Ainda não verificado nesta sessão — clique em ""Verificar regras""."
+        .Font.Name = "Segoe UI"
+        .Font.Size = 10
+        .VerticalAlignment = xlCenter
+    End With
+
+    RemoverBotaoSeExistirRegras ws, NOME_BOTAO_VERIFICAR
+
+    Set botao = ws.Buttons.Add( _
+        ws.Range(CELULA_BOTAO_ANCORA).Left, _
+        ws.Range(CELULA_BOTAO_ANCORA).Top, _
+        140, 28)
+    With botao
+        .Name = NOME_BOTAO_VERIFICAR
+        .Caption = "Verificar regras"
+        .OnAction = "VerificarRegras"
+        .Font.Name = "Segoe UI"
+        .Font.Size = 10
+    End With
+
+    MsgBox "Indicador instalado na aba """ & ABA_STATUS & """, células " & _
+           CELULA_ROTULO & "/" & CELULA_LAMPADA & "/" & CELULA_DETALHE & _
+           ", com o botão ""Verificar regras"".", _
+           vbInformation, "Instalação concluída"
+    Exit Sub
+
+TratarErro:
+    MsgBox "Não foi possível instalar o indicador." & vbNewLine & vbNewLine & _
+           Err.Number & " - " & Err.Description, _
+           vbCritical, "Instalar indicador"
+End Sub
+
+Private Sub RemoverBotaoSeExistirRegras(ByVal ws As Worksheet, ByVal nome As String)
+    On Error Resume Next
+    ws.Buttons(nome).Delete
+    On Error GoTo 0
+End Sub
+
+' -----------------------------------------------------------------------------
+' VERIFICAÇÃO
+' -----------------------------------------------------------------------------
+Public Sub VerificarRegras()
+    Dim wshShell As Object
+    Dim raizRepositorio As String
+    Dim perfilId As String
+    Dim caminhoJson As String
+    Dim comando As String
+    Dim codigoSaida As Long
+    Dim horaAntes As Date
+
+    On Error GoTo TratarErro
+
+    raizRepositorio = LocalizarRaizRepositorioRegras()
+    perfilId = ObterPerfilIdRegras()
+
+    ' O validador lê o arquivo do disco, não o estado em memória do Excel.
+    If Not ThisWorkbook.Saved Then ThisWorkbook.Save
+
+    caminhoJson = raizRepositorio & "\saida\" & perfilId & "\relatorios\validacao.json"
+    horaAntes = DateAdd("s", -2, Now)
+
+    Set wshShell = CreateObject("WScript.Shell")
+    wshShell.CurrentDirectory = raizRepositorio
+    comando = "cmd /c python -m ppcgen validar --perfil " & perfilId
+    codigoSaida = wshShell.Run(comando, 0, True)
+
+    If Not ArquivoExisteRegras(caminhoJson) Then
+        Err.Raise vbObjectError + 3300, "VerificarRegras", _
+                  "python -m ppcgen validar não gerou o relatório esperado (" & _
+                  caminhoJson & "). Código de saída do processo: " & codigoSaida & _
+                  ". Confirme que 'python' está no PATH e que o pacote ppcgen " & _
+                  "está instalado nesse Python."
+    End If
+
+    If FileDateTime(caminhoJson) < horaAntes Then
+        Err.Raise vbObjectError + 3304, "VerificarRegras", _
+                  "O relatório em " & caminhoJson & " não foi atualizado por esta " & _
+                  "execução (está desatualizado). Código de saída do processo: " & _
+                  codigoSaida & ". Confirme que 'python' está no PATH."
+    End If
+
+    AtualizarLampadaRegras caminhoJson
+    Exit Sub
+
+TratarErro:
+    AtualizarLampadaComErroRegras Err.Number & " - " & Err.Description
+    MsgBox "Não foi possível verificar as regras." & vbNewLine & vbNewLine & _
+           Err.Number & " - " & Err.Description, _
+           vbCritical, "Verificar regras"
+End Sub
+
+Private Function LocalizarRaizRepositorioRegras() As String
+    Dim pasta As String
+    Dim anterior As String
+
+    pasta = ThisWorkbook.Path
+
+    Do While pasta <> vbNullString
+        If ArquivoExisteRegras(pasta & "\pyproject.toml") Or _
+           PastaExisteRegras(pasta & "\.git") Then
+            LocalizarRaizRepositorioRegras = pasta
+            Exit Function
+        End If
+
+        anterior = pasta
+        pasta = Left$(pasta, InStrRev(pasta, "\") - 1)
+        If pasta = anterior Then Exit Do
+    Loop
+
+    Err.Raise vbObjectError + 3301, "LocalizarRaizRepositorioRegras", _
+              "Não foi possível localizar a raiz do repositório (pasta com " & _
+              "pyproject.toml ou .git) a partir de " & ThisWorkbook.Path & "."
+End Function
+
+Private Function ObterPerfilIdRegras() As String
+    Dim ws As Worksheet
+    Dim linha As Long
+    Dim ultimaLinha As Long
+
+    Set ws = ThisWorkbook.Worksheets(ABA_STATUS)
+    ultimaLinha = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+
+    For linha = 2 To ultimaLinha
+        If Trim$(CStr(ws.Cells(linha, 1).Value2)) = "perfil.id" Then
+            ObterPerfilIdRegras = Trim$(CStr(ws.Cells(linha, 2).Value2))
+            Exit Function
+        End If
+    Next linha
+
+    Err.Raise vbObjectError + 3303, "ObterPerfilIdRegras", _
+              "Não foi encontrada a chave 'perfil.id' na aba '" & ABA_STATUS & "'."
+End Function
+
+Private Function ArquivoExisteRegras(ByVal caminho As String) As Boolean
+    ArquivoExisteRegras = (Dir$(caminho) <> vbNullString)
+End Function
+
+Private Function PastaExisteRegras(ByVal caminho As String) As Boolean
+    Dim atributos As Long
+    Dim ocorreuErro As Boolean
+
+    On Error Resume Next
+    atributos = GetAttr(caminho)
+    ocorreuErro = (Err.Number <> 0)
+    On Error GoTo 0
+
+    PastaExisteRegras = (Not ocorreuErro) And ((atributos And vbDirectory) = vbDirectory)
+End Function
+
+' -----------------------------------------------------------------------------
+' LEITURA DO RELATÓRIO E ATUALIZAÇÃO DA LÂMPADA
+' -----------------------------------------------------------------------------
+Private Sub AtualizarLampadaRegras(ByVal caminhoJson As String)
+    Dim texto As String
+    Dim erros As Long
+    Dim alertas As Long
+    Dim ws As Worksheet
+
+    texto = LerArquivoTextoRegras(caminhoJson)
+    erros = ExtrairInteiroDepoisDaChaveRegras(texto, "erros")
+    alertas = ExtrairInteiroDepoisDaChaveRegras(texto, "alertas")
+
+    Set ws = ThisWorkbook.Worksheets(ABA_STATUS)
+
+    With ws.Range(CELULA_LAMPADA)
+        .Value = ChrW(CARACTERE_LAMPADA)
+        If erros = 0 Then
+            .Font.Color = RGB(46, 125, 50)
+        Else
+            .Font.Color = RGB(198, 40, 40)
+        End If
+    End With
+
+    With ws.Range(CELULA_DETALHE)
+        .Value = CStr(erros) & " erro(s), " & CStr(alertas) & " alerta(s) — verificado em " & _
+                 Format$(Now, "dd/mm/yyyy hh:nn")
+    End With
+End Sub
+
+Private Sub AtualizarLampadaComErroRegras(ByVal mensagem As String)
+    Dim ws As Worksheet
+
+    On Error Resume Next
+    Set ws = ThisWorkbook.Worksheets(ABA_STATUS)
+    If ws Is Nothing Then Exit Sub
+
+    With ws.Range(CELULA_LAMPADA)
+        .Value = ChrW(CARACTERE_LAMPADA)
+        .Font.Color = RGB(158, 158, 158)
+    End With
+
+    With ws.Range(CELULA_DETALHE)
+        .Value = "Falha ao verificar: " & mensagem
+    End With
+    On Error GoTo 0
+End Sub
+
+Private Function LerArquivoTextoRegras(ByVal caminho As String) As String
+    Dim numeroArquivo As Integer
+
+    numeroArquivo = FreeFile
+    Open caminho For Input As #numeroArquivo
+    LerArquivoTextoRegras = Input$(LOF(numeroArquivo), numeroArquivo)
+    Close #numeroArquivo
+End Function
+
+Private Function ExtrairInteiroDepoisDaChaveRegras( _
+    ByVal texto As String, ByVal chave As String) As Long
+
+    Dim posicaoChave As Long
+    Dim posicaoInicioValor As Long
+    Dim posicaoFimValor As Long
+    Dim caractere As String
+
+    posicaoChave = InStr(1, texto, """" & chave & """:", vbBinaryCompare)
+    If posicaoChave = 0 Then
+        Err.Raise vbObjectError + 3302, "ExtrairInteiroDepoisDaChaveRegras", _
+                  "Chave '" & chave & "' não encontrada no relatório de validação."
+    End If
+
+    posicaoInicioValor = posicaoChave + Len(chave) + 3 ' pula "chave":
+    posicaoFimValor = posicaoInicioValor
+
+    Do While posicaoFimValor <= Len(texto)
+        caractere = Mid$(texto, posicaoFimValor, 1)
+        If caractere = "," Or caractere = "}" Or caractere = vbCr Or caractere = vbLf Then
+            Exit Do
+        End If
+        posicaoFimValor = posicaoFimValor + 1
+    Loop
+
+    ExtrairInteiroDepoisDaChaveRegras = _
+        CLng(Trim$(Mid$(texto, posicaoInicioValor, posicaoFimValor - posicaoInicioValor)))
+End Function
