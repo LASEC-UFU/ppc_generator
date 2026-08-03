@@ -1,0 +1,710 @@
+Option Explicit
+
+' =============================================================================
+' FORMULÁRIO DE SELEÇÃO MÚLTIPLA DE COMPONENTES
+'
+' Instalação:
+'   1. Importe este módulo no VBA.
+'   2. Execute InstalarFormularioComponentes uma única vez.
+'   3. Associe um botão à macro AbrirFormularioComponentes.
+'
+' Uso:
+'   - Selecione uma célula abaixo de um cabeçalho chamado componentes.
+'   - Abra o formulário.
+'   - Pesquise e marque vários nomes.
+'   - O campo recebe os códigos separados por |.
+'   - Códigos que já estavam no campo aparecem previamente marcados.
+' =============================================================================
+
+Private Const NOME_FORMULARIO As String = "frmSelecionarComponentes"
+Private Const ABA_COMPONENTES As String = "Componentes"
+Private Const CABECALHO_ALVO As String = "componentes"
+Private Const CABECALHO_CODIGO As String = "codigo"
+Private Const CABECALHO_NOME As String = "nome"
+
+Public gCelulaDestinoFormulario As Range
+
+' -----------------------------------------------------------------------------
+' INSTALAÇÃO DO USERFORM
+' -----------------------------------------------------------------------------
+Public Sub InstalarFormularioComponentes()
+    Dim projeto As Object
+    Dim componente As Object
+    Dim formulario As Object
+    Dim controle As Object
+
+    On Error GoTo SemAcesso
+
+    Set projeto = ThisWorkbook.VBProject
+
+    RemoverComponenteSeExistir projeto, NOME_FORMULARIO
+
+    Set componente = projeto.VBComponents.Add(3)
+    componente.Name = NOME_FORMULARIO
+    Set formulario = componente.Designer
+
+    With componente.Properties
+        .item("Caption") = "Selecionar componentes"
+        .item("Width") = 760
+        .item("Height") = 620
+        .item("StartUpPosition") = 1
+    End With
+
+    ' Fonte maior em todos os controles — o formulário nunca definia fonte
+    ' própria e caía no padrão minúsculo do UserForm, ilegível em telas
+    ' com escala de tela alta.
+    Set controle = formulario.Controls.Add("Forms.Label.1", "lblInstrucao", True)
+    With controle
+        .Caption = "Selecione os componentes. O nome é exibido e o código será gravado na célula."
+        .Left = 18
+        .Top = 15
+        .Width = 710
+        .Height = 42
+        .WordWrap = True
+        .Font.Name = "Segoe UI"
+        .Font.Size = 11
+    End With
+
+    Set controle = formulario.Controls.Add("Forms.Label.1", "lblFiltro", True)
+    With controle
+        .Caption = "Pesquisar:"
+        .Left = 18
+        .Top = 66
+        .Width = 100
+        .Height = 24
+        .Font.Name = "Segoe UI"
+        .Font.Size = 11
+    End With
+
+    Set controle = formulario.Controls.Add("Forms.TextBox.1", "txtFiltro", True)
+    With controle
+        .Left = 124
+        .Top = 62
+        .Width = 618
+        .Height = 28
+        .Font.Name = "Segoe UI"
+        .Font.Size = 11
+    End With
+
+    Set controle = formulario.Controls.Add("Forms.ListBox.1", "lstComponentes", True)
+    With controle
+        .Left = 18
+        .Top = 100
+        .Width = 724
+        .Height = 380
+        .ColumnCount = 2
+        .ColumnWidths = "540 pt;150 pt"
+        .MultiSelect = 1
+        .ListStyle = 1
+        .IntegralHeight = False
+        .Font.Name = "Segoe UI"
+        .Font.Size = 11
+    End With
+
+    Set controle = formulario.Controls.Add("Forms.Label.1", "lblResumo", True)
+    With controle
+        .Caption = "0 componentes selecionados"
+        .Left = 18
+        .Top = 494
+        .Width = 280
+        .Height = 24
+        .Font.Name = "Segoe UI"
+        .Font.Size = 11
+    End With
+
+    Set controle = formulario.Controls.Add("Forms.CommandButton.1", "cmdMarcarTodos", True)
+    With controle
+        .Caption = "Marcar visíveis"
+        .Left = 310
+        .Top = 490
+        .Width = 145
+        .Height = 32
+        .Font.Name = "Segoe UI"
+        .Font.Size = 11
+    End With
+
+    Set controle = formulario.Controls.Add("Forms.CommandButton.1", "cmdDesmarcarTodos", True)
+    With controle
+        .Caption = "Desmarcar visíveis"
+        .Left = 465
+        .Top = 490
+        .Width = 165
+        .Height = 32
+        .Font.Name = "Segoe UI"
+        .Font.Size = 11
+    End With
+
+    Set controle = formulario.Controls.Add("Forms.CommandButton.1", "cmdConfirmar", True)
+    With controle
+        .Caption = "Confirmar"
+        .Default = True
+        .Left = 480
+        .Top = 534
+        .Width = 125
+        .Height = 36
+        .Font.Name = "Segoe UI"
+        .Font.Size = 11
+    End With
+
+    Set controle = formulario.Controls.Add("Forms.CommandButton.1", "cmdCancelar", True)
+    With controle
+        .Caption = "Cancelar"
+        .Cancel = True
+        .Left = 617
+        .Top = 534
+        .Width = 125
+        .Height = 36
+        .Font.Name = "Segoe UI"
+        .Font.Size = 11
+    End With
+
+    componente.CodeModule.AddFromString CodigoFormulario()
+
+    MsgBox "O formulário foi instalado com sucesso." & vbNewLine & vbNewLine & _
+           "Associe seu botão à macro AbrirFormularioComponentes.", _
+           vbInformation, "Instalação concluída"
+    Exit Sub
+
+SemAcesso:
+    MsgBox "Não foi possível instalar o formulário." & vbNewLine & vbNewLine & _
+           "Ative no Excel: Arquivo > Opções > Central de Confiabilidade > " & _
+           "Configurações da Central de Confiabilidade > Configurações de Macro > " & _
+           "Confiar no acesso ao modelo de objeto do projeto VBA." & vbNewLine & vbNewLine & _
+           Err.Number & " - " & Err.Description, _
+           vbCritical, "Instalar formulário"
+End Sub
+
+Private Sub RemoverComponenteSeExistir(ByVal projeto As Object, ByVal nome As String)
+    Dim componente As Object
+
+    On Error Resume Next
+    Set componente = projeto.VBComponents(nome)
+    On Error GoTo 0
+
+    If Not componente Is Nothing Then
+        projeto.VBComponents.Remove componente
+    End If
+End Sub
+
+' -----------------------------------------------------------------------------
+' ABERTURA DO FORMULÁRIO
+' -----------------------------------------------------------------------------
+Public Sub AbrirFormularioComponentes()
+    Dim alvo As Range
+    Dim formulario As Object
+
+    On Error GoTo TratarErro
+
+    If TypeName(Selection) <> "Range" Then
+        Err.Raise vbObjectError + 3100, "AbrirFormularioComponentes", _
+                  "Selecione uma célula da coluna componentes."
+    End If
+
+    If Selection.Cells.CountLarge <> 1 Then
+        Err.Raise vbObjectError + 3101, "AbrirFormularioComponentes", _
+                  "Selecione somente uma célula."
+    End If
+
+    Set alvo = Selection.Cells(1, 1)
+
+    If alvo.MergeCells Then
+        Set alvo = alvo.MergeArea.Cells(1, 1)
+    End If
+
+    If Not EhCelulaDaColunaComponentesFormulario(alvo) Then
+        Err.Raise vbObjectError + 3102, "AbrirFormularioComponentes", _
+                  "A célula " & alvo.Worksheet.Name & "!" & alvo.Address(False, False) & _
+                  " não está abaixo de um cabeçalho chamado componentes."
+    End If
+
+    Set gCelulaDestinoFormulario = alvo
+    Set formulario = VBA.UserForms.Add(NOME_FORMULARIO)
+    formulario.Show
+    Set formulario = Nothing
+    Exit Sub
+
+TratarErro:
+    MsgBox "Não foi possível abrir o formulário." & vbNewLine & vbNewLine & _
+           Err.Number & " - " & Err.Description, _
+           vbExclamation, "Selecionar componentes"
+End Sub
+
+Public Function ObterCelulaDestinoFormulario() As Range
+    Set ObterCelulaDestinoFormulario = gCelulaDestinoFormulario
+End Function
+
+Public Sub LimparDestinoFormulario()
+    Set gCelulaDestinoFormulario = Nothing
+End Sub
+
+Public Function EhCelulaDaColunaComponentesFormulario(ByVal alvo As Range) As Boolean
+    EhCelulaDaColunaComponentesFormulario = _
+        (LocalizarLinhaCabecalhoFormulario(alvo) > 0)
+End Function
+
+Private Function LocalizarLinhaCabecalhoFormulario(ByVal alvo As Range) As Long
+    Dim linha As Long
+
+    If alvo Is Nothing Then Exit Function
+    If Not (alvo.Parent.Parent Is ThisWorkbook) Then Exit Function
+
+    For linha = alvo.Row To 1 Step -1
+        If NormalizarCabecalhoFormulario( _
+            alvo.Worksheet.Cells(linha, alvo.Column).Value2) = CABECALHO_ALVO Then
+
+            If linha < alvo.Row Then
+                LocalizarLinhaCabecalhoFormulario = linha
+                Exit Function
+            End If
+        End If
+    Next linha
+End Function
+
+' -----------------------------------------------------------------------------
+' FONTE DOS COMPONENTES
+' -----------------------------------------------------------------------------
+Public Function CarregarComponentesFormulario( _
+    ByRef codigos() As String, _
+    ByRef nomes() As String) As Long
+
+    Dim ws As Worksheet
+    Dim linhaCabecalho As Long
+    Dim colunaCodigo As Long
+    Dim colunaNome As Long
+    Dim ultimaLinha As Long
+    Dim linha As Long
+    Dim total As Long
+    Dim codigo As String
+    Dim nome As String
+    Dim usados As Object
+
+    Set ws = ThisWorkbook.Worksheets(ABA_COMPONENTES)
+
+    LocalizarCabecalhosFonteFormulario _
+        ws, linhaCabecalho, colunaCodigo, colunaNome
+
+    ultimaLinha = Application.Max( _
+        ws.Cells(ws.Rows.Count, colunaCodigo).End(xlUp).Row, _
+        ws.Cells(ws.Rows.Count, colunaNome).End(xlUp).Row)
+
+    Set usados = CreateObject("Scripting.Dictionary")
+    usados.CompareMode = vbTextCompare
+
+    For linha = linhaCabecalho + 1 To ultimaLinha
+        codigo = Trim$(CStr(ws.Cells(linha, colunaCodigo).Value2))
+        nome = Trim$(CStr(ws.Cells(linha, colunaNome).Value2))
+
+        If codigo <> vbNullString Or nome <> vbNullString Then
+            If codigo = vbNullString Then
+                Err.Raise vbObjectError + 3110, "CarregarComponentesFormulario", _
+                          "Componente sem código em " & ws.Name & "!" & _
+                          ws.Cells(linha, colunaCodigo).Address(False, False) & "."
+            End If
+
+            If nome = vbNullString Then
+                Err.Raise vbObjectError + 3111, "CarregarComponentesFormulario", _
+                          "Componente sem nome em " & ws.Name & "!" & _
+                          ws.Cells(linha, colunaNome).Address(False, False) & "."
+            End If
+
+            If usados.Exists(codigo) Then
+                Err.Raise vbObjectError + 3112, "CarregarComponentesFormulario", _
+                          "Código duplicado na aba Componentes: " & codigo & "."
+            End If
+
+            usados.Add codigo, True
+            total = total + 1
+
+            If total = 1 Then
+                ReDim codigos(1 To 1)
+                ReDim nomes(1 To 1)
+            Else
+                ReDim Preserve codigos(1 To total)
+                ReDim Preserve nomes(1 To total)
+            End If
+
+            codigos(total) = codigo
+            nomes(total) = nome
+        End If
+    Next linha
+
+    If total = 0 Then
+        Err.Raise vbObjectError + 3113, "CarregarComponentesFormulario", _
+                  "Nenhum componente foi encontrado na aba Componentes."
+    End If
+
+    CarregarComponentesFormulario = total
+End Function
+
+Private Sub LocalizarCabecalhosFonteFormulario( _
+    ByVal ws As Worksheet, _
+    ByRef linhaCabecalho As Long, _
+    ByRef colunaCodigo As Long, _
+    ByRef colunaNome As Long)
+
+    Dim primeiraLinha As Long
+    Dim ultimaLinhaBusca As Long
+    Dim primeiraColuna As Long
+    Dim ultimaColuna As Long
+    Dim linha As Long
+    Dim coluna As Long
+    Dim cabecalho As String
+
+    primeiraLinha = ws.UsedRange.Row
+    ultimaLinhaBusca = Application.Min( _
+        ws.UsedRange.Row + ws.UsedRange.Rows.Count - 1, primeiraLinha + 100)
+    primeiraColuna = ws.UsedRange.Column
+    ultimaColuna = ws.UsedRange.Column + ws.UsedRange.Columns.Count - 1
+
+    For linha = primeiraLinha To ultimaLinhaBusca
+        colunaCodigo = 0
+        colunaNome = 0
+
+        For coluna = primeiraColuna To ultimaColuna
+            cabecalho = NormalizarCabecalhoFormulario( _
+                ws.Cells(linha, coluna).Value2)
+
+            Select Case cabecalho
+                Case CABECALHO_CODIGO
+                    colunaCodigo = coluna
+                Case CABECALHO_NOME
+                    colunaNome = coluna
+            End Select
+        Next coluna
+
+        If colunaCodigo > 0 And colunaNome > 0 Then
+            linhaCabecalho = linha
+            Exit Sub
+        End If
+    Next linha
+
+    Err.Raise vbObjectError + 3114, "LocalizarCabecalhosFonteFormulario", _
+              "Não foram encontrados, na mesma linha da aba Componentes, " & _
+              "os cabeçalhos codigo e nome."
+End Sub
+
+' -----------------------------------------------------------------------------
+' NORMALIZAÇÃO
+' -----------------------------------------------------------------------------
+Private Function NormalizarCabecalhoFormulario(ByVal valor As Variant) As String
+    Dim texto As String
+
+    If IsError(valor) Or IsEmpty(valor) Or IsNull(valor) Then Exit Function
+
+    texto = NormalizarPesquisaFormulario(CStr(valor))
+    texto = Replace(texto, "-", "_")
+    texto = Replace(texto, " ", "_")
+
+    Do While InStr(texto, "__") > 0
+        texto = Replace(texto, "__", "_")
+    Loop
+
+    NormalizarCabecalhoFormulario = texto
+End Function
+
+Public Function NormalizarPesquisaFormulario(ByVal valor As Variant) As String
+    Dim texto As String
+
+    If IsError(valor) Or IsEmpty(valor) Or IsNull(valor) Then Exit Function
+
+    texto = LCase$(Trim$(CStr(valor)))
+    texto = Replace(texto, ChrW(160), " ")
+    texto = Replace(texto, "á", "a")
+    texto = Replace(texto, "à", "a")
+    texto = Replace(texto, "â", "a")
+    texto = Replace(texto, "ã", "a")
+    texto = Replace(texto, "ä", "a")
+    texto = Replace(texto, "é", "e")
+    texto = Replace(texto, "ê", "e")
+    texto = Replace(texto, "ë", "e")
+    texto = Replace(texto, "í", "i")
+    texto = Replace(texto, "ï", "i")
+    texto = Replace(texto, "ó", "o")
+    texto = Replace(texto, "ô", "o")
+    texto = Replace(texto, "õ", "o")
+    texto = Replace(texto, "ö", "o")
+    texto = Replace(texto, "ú", "u")
+    texto = Replace(texto, "ü", "u")
+    texto = Replace(texto, "ç", "c")
+
+    Do While InStr(texto, "  ") > 0
+        texto = Replace(texto, "  ", " ")
+    Loop
+
+    NormalizarPesquisaFormulario = texto
+End Function
+
+Private Function CodigoFormulario() As String
+    Dim texto As String
+
+    texto = texto & "Option Explicit" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "Private mCodigos() As String" & vbCrLf
+    texto = texto & "Private mNomes() As String" & vbCrLf
+    texto = texto & "Private mTotal As Long" & vbCrLf
+    texto = texto & "Private mSelecionados As Object" & vbCrLf
+    texto = texto & "Private mCarregando As Boolean" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "Private Sub UserForm_Initialize()" & vbCrLf
+    texto = texto & "    On Error GoTo TratarErro" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "    Set mSelecionados = CreateObject(""Scripting.Dictionary"")" & vbCrLf
+    texto = texto & "    mSelecionados.CompareMode = vbTextCompare" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "    CarregarSelecaoAtual" & vbCrLf
+    texto = texto & "    mTotal = modFormularioComponentes.CarregarComponentesFormulario(mCodigos, mNomes)" & vbCrLf
+    texto = texto & "    IncluirCodigosNaoLocalizados" & vbCrLf
+    texto = texto & "    OrdenarComponentesPorNome" & vbCrLf
+    texto = texto & "    AtualizarLista" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "    Me.txtFiltro.SetFocus" & vbCrLf
+    texto = texto & "    Exit Sub" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "TratarErro:" & vbCrLf
+    texto = texto & "    MsgBox ""Não foi possível carregar o formulário."" & vbNewLine & vbNewLine & _" & vbCrLf
+    texto = texto & "           Err.Number & "" - "" & Err.Description, _" & vbCrLf
+    texto = texto & "           vbCritical, ""Selecionar componentes""" & vbCrLf
+    texto = texto & "    Unload Me" & vbCrLf
+    texto = texto & "End Sub" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "Private Sub CarregarSelecaoAtual()" & vbCrLf
+    texto = texto & "    Dim alvo As Range" & vbCrLf
+    texto = texto & "    Dim partes As Variant" & vbCrLf
+    texto = texto & "    Dim parte As Variant" & vbCrLf
+    texto = texto & "    Dim codigo As String" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "    Set alvo = modFormularioComponentes.ObterCelulaDestinoFormulario()" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "    If alvo Is Nothing Then" & vbCrLf
+    texto = texto & "        Err.Raise vbObjectError + 3200, ""CarregarSelecaoAtual"", _" & vbCrLf
+    texto = texto & "                  ""A célula de destino não foi definida.""" & vbCrLf
+    texto = texto & "    End If" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "    partes = Split(CStr(alvo.Value2), ""|"")" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "    For Each parte In partes" & vbCrLf
+    texto = texto & "        codigo = Trim$(CStr(parte))" & vbCrLf
+    texto = texto & "        If codigo <> vbNullString Then" & vbCrLf
+    texto = texto & "            If Not mSelecionados.Exists(codigo) Then" & vbCrLf
+    texto = texto & "                mSelecionados.Add codigo, True" & vbCrLf
+    texto = texto & "            End If" & vbCrLf
+    texto = texto & "        End If" & vbCrLf
+    texto = texto & "    Next parte" & vbCrLf
+    texto = texto & "End Sub" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "Private Sub IncluirCodigosNaoLocalizados()" & vbCrLf
+    texto = texto & "    Dim conhecidos As Object" & vbCrLf
+    texto = texto & "    Dim codigo As Variant" & vbCrLf
+    texto = texto & "    Dim i As Long" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "    Set conhecidos = CreateObject(""Scripting.Dictionary"")" & vbCrLf
+    texto = texto & "    conhecidos.CompareMode = vbTextCompare" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "    For i = 1 To mTotal" & vbCrLf
+    texto = texto & "        If Not conhecidos.Exists(mCodigos(i)) Then" & vbCrLf
+    texto = texto & "            conhecidos.Add mCodigos(i), True" & vbCrLf
+    texto = texto & "        End If" & vbCrLf
+    texto = texto & "    Next i" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "    For Each codigo In mSelecionados.Keys" & vbCrLf
+    texto = texto & "        If Not conhecidos.Exists(CStr(codigo)) Then" & vbCrLf
+    texto = texto & "            mTotal = mTotal + 1" & vbCrLf
+    texto = texto & "            ReDim Preserve mCodigos(1 To mTotal)" & vbCrLf
+    texto = texto & "            ReDim Preserve mNomes(1 To mTotal)" & vbCrLf
+    texto = texto & "            mCodigos(mTotal) = CStr(codigo)" & vbCrLf
+    texto = texto & "            mNomes(mTotal) = ""[Código não localizado] "" & CStr(codigo)" & vbCrLf
+    texto = texto & "        End If" & vbCrLf
+    texto = texto & "    Next codigo" & vbCrLf
+    texto = texto & "End Sub" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "Private Sub OrdenarComponentesPorNome()" & vbCrLf
+    texto = texto & "    Dim i As Long" & vbCrLf
+    texto = texto & "    Dim j As Long" & vbCrLf
+    texto = texto & "    Dim nomeTemp As String" & vbCrLf
+    texto = texto & "    Dim codigoTemp As String" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "    For i = 1 To mTotal - 1" & vbCrLf
+    texto = texto & "        For j = i + 1 To mTotal" & vbCrLf
+    texto = texto & "            If StrComp(mNomes(i), mNomes(j), vbTextCompare) > 0 Then" & vbCrLf
+    texto = texto & "                nomeTemp = mNomes(i)" & vbCrLf
+    texto = texto & "                mNomes(i) = mNomes(j)" & vbCrLf
+    texto = texto & "                mNomes(j) = nomeTemp" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "                codigoTemp = mCodigos(i)" & vbCrLf
+    texto = texto & "                mCodigos(i) = mCodigos(j)" & vbCrLf
+    texto = texto & "                mCodigos(j) = codigoTemp" & vbCrLf
+    texto = texto & "            End If" & vbCrLf
+    texto = texto & "        Next j" & vbCrLf
+    texto = texto & "    Next i" & vbCrLf
+    texto = texto & "End Sub" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "Private Sub AtualizarLista()" & vbCrLf
+    texto = texto & "    Dim filtro As String" & vbCrLf
+    texto = texto & "    Dim i As Long" & vbCrLf
+    texto = texto & "    Dim indice As Long" & vbCrLf
+    texto = texto & "    Dim textoPesquisa As String" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "    If Not mCarregando Then CapturarSelecoesVisiveis" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "    mCarregando = True" & vbCrLf
+    texto = texto & "    Me.lstComponentes.Clear" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "    filtro = modFormularioComponentes.NormalizarPesquisaFormulario(Me.txtFiltro.Text)" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "    For i = 1 To mTotal" & vbCrLf
+    texto = texto & "        textoPesquisa = modFormularioComponentes.NormalizarPesquisaFormulario( _" & vbCrLf
+    texto = texto & "            mNomes(i) & "" "" & mCodigos(i))" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "        If filtro = vbNullString Or InStr(1, textoPesquisa, filtro, vbTextCompare) > 0 Then" & vbCrLf
+    texto = texto & "            Me.lstComponentes.AddItem mNomes(i)" & vbCrLf
+    texto = texto & "            indice = Me.lstComponentes.ListCount - 1" & vbCrLf
+    texto = texto & "            Me.lstComponentes.List(indice, 1) = mCodigos(i)" & vbCrLf
+    texto = texto & "            Me.lstComponentes.Selected(indice) = mSelecionados.Exists(mCodigos(i))" & vbCrLf
+    texto = texto & "        End If" & vbCrLf
+    texto = texto & "    Next i" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "    mCarregando = False" & vbCrLf
+    texto = texto & "    AtualizarResumo" & vbCrLf
+    texto = texto & "End Sub" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "Private Sub CapturarSelecoesVisiveis()" & vbCrLf
+    texto = texto & "    Dim i As Long" & vbCrLf
+    texto = texto & "    Dim codigo As String" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "    If mCarregando Then Exit Sub" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "    For i = 0 To Me.lstComponentes.ListCount - 1" & vbCrLf
+    texto = texto & "        codigo = Trim$(CStr(Me.lstComponentes.List(i, 1)))" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "        If codigo <> vbNullString Then" & vbCrLf
+    texto = texto & "            If Me.lstComponentes.Selected(i) Then" & vbCrLf
+    texto = texto & "                If Not mSelecionados.Exists(codigo) Then" & vbCrLf
+    texto = texto & "                    mSelecionados.Add codigo, True" & vbCrLf
+    texto = texto & "                End If" & vbCrLf
+    texto = texto & "            Else" & vbCrLf
+    texto = texto & "                If mSelecionados.Exists(codigo) Then" & vbCrLf
+    texto = texto & "                    mSelecionados.Remove codigo" & vbCrLf
+    texto = texto & "                End If" & vbCrLf
+    texto = texto & "            End If" & vbCrLf
+    texto = texto & "        End If" & vbCrLf
+    texto = texto & "    Next i" & vbCrLf
+    texto = texto & "End Sub" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "Private Sub AtualizarResumo()" & vbCrLf
+    texto = texto & "    Me.lblResumo.Caption = CStr(mSelecionados.Count) & _" & vbCrLf
+    texto = texto & "        IIf(mSelecionados.Count = 1, "" componente selecionado"", "" componentes selecionados"")" & vbCrLf
+    texto = texto & "End Sub" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "Private Sub txtFiltro_Change()" & vbCrLf
+    texto = texto & "    If mCarregando Then Exit Sub" & vbCrLf
+    texto = texto & "    AtualizarLista" & vbCrLf
+    texto = texto & "End Sub" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "Private Sub lstComponentes_Change()" & vbCrLf
+    texto = texto & "    If mCarregando Then Exit Sub" & vbCrLf
+    texto = texto & "    CapturarSelecoesVisiveis" & vbCrLf
+    texto = texto & "    AtualizarResumo" & vbCrLf
+    texto = texto & "End Sub" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "Private Sub cmdMarcarTodos_Click()" & vbCrLf
+    texto = texto & "    Dim i As Long" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "    mCarregando = True" & vbCrLf
+    texto = texto & "    For i = 0 To Me.lstComponentes.ListCount - 1" & vbCrLf
+    texto = texto & "        Me.lstComponentes.Selected(i) = True" & vbCrLf
+    texto = texto & "    Next i" & vbCrLf
+    texto = texto & "    mCarregando = False" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "    CapturarSelecoesVisiveis" & vbCrLf
+    texto = texto & "    AtualizarResumo" & vbCrLf
+    texto = texto & "End Sub" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "Private Sub cmdDesmarcarTodos_Click()" & vbCrLf
+    texto = texto & "    Dim i As Long" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "    mCarregando = True" & vbCrLf
+    texto = texto & "    For i = 0 To Me.lstComponentes.ListCount - 1" & vbCrLf
+    texto = texto & "        Me.lstComponentes.Selected(i) = False" & vbCrLf
+    texto = texto & "    Next i" & vbCrLf
+    texto = texto & "    mCarregando = False" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "    CapturarSelecoesVisiveis" & vbCrLf
+    texto = texto & "    AtualizarResumo" & vbCrLf
+    texto = texto & "End Sub" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "Private Sub cmdConfirmar_Click()" & vbCrLf
+    texto = texto & "    Dim alvo As Range" & vbCrLf
+    texto = texto & "    Dim incluidos As Object" & vbCrLf
+    texto = texto & "    Dim resultado As String" & vbCrLf
+    texto = texto & "    Dim codigo As String" & vbCrLf
+    texto = texto & "    Dim i As Long" & vbCrLf
+    texto = texto & "    Dim eventosAtivos As Boolean" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "    On Error GoTo TratarErro" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "    CapturarSelecoesVisiveis" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "    Set alvo = modFormularioComponentes.ObterCelulaDestinoFormulario()" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "    If alvo Is Nothing Then" & vbCrLf
+    texto = texto & "        Err.Raise vbObjectError + 3201, ""cmdConfirmar_Click"", _" & vbCrLf
+    texto = texto & "                  ""A célula de destino não está mais disponível.""" & vbCrLf
+    texto = texto & "    End If" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "    If Not modFormularioComponentes.EhCelulaDaColunaComponentesFormulario(alvo) Then" & vbCrLf
+    texto = texto & "        Err.Raise vbObjectError + 3202, ""cmdConfirmar_Click"", _" & vbCrLf
+    texto = texto & "                  ""A célula de destino não pertence mais a uma coluna chamada componentes.""" & vbCrLf
+    texto = texto & "    End If" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "    Set incluidos = CreateObject(""Scripting.Dictionary"")" & vbCrLf
+    texto = texto & "    incluidos.CompareMode = vbTextCompare" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "    For i = 1 To mTotal" & vbCrLf
+    texto = texto & "        codigo = Trim$(mCodigos(i))" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "        If codigo <> vbNullString And mSelecionados.Exists(codigo) Then" & vbCrLf
+    texto = texto & "            If Not incluidos.Exists(codigo) Then" & vbCrLf
+    texto = texto & "                incluidos.Add codigo, True" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "                If resultado = vbNullString Then" & vbCrLf
+    texto = texto & "                    resultado = codigo" & vbCrLf
+    texto = texto & "                Else" & vbCrLf
+    texto = texto & "                    resultado = resultado & ""|"" & codigo" & vbCrLf
+    texto = texto & "                End If" & vbCrLf
+    texto = texto & "            End If" & vbCrLf
+    texto = texto & "        End If" & vbCrLf
+    texto = texto & "    Next i" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "    eventosAtivos = Application.EnableEvents" & vbCrLf
+    texto = texto & "    Application.EnableEvents = False" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "    If resultado = vbNullString Then" & vbCrLf
+    texto = texto & "        alvo.ClearContents" & vbCrLf
+    texto = texto & "    Else" & vbCrLf
+    texto = texto & "        alvo.Value2 = resultado" & vbCrLf
+    texto = texto & "    End If" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "    Application.EnableEvents = eventosAtivos" & vbCrLf
+    texto = texto & "    Unload Me" & vbCrLf
+    texto = texto & "    Exit Sub" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "TratarErro:" & vbCrLf
+    texto = texto & "    On Error Resume Next" & vbCrLf
+    texto = texto & "    Application.EnableEvents = eventosAtivos" & vbCrLf
+    texto = texto & "    On Error GoTo 0" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "    MsgBox ""Não foi possível gravar a seleção."" & vbNewLine & vbNewLine & _" & vbCrLf
+    texto = texto & "           Err.Number & "" - "" & Err.Description, _" & vbCrLf
+    texto = texto & "           vbCritical, ""Selecionar componentes""" & vbCrLf
+    texto = texto & "End Sub" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "Private Sub cmdCancelar_Click()" & vbCrLf
+    texto = texto & "    Unload Me" & vbCrLf
+    texto = texto & "End Sub" & vbCrLf
+    texto = texto & "" & vbCrLf
+    texto = texto & "Private Sub UserForm_QueryClose(Cancel As Integer, CloseMode As Integer)" & vbCrLf
+    texto = texto & "    modFormularioComponentes.LimparDestinoFormulario" & vbCrLf
+    texto = texto & "End Sub" & vbCrLf
+
+    CodigoFormulario = texto
+End Function
