@@ -89,7 +89,10 @@ class CurriculoConfig:
     percentual_minimo_extensao: float | None = None
     """Em pontos percentuais (0-100), não fração — ex.: ``10`` = 10%."""
     percentual_maximo_ead: float | None = None
-    carga_horaria_maxima_periodo: int | None = None
+    carga_horaria_presencial_maxima_periodo: int | None = None
+    """Máximo de carga PRESENCIAL (CHT+CHP) por período — carga a distância
+    (CHD) e de extensão (CHE) não entram nessa soma (ver
+    ppcgen/validadores/cargas.py)."""
     periodo_minimo_tcc: int | None = None
     periodo_minimo_estagio: int | None = None
 

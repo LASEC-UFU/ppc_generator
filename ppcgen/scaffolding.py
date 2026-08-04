@@ -61,7 +61,7 @@ def _linhas_perfil_padrao(perfil_id: str, nome: str) -> list[tuple[str, object]]
         ("curriculo.carga_tcc", None),
         ("curriculo.percentual_minimo_extensao", None),
         ("curriculo.percentual_maximo_ead", None),
-        ("curriculo.carga_horaria_maxima_periodo", None),
+        ("curriculo.carga_horaria_presencial_maxima_periodo", None),
         ("curriculo.periodo_minimo_tcc", None),
         ("curriculo.periodo_minimo_estagio", None),
         ("arquivos.textos", "textos"),

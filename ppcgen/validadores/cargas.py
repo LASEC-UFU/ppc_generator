@@ -92,19 +92,23 @@ def validar_cargas(curriculo: Curriculo, perfil: Perfil) -> ResultadoValidacao:
                 )
             )
 
-    if cfg.carga_horaria_maxima_periodo is not None:
-        cargas_por_periodo: dict[int, int] = {}
+    if cfg.carga_horaria_presencial_maxima_periodo is not None:
+        cargas_presenciais_por_periodo: dict[int, int] = {}
         for c in curriculo.ativos():
             if c.periodo is None:
                 continue
-            cargas_por_periodo[c.periodo] = cargas_por_periodo.get(c.periodo, 0) + c.carga_total
-        for periodo, carga in sorted(cargas_por_periodo.items()):
-            if carga > cfg.carga_horaria_maxima_periodo:
+            carga_presencial = (c.carga_horaria.teorica or 0) + (c.carga_horaria.pratica or 0)
+            cargas_presenciais_por_periodo[c.periodo] = (
+                cargas_presenciais_por_periodo.get(c.periodo, 0) + carga_presencial
+            )
+        for periodo, carga in sorted(cargas_presenciais_por_periodo.items()):
+            if carga > cfg.carga_horaria_presencial_maxima_periodo:
                 resultado.adicionar(
                     ErroValidacao(
                         "CARGA_MAXIMA_PERIODO_EXCEDIDA",
-                        f"{periodo}º período soma {carga}h, acima do máximo configurado "
-                        f"de {cfg.carga_horaria_maxima_periodo}h.",
+                        f"{periodo}º período soma {carga}h de carga presencial (CHT+CHP), "
+                        f"acima do máximo configurado de "
+                        f"{cfg.carga_horaria_presencial_maxima_periodo}h.",
                     )
                 )
 

@@ -61,7 +61,7 @@ Campos adicionais em `instituicao.*` continuam aceitos e ficam disponíveis em
 | `CARGA_TOTAL_CURSO_DIVERGENTE` | ERRO | carga oficial calculada (ver `ppcgen/calculo.py`) ≠ `curriculo.carga_horaria_total` configurado |
 | `POOL_OPTATIVAS_INSUFICIENTE` | ERRO | soma dos componentes `tipo=carga_optativa` < `curriculo.carga_optativa_minima` |
 | `CARGA_TIPO_DIVERGENTE` | ALERTA | soma de AAC/estágio/TCC na matriz ≠ configurado na aba `Perfil` |
-| `CARGA_MAXIMA_PERIODO_EXCEDIDA` | ERRO | soma de um período > `curriculo.carga_horaria_maxima_periodo` |
+| `CARGA_MAXIMA_PERIODO_EXCEDIDA` | ERRO | soma de CHT+CHP (carga presencial) de um período > `curriculo.carga_horaria_presencial_maxima_periodo` |
 
 ## Extensão (`ppcgen.validadores.extensao`)
 

@@ -54,7 +54,7 @@ def test_pool_optativas_insuficiente():
 def test_carga_maxima_por_periodo_excedida():
     perfil = construir_perfil(
         curso=CursoConfig(numero_periodos=1),
-        curriculo=CurriculoConfig(carga_horaria_maxima_periodo=50),
+        curriculo=CurriculoConfig(carga_horaria_presencial_maxima_periodo=50),
     )
     curriculo = Curriculo(
         versao="t",
@@ -62,3 +62,18 @@ def test_carga_maxima_por_periodo_excedida():
     )
     resultado = validar_cargas(curriculo, perfil)
     assert any(m.codigo_regra == "CARGA_MAXIMA_PERIODO_EXCEDIDA" for m in resultado.erros)
+
+
+def test_carga_maxima_por_periodo_considera_so_presencial():
+    """CHD (a distância) e CHE (extensão) não contam pro limite — só
+    CHT+CHP (presencial). Um período com CHT+CHP dentro do limite não deve
+    disparar o erro mesmo que CHD/CHE empurrem o total muito acima dele."""
+
+    perfil = construir_perfil(
+        curso=CursoConfig(numero_periodos=1),
+        curriculo=CurriculoConfig(carga_horaria_presencial_maxima_periodo=50),
+    )
+    disc = componente("A1", periodo=1, cht=30, chp=10, chd=100, che=100, tot=240)
+    curriculo = Curriculo(versao="t", componentes=[disc])
+    resultado = validar_cargas(curriculo, perfil)
+    assert not any(m.codigo_regra == "CARGA_MAXIMA_PERIODO_EXCEDIDA" for m in resultado.erros)

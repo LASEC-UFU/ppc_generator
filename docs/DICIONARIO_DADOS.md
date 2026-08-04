@@ -49,7 +49,8 @@ telefone... — vira `InstituicaoConfig.extra`, acessível pelos templates
 por nome); `curriculo.carga_horaria_total`/`carga_obrigatoria`/
 `carga_optativa_minima`/`carga_extensao`/`carga_aac`/`carga_estagio`/
 `carga_tcc`/`percentual_minimo_extensao`/`percentual_maximo_ead`/
-`carga_horaria_maxima_periodo`/`periodo_minimo_tcc`/
+`carga_horaria_presencial_maxima_periodo` (máximo de CHT+CHP por período —
+carga a distância e de extensão não entram nessa soma)/`periodo_minimo_tcc`/
 `periodo_minimo_estagio`; `oferta.formato`/`possui_carga_ead`/
 `norma_federal`/`norma_institucional`/`status_validacao_institucional`;
 `capa.ano`/`logo_curso` (`logo_curso` é o caminho, relativo à pasta do
