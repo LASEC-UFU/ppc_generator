@@ -5,10 +5,10 @@ Option Explicit
 '
 ' Instalação:
 '   1. Importe este módulo no VBA (ou cole o conteúdo em um módulo padrão novo).
-'   2. Execute InstalarIndicadorRegras uma única vez — cria, na aba Perfil, o
-'      rótulo, a lâmpada, o texto de status e o botão "Verificar regras".
-'      Pode ser executada de novo a qualquer momento (reinstala sem duplicar
-'      nada).
+'   2. Execute InstalarIndicadorRegras uma única vez — escreve, na aba Perfil,
+'      ACIMA do cabeçalho "chave"/"valor" (que é empurrado pra baixo — ver
+'      "Como o bloco fica posicionado" abaixo), o rótulo, a lâmpada e o botão
+'      "Verificar regras". Pode ser executada de novo a qualquer momento.
 '
 ' Uso:
 '   Clique no botão "Verificar regras" sempre que quiser conferir se todos
@@ -22,14 +22,37 @@ Option Explicit
 '        reimplementadas em VBA de propósito, para nunca divergir do
 '        validador oficial (ver ppcgen/calculo.py, Seção 29 — "não duplique
 '        lógica");
-'     3. lê saida/<id>/relatorios/validacao.json e atualiza a lâmpada:
+'     3. lê saida/<id>/relatorios/validacao.json e reescreve o bloco:
 '          verde    = 0 erro(s) nas regras do Python;
-'          vermelho = 1 ou mais erro(s);
-'          cinza    = falha ao verificar (mensagem de erro no texto ao lado
-'                     e em uma caixa de diálogo).
-'   O texto ao lado da lâmpada sempre mostra a contagem de erros E de
-'   alertas, mesmo quando a lâmpada está verde — alertas não deixam a
-'   lâmpada vermelha, mas nunca ficam escondidos.
+'          vermelho = 1 ou mais erro(s) — cada um vira uma linha no log de
+'                     erros (código da regra na coluna A, mensagem na
+'                     coluna B), pra dar pra resolver um a um; a lista
+'                     encolhe sozinha conforme os erros forem corrigidos e
+'                     a verificação rodar de novo;
+'          cinza    = falha ao verificar (mensagem de erro no bloco e em uma
+'                     caixa de diálogo).
+'        Os alertas nunca deixam a lâmpada vermelha, mas nunca ficam
+'        escondidos: aparecem como um resumo agrupado por regra (quantos
+'        alertas de cada tipo), não como lista individual — são muitos e,
+'        ao contrário dos erros, não bloqueiam nada. Cada linha do resumo
+'        de alertas tem uma anotação do Excel (passe o mouse sobre o
+'        triângulo vermelho no canto da célula) explicando em português
+'        simples o que aquela regra verifica — ver ExplicacaoRegraAlerta.
+'
+' Como o bloco fica posicionado:
+'   As linhas 1-3 (rótulo/lâmpada, botão/resumo, linha em branco) são fixas
+'   — criadas uma vez e só reescritas no lugar depois disso, nunca apagadas/
+'   reinseridas (isso preservaria a área de impressão da aba, que o Excel
+'   perde se essas linhas forem recriadas a cada verificação). A partir da
+'   linha 4, o log de erros e o resumo de alertas ocupam quantas linhas
+'   forem necessárias (varia a cada verificação — mais erros = seção maior),
+'   e o cabeçalho "chave"/"valor" (com todos os dados abaixo dele) fica logo
+'   depois, deslocando sozinho pra baixo ou pra cima a cada clique em
+'   "Verificar regras". Isso só funciona porque ppcgen.leitores.excel.
+'   ler_configuracao_perfil localiza esse cabeçalho dinamicamente (procura a
+'   linha com "chave"/"valor", não assume que é a 1ª) — se você reverter
+'   essa mudança no leitor Python, o perfil pára de carregar assim que o
+'   bloco tiver qualquer conteúdo.
 '
 ' Requer 'python' no PATH do Windows e o pacote ppcgen instalado nesse mesmo
 ' Python (o mesmo ambiente usado para rodar "python -m ppcgen" no terminal).
@@ -39,10 +62,8 @@ Option Explicit
 ' =============================================================================
 
 Private Const ABA_STATUS As String = "Perfil"
-Private Const CELULA_ROTULO As String = "D1"
-Private Const CELULA_LAMPADA As String = "D2"
-Private Const CELULA_DETALHE As String = "E2"
-Private Const CELULA_BOTAO_ANCORA As String = "D4"
+Private Const CABECALHO_CHAVE As String = "chave"
+Private Const CABECALHO_VALOR As String = "valor"
 Private Const NOME_BOTAO_VERIFICAR As String = "btnVerificarRegras"
 Private Const CARACTERE_LAMPADA As Long = 9679 ' ● (BLACK CIRCLE)
 
@@ -51,52 +72,19 @@ Private Const CARACTERE_LAMPADA As Long = 9679 ' ● (BLACK CIRCLE)
 ' -----------------------------------------------------------------------------
 Public Sub InstalarIndicadorRegras()
     Dim ws As Worksheet
-    Dim botao As Button
 
     On Error GoTo TratarErro
 
     Set ws = ThisWorkbook.Worksheets(ABA_STATUS)
 
-    With ws.Range(CELULA_ROTULO)
-        .Value = "Verificação de regras (Python)"
-        .Font.Name = "Segoe UI"
-        .Font.Size = 10
-        .Font.Bold = True
-    End With
+    GarantirLinhasFixasDoBloco ws
+    RedimensionarSecaoVariavel ws, 0 ' sem log de erros/alertas ainda
 
-    With ws.Range(CELULA_LAMPADA)
-        .Value = ChrW(CARACTERE_LAMPADA)
-        .Font.Name = "Segoe UI Symbol"
-        .Font.Size = 28
-        .Font.Color = RGB(158, 158, 158)
-        .HorizontalAlignment = xlCenter
-        .VerticalAlignment = xlCenter
-    End With
+    EscreverCabecalhoBloco ws, RGB(158, 158, 158), _
+        "Ainda não verificado nesta sessão — clique em ""Verificar regras""."
 
-    With ws.Range(CELULA_DETALHE)
-        .Value = "Ainda não verificado nesta sessão — clique em ""Verificar regras""."
-        .Font.Name = "Segoe UI"
-        .Font.Size = 10
-        .VerticalAlignment = xlCenter
-    End With
-
-    RemoverBotaoSeExistirRegras ws, NOME_BOTAO_VERIFICAR
-
-    Set botao = ws.Buttons.Add( _
-        ws.Range(CELULA_BOTAO_ANCORA).Left, _
-        ws.Range(CELULA_BOTAO_ANCORA).Top, _
-        140, 28)
-    With botao
-        .Name = NOME_BOTAO_VERIFICAR
-        .Caption = "Verificar regras"
-        .OnAction = "VerificarRegras"
-        .Font.Name = "Segoe UI"
-        .Font.Size = 10
-    End With
-
-    MsgBox "Indicador instalado na aba """ & ABA_STATUS & """, células " & _
-           CELULA_ROTULO & "/" & CELULA_LAMPADA & "/" & CELULA_DETALHE & _
-           ", com o botão ""Verificar regras"".", _
+    MsgBox "Indicador instalado na aba """ & ABA_STATUS & """, acima do cabeçalho " & _
+           """chave""/""valor"" (empurrado pra baixo), com o botão ""Verificar regras"".", _
            vbInformation, "Instalação concluída"
     Exit Sub
 
@@ -104,12 +92,6 @@ TratarErro:
     MsgBox "Não foi possível instalar o indicador." & vbNewLine & vbNewLine & _
            Err.Number & " - " & Err.Description, _
            vbCritical, "Instalar indicador"
-End Sub
-
-Private Sub RemoverBotaoSeExistirRegras(ByVal ws As Worksheet, ByVal nome As String)
-    On Error Resume Next
-    ws.Buttons(nome).Delete
-    On Error GoTo 0
 End Sub
 
 ' -----------------------------------------------------------------------------
@@ -155,11 +137,11 @@ Public Sub VerificarRegras()
                   codigoSaida & ". Confirme que 'python' está no PATH."
     End If
 
-    AtualizarLampadaRegras caminhoJson
+    AtualizarBlocoComRelatorio caminhoJson
     Exit Sub
 
 TratarErro:
-    AtualizarLampadaComErroRegras Err.Number & " - " & Err.Description
+    AtualizarBlocoComErro Err.Number & " - " & Err.Description
     MsgBox "Não foi possível verificar as regras." & vbNewLine & vbNewLine & _
            Err.Number & " - " & Err.Description, _
            vbCritical, "Verificar regras"
@@ -196,7 +178,7 @@ Private Function ObterPerfilIdRegras() As String
     Set ws = ThisWorkbook.Worksheets(ABA_STATUS)
     ultimaLinha = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
 
-    For linha = 2 To ultimaLinha
+    For linha = 1 To ultimaLinha
         If Trim$(CStr(ws.Cells(linha, 1).Value2)) = "perfil.id" Then
             ObterPerfilIdRegras = Trim$(CStr(ws.Cells(linha, 2).Value2))
             Exit Function
@@ -224,60 +206,426 @@ Private Function PastaExisteRegras(ByVal caminho As String) As Boolean
 End Function
 
 ' -----------------------------------------------------------------------------
-' LEITURA DO RELATÓRIO E ATUALIZAÇÃO DA LÂMPADA
+' POSICIONAMENTO DO BLOCO (acima do cabeçalho "chave"/"valor")
 ' -----------------------------------------------------------------------------
-Private Sub AtualizarLampadaRegras(ByVal caminhoJson As String)
+Private Function LocalizarLinhaCabecalhoChaveValor(ByVal ws As Worksheet) As Long
+    Dim ultimaLinha As Long
+    Dim linha As Long
+
+    ultimaLinha = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+    If ultimaLinha < 1 Then ultimaLinha = 1
+
+    For linha = 1 To ultimaLinha
+        If Trim$(CStr(ws.Cells(linha, 1).Value2)) = CABECALHO_CHAVE And _
+           Trim$(CStr(ws.Cells(linha, 2).Value2)) = CABECALHO_VALOR Then
+            LocalizarLinhaCabecalhoChaveValor = linha
+            Exit Function
+        End If
+    Next linha
+
+    Err.Raise vbObjectError + 3305, "LocalizarLinhaCabecalhoChaveValor", _
+              "Não foi encontrada a linha de cabeçalho 'chave'/'valor' na aba '" & _
+              ABA_STATUS & "'."
+End Function
+
+' As linhas 1-3 (rótulo/lâmpada, botão/resumo, linha em branco) são fixas —
+' depois de criadas uma vez, nunca mais são apagadas/reinseridas, só têm o
+' conteúdo reescrito no lugar (EscreverCabecalhoBloco). Apagar e reinserir
+' TODO o bloco a cada verificação (como a versão anterior fazia) reseta a
+' área de impressão da aba — o Excel liga área de impressão/quebras de
+' página a linhas específicas, e um Delete seguido de Insert nelas invalida
+' essa referência. Só a seção variável (linha 4 em diante — log de erros +
+' resumo de alertas, que muda de tamanho a cada verificação) é apagada e
+' reinserida; ver RedimensionarSecaoVariavel abaixo.
+Private Sub GarantirLinhasFixasDoBloco(ByVal ws As Worksheet)
+    Dim linhaCabecalhoAtual As Long
+
+    linhaCabecalhoAtual = LocalizarLinhaCabecalhoChaveValor(ws)
+    If linhaCabecalhoAtual < 4 Then
+        ws.Rows("1:" & (4 - linhaCabecalhoAtual)).Insert Shift:=xlDown
+    End If
+End Sub
+
+' Redimensiona só a seção variável (linha 4 em diante) pra ter exatamente
+' novoTotalLinhas linhas — as linhas 1-3 nunca são tocadas aqui (ver
+' GarantirLinhasFixasDoBloco, que deve ser chamada antes desta). "chave"/
+' "valor" e tudo abaixo são só empurrados pelo Insert/Delete nativo do
+' Excel, nunca reescritos.
+Private Sub RedimensionarSecaoVariavel(ByVal ws As Worksheet, ByVal novoTotalLinhas As Long)
+    Dim linhaCabecalhoAtual As Long
+    Dim linhasVariaveisAtuais As Long
+
+    linhaCabecalhoAtual = LocalizarLinhaCabecalhoChaveValor(ws)
+    linhasVariaveisAtuais = linhaCabecalhoAtual - 4
+
+    If linhasVariaveisAtuais > 0 Then
+        ws.Rows("4:" & (3 + linhasVariaveisAtuais)).Delete Shift:=xlUp
+    End If
+    If novoTotalLinhas > 0 Then
+        ws.Rows("4:" & (3 + novoTotalLinhas)).Insert Shift:=xlDown
+        ' Linha inserida herda a formatação da linha anterior — limpa antes
+        ' de escrever, pra cada cor/fonte vir só do código abaixo.
+        ws.Rows("4:" & (3 + novoTotalLinhas)).ClearFormats
+    End If
+End Sub
+
+' Linha 1: rótulo (A1) + lâmpada (B1). Linha 2: botão (A2) + texto de detalhe
+' (B2). O botão fica do lado do resumo, não empilhado numa linha própria —
+' antes disso, o botão (28pt de altura) ficava sozinho numa linha de altura
+' padrão (~15pt) e vazava por cima do texto da linha seguinte.
+Private Sub EscreverCabecalhoBloco(ByVal ws As Worksheet, _
+    ByVal corLampada As Long, ByVal textoDetalhe As String)
+
+    With ws.Cells(1, 1)
+        .Value = "Verificação de regras (Python)"
+        .Font.Name = "Segoe UI"
+        .Font.Size = 10
+        .Font.Bold = True
+    End With
+
+    With ws.Cells(1, 2)
+        .Value = ChrW(CARACTERE_LAMPADA)
+        .Font.Name = "Segoe UI Symbol"
+        .Font.Size = 18
+        .Font.Color = corLampada
+        .HorizontalAlignment = xlLeft
+        .VerticalAlignment = xlCenter
+    End With
+
+    With ws.Cells(2, 2)
+        .Value = textoDetalhe
+        .Font.Name = "Segoe UI"
+        .Font.Size = 10
+        .VerticalAlignment = xlCenter
+    End With
+
+    CriarBotaoVerificar ws, 2
+End Sub
+
+Private Sub CriarBotaoVerificar(ByVal ws As Worksheet, ByVal linha As Long)
+    Dim botao As Button
+    Const MARGEM_ESQUERDA As Long = 10 ' espaço antes do botão, não colado na borda da coluna A
+
+    RemoverBotaoSeExistirRegras ws, NOME_BOTAO_VERIFICAR
+
+    Set botao = ws.Buttons.Add( _
+        ws.Cells(linha, 1).Left + MARGEM_ESQUERDA, ws.Cells(linha, 1).Top, 130, 22)
+    With botao
+        .Name = NOME_BOTAO_VERIFICAR
+        .Caption = "Verificar regras"
+        .OnAction = "VerificarRegras"
+        .Font.Name = "Segoe UI"
+        .Font.Size = 9
+    End With
+End Sub
+
+Private Sub RemoverBotaoSeExistirRegras(ByVal ws As Worksheet, ByVal nome As String)
+    On Error Resume Next
+    ws.Buttons(nome).Delete
+    On Error GoTo 0
+End Sub
+
+' -----------------------------------------------------------------------------
+' LEITURA DO RELATÓRIO E REESCRITA DO BLOCO (lâmpada + log de erros + resumo
+' de alertas)
+' -----------------------------------------------------------------------------
+Private Sub AtualizarBlocoComRelatorio(ByVal caminhoJson As String)
     Dim texto As String
     Dim erros As Long
     Dim alertas As Long
     Dim ws As Worksheet
+    Dim objetosMensagens As Collection
+    Dim linhasErro As Collection
+    Dim contagemAlertas As Object
+    Dim itemMensagem As Variant
+    Dim itemErro As Variant
+    Dim chaveAlerta As Variant
+    Dim severidade As String
+    Dim codigoRegra As String
+    Dim linhaErro(0 To 1) As String ' 0 = codigo_regra, 1 = mensagem
+    Dim mostrarAvisoDivergencia As Boolean
+    Dim totalLinhasVariavel As Long
+    Dim linhaAtual As Long
+    Dim corLampada As Long
+    Dim textoResumo As String
+    Dim comentario As Comment
+
+    Application.ScreenUpdating = False
+    On Error GoTo Limpar
 
     texto = LerArquivoTextoRegras(caminhoJson)
     erros = ExtrairInteiroDepoisDaChaveRegras(texto, "erros")
     alertas = ExtrairInteiroDepoisDaChaveRegras(texto, "alertas")
 
-    Set ws = ThisWorkbook.Worksheets(ABA_STATUS)
+    Set objetosMensagens = ObterObjetosMensagens(texto)
+    Set linhasErro = New Collection
+    Set contagemAlertas = CreateObject("Scripting.Dictionary")
+    contagemAlertas.CompareMode = vbTextCompare
 
-    With ws.Range(CELULA_LAMPADA)
-        .Value = ChrW(CARACTERE_LAMPADA)
-        If erros = 0 Then
-            .Font.Color = RGB(46, 125, 50)
-        Else
-            .Font.Color = RGB(198, 40, 40)
+    For Each itemMensagem In objetosMensagens
+        severidade = ExtrairCampoTexto(CStr(itemMensagem), "severidade")
+        codigoRegra = ExtrairCampoTexto(CStr(itemMensagem), "codigo_regra")
+
+        If severidade = "erro" Then
+            linhaErro(0) = codigoRegra
+            linhaErro(1) = ExtrairCampoTexto(CStr(itemMensagem), "mensagem")
+            linhasErro.Add linhaErro
+        ElseIf severidade = "alerta" Then
+            If contagemAlertas.Exists(codigoRegra) Then
+                contagemAlertas(codigoRegra) = contagemAlertas(codigoRegra) + 1
+            Else
+                contagemAlertas.Add codigoRegra, 1
+            End If
         End If
-    End With
+    Next itemMensagem
 
-    With ws.Range(CELULA_DETALHE)
-        .Value = CStr(erros) & " erro(s), " & CStr(alertas) & " alerta(s) — verificado em " & _
-                 Format$(Now, "dd/mm/yyyy hh:nn")
+    ' Os totais exibidos vêm sempre de resumo.erros/resumo.alertas (o JSON já
+    ' soma certo); a lista/o resumo por regra vêm do parser leve acima — se
+    ' os dois divergirem (parser não reconheceu algum objeto), avisa em vez
+    ' de mostrar uma lista incompleta calada.
+    mostrarAvisoDivergencia = (linhasErro.Count <> erros)
+
+    totalLinhasVariavel = 1 + IIf(mostrarAvisoDivergencia, 1, 0) + linhasErro.Count + _
+                           1 + 1 + contagemAlertas.Count + 1
+
+    Set ws = ThisWorkbook.Worksheets(ABA_STATUS)
+    GarantirLinhasFixasDoBloco ws
+    RedimensionarSecaoVariavel ws, totalLinhasVariavel
+
+    textoResumo = CStr(erros) & " erro(s), " & CStr(alertas) & " alerta(s) — verificado em " & _
+                  Format$(Now, "dd/mm/yyyy hh:nn")
+    If erros = 0 Then
+        corLampada = RGB(46, 125, 50)
+    Else
+        corLampada = RGB(198, 40, 40)
+    End If
+    EscreverCabecalhoBloco ws, corLampada, textoResumo
+
+    linhaAtual = 4
+    With ws.Cells(linhaAtual, 1)
+        If linhasErro.Count = 0 Then
+            .Value = "Nenhum erro nas regras do Python."
+        Else
+            .Value = "Erros (" & linhasErro.Count & _
+                     ") — resolva um a um; a lista atualiza a cada verificação:"
+        End If
+        .Font.Name = "Segoe UI"
+        .Font.Size = 10
+        .Font.Bold = True
     End With
+    linhaAtual = linhaAtual + 1
+
+    If mostrarAvisoDivergencia Then
+        ws.Cells(linhaAtual, 1).Value = _
+            "Aviso: a lista abaixo não bate com o total do relatório — veja " & _
+            "saida\...\relatorios\validacao.html para a lista completa."
+        ws.Cells(linhaAtual, 1).Font.Name = "Segoe UI"
+        ws.Cells(linhaAtual, 1).Font.Size = 9
+        ws.Cells(linhaAtual, 1).Font.Italic = True
+        linhaAtual = linhaAtual + 1
+    End If
+
+    For Each itemErro In linhasErro
+        ws.Cells(linhaAtual, 1).Value = itemErro(0)
+        ws.Cells(linhaAtual, 2).Value = itemErro(1)
+        With ws.Range(ws.Cells(linhaAtual, 1), ws.Cells(linhaAtual, 2))
+            .Interior.Color = RGB(250, 214, 210)
+            .Font.Name = "Segoe UI"
+            .Font.Size = 9
+        End With
+        linhaAtual = linhaAtual + 1
+    Next itemErro
+
+    linhaAtual = linhaAtual + 1 ' linha em branco antes do resumo de alertas
+
+    With ws.Cells(linhaAtual, 1)
+        .Value = "Alertas (resumo): " & alertas & " no total"
+        .Font.Name = "Segoe UI"
+        .Font.Size = 10
+        .Font.Bold = True
+    End With
+    linhaAtual = linhaAtual + 1
+
+    For Each chaveAlerta In contagemAlertas.Keys
+        ws.Cells(linhaAtual, 1).Value = chaveAlerta
+        ws.Cells(linhaAtual, 2).Value = contagemAlertas(chaveAlerta) & " alerta(s)"
+        With ws.Range(ws.Cells(linhaAtual, 1), ws.Cells(linhaAtual, 2))
+            .Interior.Color = RGB(255, 236, 179)
+            .Font.Name = "Segoe UI"
+            .Font.Size = 9
+        End With
+
+        ' Anotação (nota do Excel — o triângulo vermelho no canto da célula,
+        ' passa o mouse por cima pra ler) explicando em português simples o
+        ' que essa regra verifica, pra quem preenche a planilha não precisar
+        ' abrir o código-fonte pra entender o alerta.
+        Set comentario = ws.Cells(linhaAtual, 1).AddComment(ExplicacaoRegraAlerta(CStr(chaveAlerta)))
+        With comentario.Shape
+            .TextFrame.AutoSize = False
+            .Width = 320
+            .TextFrame.AutoSize = True
+        End With
+
+        linhaAtual = linhaAtual + 1
+    Next chaveAlerta
+
+    Application.ScreenUpdating = True
+    Exit Sub
+
+Limpar:
+    Application.ScreenUpdating = True
+    Err.Raise Err.Number, Err.Source, Err.Description
 End Sub
 
-Private Sub AtualizarLampadaComErroRegras(ByVal mensagem As String)
+Private Sub AtualizarBlocoComErro(ByVal mensagem As String)
     Dim ws As Worksheet
 
     On Error Resume Next
     Set ws = ThisWorkbook.Worksheets(ABA_STATUS)
     If ws Is Nothing Then Exit Sub
 
-    With ws.Range(CELULA_LAMPADA)
-        .Value = ChrW(CARACTERE_LAMPADA)
-        .Font.Color = RGB(158, 158, 158)
-    End With
-
-    With ws.Range(CELULA_DETALHE)
-        .Value = "Falha ao verificar: " & mensagem
-    End With
+    GarantirLinhasFixasDoBloco ws
+    RedimensionarSecaoVariavel ws, 0
+    EscreverCabecalhoBloco ws, RGB(158, 158, 158), "Falha ao verificar: " & mensagem
     On Error GoTo 0
 End Sub
 
-Private Function LerArquivoTextoRegras(ByVal caminho As String) As String
-    Dim numeroArquivo As Integer
+' -----------------------------------------------------------------------------
+' EXPLICAÇÕES DAS REGRAS DE ALERTA
+' -----------------------------------------------------------------------------
+' Um texto curto, em português simples, pra cada codigo_regra que pode
+' aparecer como ALERTA no relatório (levantado direto do código-fonte dos
+' validadores em ppcgen/validadores/*.py — não é um resumo solto, é o que a
+' regra realmente confere). Cobre inclusive códigos de ppcgen/validadores/
+' fichas.py, que só aparecem se um dia "python -m ppcgen validar" passar a
+' ser chamado com --incluir-fichas (hoje VerificarRegras não usa essa flag).
+' Se um código não estiver aqui (regra nova, ou um erro que virou alerta em
+' algum contexto específico), cai no texto padrão do Case Else — nunca fica
+' sem anotação nenhuma.
+Private Function ExplicacaoRegraAlerta(ByVal codigoRegra As String) As String
+    Select Case codigoRegra
+        Case "NOME_DUPLICADO"
+            ExplicacaoRegraAlerta = "Dois ou mais componentes têm nomes iguais ou muito " & _
+                "parecidos. Pode ser proposital (ex.: várias optativas genéricas), mas vale " & _
+                "conferir se não é engano de digitação."
 
-    numeroArquivo = FreeFile
-    Open caminho For Input As #numeroArquivo
-    LerArquivoTextoRegras = Input$(LOF(numeroArquivo), numeroArquivo)
-    Close #numeroArquivo
+        Case "CODIGO_PROVISORIO"
+            ExplicacaoRegraAlerta = "O código deste componente tem ""?"" ou ""!"", ou está " & _
+                "marcado como provisório — é um código temporário que precisa ser trocado pelo " & _
+                "código oficial definitivo antes de aprovar o PPC."
+
+        Case "CARGA_TIPO_DIVERGENTE"
+            ExplicacaoRegraAlerta = "A carga horária somada na matriz para AAC, Estágio ou TCC " & _
+                "é diferente do valor configurado na aba Perfil para esse mesmo item — confira " & _
+                "se os dois deveriam bater."
+
+        Case "OFERTA_SEM_NORMA_INSTITUCIONAL_CONFIRMADA"
+            ExplicacaoRegraAlerta = "O curso declara ter carga em EaD, mas o status de " & _
+                "validação institucional dessa oferta (aba Perfil) ainda está ""pendente"" — " & _
+                "confirme com a UFU/CONGRAD antes de considerar o PPC pronto."
+
+        Case "EQUIVALENCIA_DESTINO_INEXISTENTE"
+            ExplicacaoRegraAlerta = "Uma equivalência cadastrada aponta para um código de " & _
+                "componente que não existe na matriz atual — normalmente é erro de digitação " & _
+                "no código de destino."
+
+        Case "EQUIVALENCIA_ORIGEM_AINDA_ATIVA"
+            ExplicacaoRegraAlerta = "O componente de origem de uma equivalência (geralmente de " & _
+                "um currículo antigo) ainda está marcado como ativo na matriz atual — confirme " & _
+                "se a equivalência é mesmo entre currículos diferentes."
+
+        Case "CORREQUISITO_PERIODO_DIVERGENTE"
+            ExplicacaoRegraAlerta = "O correquisito está num período diferente do componente " & _
+                "que o exige. Por definição, um correquisito deveria ser cursado no mesmo período."
+
+        Case "PREREQUISITO_INEXISTENTE"
+            ExplicacaoRegraAlerta = "O código do pré-requisito informado não foi encontrado " & _
+                "entre os componentes da matriz (é alerta, não erro, porque este pré-requisito " & _
+                "está marcado como opcional)."
+
+        Case "CORREQUISITO_INEXISTENTE"
+            ExplicacaoRegraAlerta = "O código do correquisito informado não foi encontrado " & _
+                "entre os componentes da matriz (é alerta, não erro, porque este correquisito " & _
+                "está marcado como opcional)."
+
+        Case "COMPETENCIA_OBRIGATORIA_SEM_COBERTURA"
+            ExplicacaoRegraAlerta = "Uma competência marcada como obrigatória não está sendo " & _
+                "trabalhada por nenhum componente ativo do curso — toda competência obrigatória " & _
+                "precisa aparecer em pelo menos uma disciplina/atividade."
+
+        Case "TEMA_TRANSVERSAL_OBRIGATORIO_SEM_COBERTURA"
+            ExplicacaoRegraAlerta = "Um tema transversal marcado como obrigatório não está " & _
+                "sendo trabalhado por nenhum componente ativo do curso."
+
+        Case "CONTEUDO_OBRIGATORIO_SEM_COBERTURA"
+            ExplicacaoRegraAlerta = "Um conteúdo marcado como obrigatório não está sendo " & _
+                "trabalhado por nenhum componente ativo do curso."
+
+        Case "LEITURA_DADO_OMITIDO"
+            ExplicacaoRegraAlerta = "Aviso genérico gerado ao ler a planilha — a mensagem " & _
+                "específica (ex.: componente listado em mais de um núcleo, ou coluna ""ativo"" " & _
+                "deixada em branco) fica no log de erros/relatório completo, não neste resumo."
+
+        Case "NOME_COM_ASPAS"
+            ExplicacaoRegraAlerta = "O nome do componente contém aspas — geralmente é sobra de " & _
+                "cópia/exportação de outro sistema (Excel/PDF); vale checar se não é sujeira no " & _
+                "texto."
+
+        Case "FICHA_AUSENTE"
+            ExplicacaoRegraAlerta = "Não foi encontrado nenhum arquivo de ficha curricular para " & _
+                "este componente ativo — toda disciplina (exceto AAC) precisa ter uma ficha " & _
+                "correspondente."
+
+        Case "FICHA_NAO_RECONHECIDA"
+            ExplicacaoRegraAlerta = "Foi encontrado um arquivo de ficha, mas não foi possível " & _
+                "ler o conteúdo com confiança (ex.: PDF escaneado sem texto selecionável) — " & _
+                "revise o arquivo manualmente."
+
+        Case "FICHA_DUPLICADA"
+            ExplicacaoRegraAlerta = "Existe mais de um arquivo de ficha reconhecido para o " & _
+                "mesmo código de componente — é preciso decidir qual arquivo é o válido."
+
+        Case "FICHA_NOME_DIVERGENTE"
+            ExplicacaoRegraAlerta = "O nome do componente escrito na ficha é diferente do nome " & _
+                "cadastrado na matriz — pode ser ficha desatualizada ou nome digitado errado em " & _
+                "um dos dois lugares."
+
+        Case "FICHA_PREREQUISITOS_DIVERGENTES"
+            ExplicacaoRegraAlerta = "A lista de pré-requisitos escrita na ficha é diferente da " & _
+                "lista cadastrada na matriz para este componente."
+
+        Case "FICHA_CAMPO_VAZIO"
+            ExplicacaoRegraAlerta = "Um dos campos obrigatórios da ficha (ementa, objetivos, " & _
+                "programa, metodologia, avaliação ou bibliografia) está vazio."
+
+        Case "FICHA_SEM_COMPONENTE_CORRESPONDENTE"
+            ExplicacaoRegraAlerta = "Existe um arquivo de ficha cujo código não corresponde a " & _
+                "nenhum componente da matriz atual — pode ser ficha de um currículo anterior " & _
+                "esquecida na pasta."
+
+        Case Else
+            ExplicacaoRegraAlerta = "Sem explicação cadastrada para esta regra ainda — veja a " & _
+                "mensagem da linha do log de erros (se houver) ou o código-fonte em " & _
+                "ppcgen/validadores/ para mais detalhes."
+    End Select
+End Function
+
+' "Open ... For Input" lê pela codepage ANSI do sistema, não UTF-8 — o JSON
+' (gravado por json.dump(..., encoding="utf-8") em ppcgen/geradores/
+' relatorios.py) tem acento em UTF-8, e ler isso como ANSI corrompe todo
+' caractere acentuado (cada byte da sequência UTF-8 vira um caractere ANSI
+' separado — "não" virava "nÃ£o"). ADODB.Stream com Charset "utf-8" decodifica
+' certo.
+Private Function LerArquivoTextoRegras(ByVal caminho As String) As String
+    Dim fluxo As Object
+
+    Set fluxo = CreateObject("ADODB.Stream")
+    fluxo.Type = 2 ' adTypeText
+    fluxo.Charset = "utf-8"
+    fluxo.Open
+    fluxo.LoadFromFile caminho
+    LerArquivoTextoRegras = fluxo.ReadText
+    fluxo.Close
 End Function
 
 Private Function ExtrairInteiroDepoisDaChaveRegras( _
@@ -307,4 +655,120 @@ Private Function ExtrairInteiroDepoisDaChaveRegras( _
 
     ExtrairInteiroDepoisDaChaveRegras = _
         CLng(Trim$(Mid$(texto, posicaoInicioValor, posicaoFimValor - posicaoInicioValor)))
+End Function
+
+' -----------------------------------------------------------------------------
+' PARSER JSON MÍNIMO — só o suficiente pra ler o array "mensagens" do
+' relatório de validação (lista achatada de objetos com campos texto/null,
+' sem aninhamento). Não é um parser JSON genérico: assume que nenhuma
+' mensagem de validação contém chaves/colchetes literais no texto (verdade
+' hoje — mensagens são frases em português) para poder separar os objetos
+' só contando profundidade de "{"/"}", sem rastrear se está dentro de uma
+' string.
+' -----------------------------------------------------------------------------
+Private Function ObterObjetosMensagens(ByVal texto As String) As Collection
+    Dim resultado As New Collection
+    Dim posicaoChave As Long
+    Dim posicaoAbreColchete As Long
+    Dim posicao As Long
+    Dim profundidade As Long
+    Dim inicioObjeto As Long
+    Dim caractere As String
+
+    posicaoChave = InStr(1, texto, """mensagens"":", vbBinaryCompare)
+    If posicaoChave = 0 Then
+        Set ObterObjetosMensagens = resultado
+        Exit Function
+    End If
+
+    posicaoAbreColchete = InStr(posicaoChave, texto, "[")
+    If posicaoAbreColchete = 0 Then
+        Set ObterObjetosMensagens = resultado
+        Exit Function
+    End If
+
+    profundidade = 0
+    inicioObjeto = 0
+
+    For posicao = posicaoAbreColchete + 1 To Len(texto)
+        caractere = Mid$(texto, posicao, 1)
+        Select Case caractere
+            Case "{"
+                If profundidade = 0 Then inicioObjeto = posicao
+                profundidade = profundidade + 1
+            Case "}"
+                profundidade = profundidade - 1
+                If profundidade = 0 And inicioObjeto > 0 Then
+                    resultado.Add Mid$(texto, inicioObjeto, posicao - inicioObjeto + 1)
+                End If
+            Case "]"
+                If profundidade = 0 Then
+                    Set ObterObjetosMensagens = resultado
+                    Exit Function
+                End If
+        End Select
+    Next posicao
+
+    Set ObterObjetosMensagens = resultado
+End Function
+
+' Lê o campo "campo": "valor" ou "campo": null de dentro de um objeto JSON
+' (uma das strings devolvidas por ObterObjetosMensagens). Devolve vazio
+' tanto para null quanto para campo ausente.
+Private Function ExtrairCampoTexto(ByVal objetoJson As String, ByVal campo As String) As String
+    Dim posicaoChave As Long
+    Dim posicaoValor As Long
+
+    posicaoChave = InStr(1, objetoJson, """" & campo & """:", vbBinaryCompare)
+    If posicaoChave = 0 Then Exit Function
+
+    posicaoValor = posicaoChave + Len(campo) + 3
+    Do While Mid$(objetoJson, posicaoValor, 1) = " "
+        posicaoValor = posicaoValor + 1
+    Loop
+
+    If Mid$(objetoJson, posicaoValor, 1) = """" Then
+        ExtrairCampoTexto = ExtrairStringJsonRegras(objetoJson, posicaoValor)
+    End If
+    ' Se não começar com aspas, é "null" (ou outro literal não citado) —
+    ' devolve vazio, que é o valor padrão de uma Function String.
+End Function
+
+Private Function ExtrairStringJsonRegras( _
+    ByVal texto As String, ByVal posicaoAspaInicial As Long) As String
+
+    Dim posicao As Long
+    Dim resultado As String
+    Dim caractere As String
+    Dim proximo As String
+
+    posicao = posicaoAspaInicial + 1 ' pula a aspa de abertura
+
+    Do While posicao <= Len(texto)
+        caractere = Mid$(texto, posicao, 1)
+
+        If caractere = "\" Then
+            proximo = Mid$(texto, posicao + 1, 1)
+            Select Case proximo
+                Case """": resultado = resultado & """"
+                Case "\": resultado = resultado & "\"
+                Case "/": resultado = resultado & "/"
+                Case "n": resultado = resultado & vbLf
+                Case "t": resultado = resultado & vbTab
+                Case "u"
+                    resultado = resultado & ChrW(CLng("&H" & Mid$(texto, posicao + 2, 4)))
+                    posicao = posicao + 4
+                Case Else
+                    resultado = resultado & proximo
+            End Select
+            posicao = posicao + 2
+        ElseIf caractere = """" Then
+            Exit Do
+        Else
+            resultado = resultado & caractere
+            posicao = posicao + 1
+        End If
+    Loop
+
+    ExtrairStringJsonRegras = resultado
 End Function

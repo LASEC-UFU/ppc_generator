@@ -118,6 +118,35 @@ def _linhas(planilha) -> list[dict]:
     return resultado
 
 
+def _linhas_com_cabecalho(planilha, coluna_a: str, coluna_b: str) -> tuple[list[dict], int]:
+    """Como :func:`_linhas`, mas localiza a linha de cabeçalho em vez de
+    assumir que é a 1ª — usado só pela aba ``Perfil``, que aceita linhas
+    extras inseridas acima do cabeçalho ``chave``/``valor`` (ex.: o
+    indicador de validação instalado por ``docs/indicador_validacao_vba.txt``
+    na própria planilha). O cabeçalho é a primeira linha cuja coluna A vale
+    ``coluna_a`` e cuja coluna B vale ``coluna_b``; linhas antes dele são
+    ignoradas. Devolve (linhas de dados, número da linha do cabeçalho —
+    1-based, para mensagens de erro apontarem a linha certa)."""
+
+    todas = list(planilha.iter_rows(values_only=True))
+    for indice, linha in enumerate(todas):
+        primeira = str(linha[0]).strip() if len(linha) > 0 and linha[0] is not None else ""
+        segunda = str(linha[1]).strip() if len(linha) > 1 and linha[1] is not None else ""
+        if primeira == coluna_a and segunda == coluna_b:
+            cabecalho = [str(c).strip() if c is not None else "" for c in linha]
+            dados = []
+            for linha_dados in todas[indice + 1 :]:
+                if all(v is None for v in linha_dados):
+                    continue
+                dados.append(dict(zip(cabecalho, linha_dados)))
+            return dados, indice + 1
+
+    raise FormatoInvalido(
+        f"Não foi encontrada uma linha de cabeçalho '{coluna_a}'/'{coluna_b}' na planilha "
+        f"'{planilha.title}'."
+    )
+
+
 def _bool(valor, padrao: bool = False) -> bool:
     if valor is None or valor == "":
         return padrao
@@ -556,7 +585,12 @@ def ler_configuracao_perfil(caminho: str | Path) -> dict:
     dict aninhado por seção (``{"curso": {"numero_periodos": 8, ...}, ...}``)
     — mesmo formato que o antigo ``perfil.yaml``, consumido por
     ``ppcgen.config.carregar_perfil``. Célula ``valor`` em branco omite a
-    chave (o default da dataclass correspondente se aplica)."""
+    chave (o default da dataclass correspondente se aplica).
+
+    O cabeçalho ``chave``/``valor`` é localizado dinamicamente (não precisa
+    ser a 1ª linha) — a planilha pode ter linhas extras acima dele, como o
+    indicador de validação instalado por ``docs/indicador_validacao_vba.txt``
+    diretamente nesta aba."""
 
     caminho = Path(caminho)
     if not caminho.exists():
@@ -566,9 +600,12 @@ def ler_configuracao_perfil(caminho: str | Path) -> dict:
     if "Perfil" not in wb.sheetnames:
         raise FormatoInvalido(f"Aba obrigatória ausente na matriz: 'Perfil' (em {caminho})")
 
+    linhas, linha_cabecalho = _linhas_com_cabecalho(wb["Perfil"], "chave", "valor")
+
     resultado: dict[str, dict] = {}
     chaves_lidas: set[str] = set()
-    for numero_linha, row in enumerate(_linhas(wb["Perfil"]), start=2):
+    for indice, row in enumerate(linhas):
+        numero_linha = linha_cabecalho + 1 + indice
         chave = _str_ou_vazio(row.get("chave"))
         if not chave:
             continue

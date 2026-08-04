@@ -368,6 +368,48 @@ def test_ler_configuracao_perfil_coage_valores(tmp_path):
     assert bruto["instituicao"]["endereco"] == "Av. Exemplo, 123"
 
 
+def test_ler_configuracao_perfil_localiza_cabecalho_deslocado(tmp_path):
+    """O cabeçalho ``chave``/``valor`` não precisa ser a 1ª linha — a aba
+    ``Perfil`` aceita linhas extras acima dele (ex.: o indicador de
+    validação de ``docs/indicador_validacao_vba.txt``, escrito direto nessa
+    aba pelo VBA). Linhas antes do cabeçalho são ignoradas, e os números de
+    linha usados nas mensagens de erro continuam apontando pra linha real."""
+
+    caminho = tmp_path / "matriz.xlsx"
+    wb = openpyxl.Workbook()
+    wb.remove(wb.active)
+    wb.create_sheet("Componentes").append(["codigo", "nome", "tipo"])
+
+    perfil = wb.create_sheet("Perfil")
+    perfil.append(["Verificação de regras (Python)", None])
+    perfil.append(["●", "6 erro(s), 64 alerta(s) — verificado em 04/08/2026 06:01"])
+    perfil.append([None, None])
+    perfil.append(["chave", "valor"])
+    perfil.append(["perfil.id", "teste_cabecalho_deslocado"])
+    perfil.append(["curso.numero_periodos", 6])
+    wb.save(caminho)
+
+    bruto = ler_configuracao_perfil(caminho)
+
+    assert bruto["perfil"]["id"] == "teste_cabecalho_deslocado"
+    assert bruto["curso"]["numero_periodos"] == 6
+
+
+def test_ler_configuracao_perfil_sem_cabecalho_gera_erro_formatado(tmp_path):
+    caminho = tmp_path / "matriz.xlsx"
+    wb = openpyxl.Workbook()
+    wb.remove(wb.active)
+    wb.create_sheet("Componentes").append(["codigo", "nome", "tipo"])
+
+    perfil = wb.create_sheet("Perfil")
+    perfil.append(["não é o cabeçalho esperado", None])
+    perfil.append(["perfil.id", "nao_deveria_ser_lido"])
+    wb.save(caminho)
+
+    with pytest.raises(FormatoInvalido, match="cabeçalho"):
+        ler_configuracao_perfil(caminho)
+
+
 def test_carregar_perfil_le_arquivos_capitulos_customizado(tmp_path):
     """``arquivos.capitulos`` é o único campo de lista da aba ``Perfil`` —
     célula com itens separados por ``|`` vira ``list[str]``, na ordem
