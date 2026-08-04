@@ -275,6 +275,13 @@ def _construir(cls, dados: dict):
             # Célula única da aba `Perfil` com itens separados por `|` —
             # mesmo formato de `componentes`/`pre_requisitos` na matriz.
             valor = [item.strip() for item in valor.split("|") if item.strip()]
+        elif campo.type == "str" and isinstance(valor, (int, float)):
+            # openpyxl lê célula puramente numérica (ex.: "30") como int/float,
+            # mesmo em campo tipado como texto livre (ex.: curso.vagas_ofertadas,
+            # que também aceita "30 no diurno, 20 no noturno") — normaliza para
+            # str aqui, na borda de leitura, em vez de cada gerador precisar
+            # tratar o caso.
+            valor = str(valor)
         filtrado[chave] = valor
     desconhecidos = set(dados) - campos_validos
     if desconhecidos:

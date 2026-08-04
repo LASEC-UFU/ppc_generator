@@ -445,6 +445,33 @@ def test_carregar_perfil_le_arquivos_capitulos_customizado(tmp_path):
     assert perfil_default.arquivos.capitulos == list(CAPITULOS_PADRAO)
 
 
+def test_carregar_perfil_coage_valor_numerico_em_campo_texto(tmp_path):
+    """``curso.vagas_ofertadas`` é ``str`` (aceita texto livre, ex.: "30 no
+    diurno, 20 no noturno"), mas uma célula puramente numérica na planilha
+    (ex.: 30) chega da leitura do Excel como ``int``, não ``str`` — sem
+    normalizar isso na borda de leitura (``_construir``), geradores que
+    esperam string (ex.: ``ppcgen.utilitarios.latex.escapar``) quebram com
+    ``TypeError`` ao tentar iterar um ``int``."""
+
+    from ppcgen.config import carregar_perfil
+
+    caminho = tmp_path / "matriz_curricular.xlsx"
+    wb = openpyxl.Workbook()
+    wb.remove(wb.active)
+    wb.create_sheet("Componentes").append(["codigo", "nome", "tipo"])
+
+    perfil = wb.create_sheet("Perfil")
+    perfil.append(["chave", "valor"])
+    perfil.append(["perfil.id", "teste_vagas_numericas"])
+    perfil.append(["curso.vagas_ofertadas", 30])
+    wb.save(caminho)
+
+    perfil_carregado = carregar_perfil(tmp_path, raiz_dados=tmp_path.parent)
+
+    assert perfil_carregado.curso.vagas_ofertadas == "30"
+    assert isinstance(perfil_carregado.curso.vagas_ofertadas, str)
+
+
 def test_carregar_perfil_aba_ausente_gera_erro_formatado(tmp_path):
     caminho = tmp_path / "matriz.xlsx"
     wb = openpyxl.Workbook()
