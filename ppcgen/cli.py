@@ -52,7 +52,7 @@ from ppcgen.geradores.relatorios import (
 )
 from ppcgen.leitores.excel import carregar_matriz
 from ppcgen.leitores.fichas import carregar_fichas
-from ppcgen.modelos import Curriculo, ReferenciaisCurso, TipoComponente
+from ppcgen.modelos import Curriculo, FichaCurricular, ReferenciaisCurso, TipoComponente
 from ppcgen.scaffolding import clonar_perfil, criar_perfil
 from ppcgen.utilitarios.caminhos import raiz_projeto
 from ppcgen.utilitarios.logging import configurar, obter_logger
@@ -247,6 +247,35 @@ def cmd_compilar(args: argparse.Namespace) -> int:
     return 0
 
 
+def _montar_lista_anexos(
+    perfil: Perfil, curriculo: Curriculo, fichas: list[FichaCurricular]
+) -> list[Path]:
+    """Fichas curriculares (na ordem curricular, se ``geracao.anexar_fichas``)
+    seguidas das resoluções em ``<perfil>/anexos/resolucoes/*.pdf`` (se
+    ``geracao.anexar_resolucoes``) — a lista que ``montar_pdf_completo``
+    concatena ao corpo do PPC."""
+
+    anexos_em_ordem: list[Path] = []
+    if perfil.geracao.anexar_fichas:
+        fichas_por_codigo = {f.codigo: f for f in fichas}
+        ordem = sorted(
+            (c for c in curriculo.ativos() if c.tipo != TipoComponente.ATIVIDADE_COMPLEMENTAR),
+            key=lambda c: (c.periodo if c.periodo is not None else 99, c.nome),
+        )
+        anexos_em_ordem = [
+            fichas_por_codigo[c.codigo].arquivo_origem
+            for c in ordem
+            if c.codigo in fichas_por_codigo and fichas_por_codigo[c.codigo].arquivo_origem
+        ]
+
+    if perfil.geracao.anexar_resolucoes:
+        pasta_resolucoes = perfil.diretorio / perfil.arquivos.anexos / "resolucoes"
+        if pasta_resolucoes.exists():
+            anexos_em_ordem += sorted(pasta_resolucoes.glob("*.pdf"))
+
+    return anexos_em_ordem
+
+
 def cmd_completo(args: argparse.Namespace) -> int:
     perfil = _resolver_perfil(args)
 
@@ -282,21 +311,7 @@ def cmd_completo(args: argparse.Namespace) -> int:
         logger.error(str(exc))
         return 1
 
-    fichas_por_codigo = {f.codigo: f for f in fichas}
-    ordem = sorted(
-        (c for c in curriculo.ativos() if c.tipo != TipoComponente.ATIVIDADE_COMPLEMENTAR),
-        key=lambda c: (c.periodo if c.periodo is not None else 99, c.nome),
-    )
-    anexos_em_ordem = [
-        fichas_por_codigo[c.codigo].arquivo_origem
-        for c in ordem
-        if c.codigo in fichas_por_codigo and fichas_por_codigo[c.codigo].arquivo_origem
-    ]
-
-    if perfil.geracao.anexar_resolucoes:
-        pasta_resolucoes = perfil.diretorio / perfil.arquivos.anexos / "resolucoes"
-        if pasta_resolucoes.exists():
-            anexos_em_ordem += sorted(pasta_resolucoes.glob("*.pdf"))
+    anexos_em_ordem = _montar_lista_anexos(perfil, curriculo, fichas)
 
     pdf_completo = pasta_saida / f"{nome_base}_completo.pdf"
     destino, nao_anexadas = montar_pdf_completo(pdf_corpo, anexos_em_ordem, pdf_completo)
