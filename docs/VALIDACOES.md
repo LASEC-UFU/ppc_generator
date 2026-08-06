@@ -59,8 +59,8 @@ Campos adicionais em `instituicao.*` continuam aceitos e ficam disponíveis em
 | `CARGA_NEGATIVA` | ERRO | qualquer de CHT/CHP/CHD/CHE/TOT `< 0` |
 | `CARGA_TOTAL_INCONSISTENTE` | ERRO | `TOT ≠ CHT+CHP+CHD+CHE` quando todas as parcelas estão informadas |
 | `CARGA_TOTAL_CURSO_DIVERGENTE` | ERRO | carga oficial calculada (ver `ppcgen/calculo.py`) ≠ `curriculo.carga_horaria_total` configurado |
-| `POOL_OPTATIVAS_INSUFICIENTE` | ERRO | soma dos componentes `tipo=carga_optativa` < `curriculo.carga_optativa_minima` |
-| `COMPONENTE_AGREGADOR_OPTATIVO` | ERRO | linha ativa `tipo=carga_optativa` usa nome agregador (por exemplo, `Módulo Optativo`) em lugar de uma disciplina cursável; a linha é excluída do cálculo do pool |
+| `POOL_OPTATIVAS_INSUFICIENTE` | ERRO | soma dos componentes `tipo=carga_optativa` < carga horária do componente agregador (ver `ppcgen.calculo.carga_optativa_minima`) |
+| `COMPONENTE_AGREGADOR_OPTATIVO` | ERRO | linha **ativa** `tipo=carga_optativa` usa nome agregador (por exemplo, `Módulo Optativo`) em lugar de uma disciplina cursável — o agregador deve estar sempre `ativo=False`; sua `carga_total` é a única fonte da carga horária optativa mínima do curso (não há campo correspondente na aba `Perfil`) |
 | `CARGA_TIPO_DIVERGENTE` | ALERTA | soma de AAC/estágio/TCC na matriz ≠ configurado na aba `Perfil` |
 | `CARGA_MAXIMA_PERIODO_EXCEDIDA` | ERRO | soma de CHT+CHP (carga presencial) de um período > `curriculo.carga_horaria_presencial_maxima_periodo` |
 

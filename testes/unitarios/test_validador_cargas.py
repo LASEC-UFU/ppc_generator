@@ -41,21 +41,27 @@ def test_carga_total_curso_divergente():
 
 
 def test_pool_optativas_insuficiente():
-    perfil = construir_perfil(
-        curso=CursoConfig(numero_periodos=1),
-        curriculo=CurriculoConfig(carga_optativa_minima=200),
+    # A carga horária optativa mínima não é mais um parâmetro da aba Perfil
+    # — vem do próprio componente agregador "MÓDULO OPTATIVO" (inativo),
+    # única fonte desse valor (ppcgen.calculo.carga_optativa_minima).
+    perfil = construir_perfil(curso=CursoConfig(numero_periodos=1))
+    agregador = componente(
+        "OPT", nome="MÓDULO OPTATIVO", tipo=TipoComponente.CARGA_OPTATIVA, periodo=None, cht=200, tot=200, ativo=False
     )
     optativa = componente("OPT1", tipo=TipoComponente.CARGA_OPTATIVA, periodo=None, cht=60, tot=60)
-    curriculo = Curriculo(versao="t", componentes=[optativa])
+    curriculo = Curriculo(versao="t", componentes=[agregador, optativa])
     resultado = validar_cargas(curriculo, perfil)
     assert any(m.codigo_regra == "POOL_OPTATIVAS_INSUFICIENTE" for m in resultado.erros)
 
 
-def test_agregador_nao_mascara_pool_optativas_insuficiente():
-    perfil = construir_perfil(
-        curso=CursoConfig(numero_periodos=1),
-        curriculo=CurriculoConfig(carga_optativa_minima=120),
-    )
+def test_agregador_ativo_gera_erro_e_nao_mascara_pool_optativas_insuficiente():
+    """Cenário de dado malformado: o agregador foi deixado ``ativo=True``
+    (deveria estar sempre inativo). Mesmo assim, ele não deve ser contado
+    como um componente real do pool (o que mascararia o déficit real de
+    horas optativas) — e sua própria presença ativa já é reportada como
+    erro à parte."""
+
+    perfil = construir_perfil(curso=CursoConfig(numero_periodos=1))
     agregador = componente(
         "OPT",
         nome="MÓDULO OPTATIVO",

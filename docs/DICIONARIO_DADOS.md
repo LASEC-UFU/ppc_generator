@@ -47,7 +47,7 @@ divulgação institucional, sem efeito em validações); `instituicao.nome`/`sig
 qualquer outra chave `instituicao.*` livre — endereço, CEP, site,
 telefone... — vira `InstituicaoConfig.extra`, acessível pelos templates
 por nome); `curriculo.carga_horaria_total`/`carga_obrigatoria`/
-`carga_optativa_minima`/`carga_extensao`/`carga_aac`/`carga_estagio`/
+`carga_extensao`/`carga_aac`/`carga_estagio`/
 `carga_tcc`/`percentual_minimo_extensao`/`percentual_maximo_ead`/
 `carga_horaria_presencial_maxima_periodo` (máximo de CHT+CHP por período —
 carga a distância e de extensão não entram nessa soma)/`periodo_minimo_tcc`/
@@ -125,6 +125,20 @@ carregado, para não ter dois dados divergindo:
   conta na carga horária oficial do curso (`ppcgen/calculo.py`) e agora
   também decide o rótulo "Obrigatória"/"Optativa" no fluxograma e a
   população da tabela "Componentes Curriculares Obrigatórios" no PDF.
+
+**Componente agregador (carga horária optativa mínima).** A carga horária
+optativa mínima do curso não é um parâmetro da aba `Perfil` — é lida
+diretamente da `carga_total` de um componente-resumo cadastrado na aba
+`Componentes`, cujo `nome` (normalizado, sem acento) seja um de "módulo
+optativo", "carga optativa", "pool optativo" ou "bloco optativo" (ver
+`ppcgen.calculo.eh_agregador_optativo`/`carga_optativa_minima`). Esse
+componente **deve estar sempre `ativo=False`**: não é uma disciplina
+cursável, apenas o valor de referência; se aparecer `ativo=True` com
+`tipo=carga_optativa`, o validador reporta `COMPONENTE_AGREGADOR_OPTATIVO`
+(ver `docs/VALIDACOES.md`). Manter esse valor em dois lugares (a aba
+`Perfil` e este componente) já foi um bug real deste projeto — os dois
+números divergiam sempre que só um era atualizado —, por isso a aba
+`Perfil` não tem mais campo equivalente.
 
 #### Sintaxe de `pre_requisitos`/`correquisitos`
 
