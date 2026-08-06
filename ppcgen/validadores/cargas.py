@@ -9,9 +9,7 @@ combinam carga horária com regras percentuais próprias.
 
 from __future__ import annotations
 
-import unicodedata
-
-from ppcgen.calculo import carga_horaria_oficial, carga_por_tipo
+from ppcgen.calculo import carga_horaria_oficial, carga_optativa_minima, carga_por_tipo, eh_agregador_optativo
 from ppcgen.config import Perfil
 from ppcgen.modelos import (
     AlertaValidacao,
@@ -20,18 +18,6 @@ from ppcgen.modelos import (
     ResultadoValidacao,
     TipoComponente,
 )
-
-
-def _eh_agregador_optativo(nome: str) -> bool:
-    """Identifica linhas-resumo que não representam componentes cursáveis."""
-
-    normalizado = "".join(
-        caractere
-        for caractere in unicodedata.normalize("NFKD", nome.casefold())
-        if not unicodedata.combining(caractere)
-    )
-    normalizado = " ".join(normalizado.split())
-    return normalizado in {"modulo optativo", "carga optativa", "pool optativo", "bloco optativo"}
 
 
 def validar_cargas(curriculo: Curriculo, perfil: Perfil) -> ResultadoValidacao:
@@ -69,7 +55,7 @@ def validar_cargas(curriculo: Curriculo, perfil: Perfil) -> ResultadoValidacao:
             )
 
     cfg = perfil.curriculo
-    total_calculado = carga_horaria_oficial(curriculo, perfil)
+    total_calculado = carga_horaria_oficial(curriculo)
     if cfg.carga_horaria_total is not None and total_calculado != cfg.carga_horaria_total:
         resultado.adicionar(
             ErroValidacao(
@@ -82,13 +68,15 @@ def validar_cargas(curriculo: Curriculo, perfil: Perfil) -> ResultadoValidacao:
     optativas_ativas = [
         c for c in curriculo.ativos() if c.tipo == TipoComponente.CARGA_OPTATIVA
     ]
-    agregadores_optativos = [c for c in optativas_ativas if _eh_agregador_optativo(c.nome)]
+    agregadores_optativos = [c for c in optativas_ativas if eh_agregador_optativo(c.nome)]
     for componente in agregadores_optativos:
         resultado.adicionar(
             ErroValidacao(
                 "COMPONENTE_AGREGADOR_OPTATIVO",
                 f"'{componente.codigo}' ('{componente.nome}') é uma linha agregadora, "
-                "não uma disciplina cursável; cadastre o elenco real de optativas.",
+                "não uma disciplina cursável — deve estar inativa (ativo=False); "
+                "sua carga_total já é lida como a carga horária optativa mínima do curso "
+                "(ppcgen.calculo.carga_optativa_minima), sem duplicar esse valor na aba Perfil.",
                 componente=componente.codigo,
                 campo="nome",
             )
@@ -97,12 +85,13 @@ def validar_cargas(curriculo: Curriculo, perfil: Perfil) -> ResultadoValidacao:
     soma_optativas = sum(
         c.carga_total for c in optativas_ativas if c not in agregadores_optativos
     )
-    if cfg.carga_optativa_minima is not None and soma_optativas < cfg.carga_optativa_minima:
+    minima_configurada = carga_optativa_minima(curriculo)
+    if minima_configurada is not None and soma_optativas < minima_configurada:
         resultado.adicionar(
             ErroValidacao(
                 "POOL_OPTATIVAS_INSUFICIENTE",
                 f"pool de componentes optativos oferece apenas {soma_optativas}h, "
-                f"insuficiente para o mínimo exigido de {cfg.carga_optativa_minima}h.",
+                f"insuficiente para o mínimo exigido de {minima_configurada}h.",
             )
         )
 

@@ -54,7 +54,6 @@ def _linhas_perfil_padrao(perfil_id: str, nome: str) -> list[tuple[str, object]]
         ("instituicao.unidade_academica", ""),
         ("curriculo.carga_horaria_total", None),
         ("curriculo.carga_obrigatoria", None),
-        ("curriculo.carga_optativa_minima", None),
         ("curriculo.carga_extensao", None),
         ("curriculo.carga_aac", None),
         ("curriculo.carga_estagio", None),

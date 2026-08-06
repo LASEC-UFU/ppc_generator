@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from ppcgen.calculo import carga_horaria_oficial, carga_por_tipo, componentes_oficiais
+from ppcgen.calculo import carga_horaria_oficial, carga_optativa_minima, carga_por_tipo, componentes_oficiais
 from ppcgen.config import Perfil
 from ppcgen.geradores.bibliografia import gerar_bibliografia_bib
 from ppcgen.geradores.fluxo import gerar_tabela_fluxo
@@ -238,12 +238,14 @@ def gerar_arquivos_latex(
     # fato cursa (ele escolhe um subconjunto). Por isso, nas tabelas de
     # carga por núcleo/área/modalidade, o grupo de optativas não é somado
     # componente a componente — ele entra uma única vez, com o valor de
-    # ``curriculo.carga_optativa_minima`` (Seção 3/6) — mantendo os totais
-    # consistentes com ``ppcgen.calculo.carga_horaria_oficial``. A listagem
-    # completa do pool aparece à parte, em "Disciplinas Optativas
-    # Pré-Aprovadas", sem linha de total (Seção 13).
-    total_geral = carga_horaria_oficial(curriculo, perfil)
-    optativa_minima = perfil.curriculo.carga_optativa_minima or 0
+    # ``ppcgen.calculo.carga_optativa_minima`` (lido do componente
+    # agregador "MÓDULO OPTATIVO" da aba Componentes, não de um campo na
+    # aba Perfil) — mantendo os totais consistentes com
+    # ``ppcgen.calculo.carga_horaria_oficial``. A listagem completa do
+    # pool aparece à parte, em "Disciplinas Optativas Pré-Aprovadas", sem
+    # linha de total (Seção 13).
+    total_geral = carga_horaria_oficial(curriculo)
+    optativa_minima = carga_optativa_minima(curriculo) or 0
     # `oficiais`: população usada nos totais/percentuais (todo tipo exceto
     # optativa — ver ppcgen.calculo.componentes_oficiais). `obrigatorios`:
     # população da tabela "Componentes Curriculares Obrigatórios" — um

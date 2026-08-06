@@ -81,7 +81,6 @@ class InstituicaoConfig:
 class CurriculoConfig:
     carga_horaria_total: int | None = None
     carga_obrigatoria: int | None = None
-    carga_optativa_minima: int | None = None
     carga_extensao: int | None = None
     carga_aac: int | None = None
     carga_estagio: int | None = None

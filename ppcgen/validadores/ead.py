@@ -84,7 +84,7 @@ def validar_ead(curriculo: Curriculo, perfil: Perfil) -> ResultadoValidacao:
     if percentual_maximo is None:
         return resultado
 
-    total = carga_horaria_oficial(curriculo, perfil)
+    total = carga_horaria_oficial(curriculo)
     if total == 0:
         return resultado
 

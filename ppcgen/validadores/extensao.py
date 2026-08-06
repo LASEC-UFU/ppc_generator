@@ -17,7 +17,7 @@ def validar_extensao(curriculo: Curriculo, perfil: Perfil) -> ResultadoValidacao
     if percentual_minimo is None:
         return resultado
 
-    total = carga_horaria_oficial(curriculo, perfil)
+    total = carga_horaria_oficial(curriculo)
     if total == 0:
         return resultado
 
