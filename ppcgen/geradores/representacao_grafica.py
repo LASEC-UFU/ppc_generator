@@ -64,12 +64,14 @@ def gerar_representacao_grafica(curriculo: Curriculo, perfil: Perfil) -> str:
         linhas_corpo += " & ".join(celulas) + r"\\" + "\n"
 
     n_colunas = len(ordem_colunas)
+    # Diagramas com muitas linhas podem ultrapassar a altura útil mesmo
+    # depois de ajustados à largura. Nesses casos, o segundo argumento limita
+    # também a altura; perfis menores preservam a proporção original.
+    altura = r"0.78\textheight" if maior_coluna > 10 else "!"
     return (
-        r"\begin{table}"
+        r"\begin{center}"
         "\n"
-        r"\centering"
-        "\n"
-        rf"\resizebox{{\linewidth}}{{!}}{{\begin{{tabular}}{{|{'c|' * n_colunas}}}"
+        rf"\resizebox{{\linewidth}}{{{altura}}}{{\begin{{tabular}}{{|{'c|' * n_colunas}}}"
         "\n\\hline\n"
         + linha_cabecalho
         + r"\hline"
@@ -77,6 +79,6 @@ def gerar_representacao_grafica(curriculo: Curriculo, perfil: Perfil) -> str:
         + linhas_corpo
         + r"\hline\end{tabular}}"
         + "\n"
-        + r"\end{table}"
+        + r"\end{center}"
         + "\n"
     )

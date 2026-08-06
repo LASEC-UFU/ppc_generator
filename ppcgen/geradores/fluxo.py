@@ -53,13 +53,14 @@ def gerar_tabela_fluxo(curriculo: Curriculo, perfil: Perfil, nomes_por_codigo: d
     caption = {Fluxo Curricular},
     label = {tab:fluxo_curricular},
 ]{
-    colspec = {|Q[c,m,wd=14mm]|Q[l,m,wd=45mm]|Q[c,m,wd=16mm]|Q[c,m,wd=8mm]|Q[c,m,wd=8mm]|Q[c,m,wd=8mm]|Q[c,m,wd=8mm]|Q[c,m,wd=10mm]|Q[l,m,wd=25mm]|Q[l,m,wd=25mm]|Q[c,m,wd=14mm]|},
+    colspec = {|Q[c,m,wd=9mm]|Q[l,m,wd=37mm]|Q[c,m,wd=13mm]|Q[c,m,wd=6mm]|Q[c,m,wd=6mm]|Q[c,m,wd=6mm]|Q[c,m,wd=6mm]|Q[c,m,wd=7mm]|Q[l,m,wd=18mm]|Q[l,m,wd=18mm]|Q[c,m,wd=9mm]|},
+    colsep = 1.5pt,
     rowhead = 1,
     hlines = {fg=AzulEscuro},
     vlines = {fg=AzulEscuro},
     row{odd} = {bg=CinzaClaro},
     row{1} = {bg=AzulEscuro, fg=white},
-    cells = {font=\fontsize{8pt}{9pt}\selectfont},
+    cells = {font=\fontsize{7.5pt}{8.5pt}\selectfont},
 }
     \textbf{PER} & \textbf{Componente Curricular} & \textbf{Natureza} & \textbf{CHT} & \textbf{CHP} & \textbf{CHD} & \textbf{CHE} & \textbf{TOT} & \textbf{PREQ} & \textbf{CREQ} & \textbf{UA Oferta} \\
 """

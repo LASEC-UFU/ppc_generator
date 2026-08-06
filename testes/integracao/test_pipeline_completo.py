@@ -68,7 +68,10 @@ def test_pipeline_gera_arquivos_latex_esperados(tmp_path, perfil_minimo):
     assert conteudo_fluxo.count(r"\begin{longtblr}") == conteudo_fluxo.count(r"\end{longtblr}")
 
 
-@pytest.mark.skipif(shutil.which("latexmk") is None, reason="TeX não disponível neste ambiente")
+@pytest.mark.skipif(
+    shutil.which("latexmk") is None and shutil.which("pdflatex") is None,
+    reason="TeX não disponível neste ambiente",
+)
 def test_pipeline_compila_pdf_do_perfil_minimo(tmp_path, perfil_minimo):
     curriculo, referenciais, _avisos = _carregar_curriculo_e_referenciais(perfil_minimo)
 

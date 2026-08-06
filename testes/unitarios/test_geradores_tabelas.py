@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from ppcgen.geradores.fluxo import gerar_tabela_fluxo, montar_grupos_fluxo
+from ppcgen.geradores.representacao_grafica import gerar_representacao_grafica
 from ppcgen.geradores.tabelas import formatar_lista_requisitos, formatar_requisito, tabela_componentes
 from ppcgen.modelos import Correquisito, Curriculo, PreRequisito, TipoComponente
 from testes.conftest import componente
@@ -61,3 +62,21 @@ def test_gerar_tabela_fluxo_nao_quebra_com_correquisito(config_basica):
     nomes = {c.codigo: c.nome for c in componentes}
     tex = gerar_tabela_fluxo(curriculo, config_basica, nomes)
     assert "tab:fluxo_curricular" in tex
+
+
+def test_representacao_grafica_alta_limita_altura_sem_float(config_basica):
+    componentes = [
+        componente(
+            f"OPT{i}",
+            periodo=None,
+            tipo=TipoComponente.CARGA_OPTATIVA,
+        )
+        for i in range(11)
+    ]
+    tex = gerar_representacao_grafica(
+        Curriculo(versao="t", componentes=componentes),
+        config_basica,
+    )
+    assert r"\resizebox{\linewidth}{0.78\textheight}" in tex
+    assert r"\begin{center}" in tex
+    assert r"\begin{table}" not in tex

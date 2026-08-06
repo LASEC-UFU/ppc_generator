@@ -53,7 +53,8 @@ def tabela_componentes(
     caption = {{{titulo}}},
     label = {{tab:{label}}},
 ]{{
-    colspec = {{Q[l,m,wd=63mm]Q[l,m,wd=23mm]Q[c,m,wd=7mm]Q[c,m,wd=7mm]Q[c,m,wd=7mm]Q[c,m,wd=7mm]Q[c,m,wd=9mm]}},
+    colspec = {{Q[l,m,wd=58mm]Q[l,m,wd=22mm]Q[c,m,wd=7mm]Q[c,m,wd=7mm]Q[c,m,wd=7mm]Q[c,m,wd=7mm]Q[c,m,wd=9mm]}},
+    colsep = 2pt,
     rowhead = 1,
     row{{odd}} = {{bg=CinzaClaro}},
     row{{1}} = {{bg=AzulEscuro, fg=white}},
@@ -73,6 +74,13 @@ def tabela_componentes(
             texto_ou_travessao(ch.extensao),
             texto_ou_travessao(ch.total),
         )
+    if not componentes:
+        # Um `longtblr` só com cabeçalho, sem nenhuma linha de corpo, falha
+        # ao compilar (tabularray espera ao menos uma linha). Uma lista
+        # vazia é um estado real (ex.: nenhum componente optativo
+        # cadastrado ainda), não um erro de geração — mantém a tabela
+        # (com legenda e rótulo) em vez de omiti-la.
+        corpo = "    \\SetCell[c=7]{c} Nenhum componente cadastrado. \\\\\n"
 
     rodape = ""
     if incluir_total and componentes:
@@ -109,6 +117,7 @@ def tabela_carga_por_grupo(
     label = {{tab:{label}}},
 ]{{
     colspec = {{Q[l,m,wd=100mm]Q[c,m,wd=20mm]Q[c,m,wd=20mm]}},
+    colsep = 2pt,
     rowhead = 1,
     row{{odd}} = {{bg=CinzaClaro}},
     row{{1}} = {{bg=AzulEscuro, fg=white}},
@@ -132,6 +141,90 @@ def tabela_carga_por_grupo(
     return cabecalho + corpo + rodape + r"\end{longtblr}" + "\n"
 
 
+def tabela_enfases_formativas(
+    enfases,
+    titulo: str,
+    label: str,
+) -> str:
+    """Quadro-resumo das ênfases formativas (áreas de formação optativa):
+    Ênfase Formativa | Conteúdos Estruturantes | Aderência Profissional.
+
+    Puramente descritivo — ao contrário de ``tabela_componentes``, não
+    depende de nenhum componente estar vinculado a uma ênfase (o vínculo é
+    inferido do nome do componente, não cadastrado aqui — ver
+    ``tabela_enfase_formativa_componentes``). As duas colunas de texto
+    longo usam o tipo ``X`` do próprio ``tabularray`` (equivalente ao
+    ``tabularx``, sem exigir pacote adicional) para não estourar a margem
+    com os textos de conteúdos/aderência, que podem ser extensos.
+    """
+
+    cabecalho = rf"""\begin{{longtblr}}[
+    theme = ppc,
+    caption = {{{titulo}}},
+    label = {{tab:{label}}},
+]{{
+    colspec = {{Q[l,m,wd=35mm]X[1,l,m]X[1,l,m]}},
+    colsep = 2pt,
+    rowhead = 1,
+    row{{odd}} = {{bg=CinzaClaro}},
+    row{{1}} = {{bg=AzulEscuro, fg=white}},
+    cells = {{font=\fontsize{{9pt}}{{11pt}}\selectfont}},
+}}
+    \textbf{{Ênfase Formativa}} & \textbf{{Conteúdos Estruturantes}} & \textbf{{Aderência Profissional}} \\
+"""
+    corpo = ""
+    for enfase in enfases:
+        nome = escapar(enfase.nome)
+        if enfase.sigla:
+            nome = f"{nome} ({escapar(enfase.sigla)})"
+        corpo += _linha(
+            nome,
+            escapar(enfase.conteudos_estruturantes) or "--",
+            escapar(enfase.aderencia_profissional) or "--",
+        )
+    if not enfases:
+        corpo = "    \\SetCell[c=3]{c} Nenhuma ênfase formativa cadastrada. \\\\\n"
+
+    return cabecalho + corpo + r"\end{longtblr}" + "\n"
+
+
+def tabela_enfase_formativa_componentes(
+    componentes: list[ComponenteCurricular],
+    titulo: str,
+    label: str,
+) -> str:
+    """Componentes de uma Ênfase Formativa: Código | Componente | CH Total |
+    Natureza. Chamada só quando ``componentes`` não é vazio (quem gera
+    decide isso, mesmo padrão de pular a escrita do arquivo usado por
+    Competências/Conteúdos/Temas) — não tem guarda de lista vazia própria.
+
+    ``componentes`` já deve vir ordenado por quem chama, pela posição
+    numérica extraída do nome (``MIAPI 1``, ``MIAPI 2``...— ver
+    ``ppcgen.utilitarios.textos.analisar_prefixo_enfase_formativa``); esta
+    função só formata, não ordena. O nome exibido é o nome completo
+    cadastrado (com o prefixo da ênfase), sem reescrever nem esconder nada."""
+
+    cabecalho = rf"""\begin{{longtblr}}[
+    theme = ppc,
+    caption = {{{titulo}}},
+    label = {{tab:{label}}},
+]{{
+    colspec = {{Q[l,m,wd=25mm]X[1,l,m]Q[c,m,wd=15mm]Q[c,m,wd=20mm]}},
+    colsep = 2pt,
+    rowhead = 1,
+    row{{odd}} = {{bg=CinzaClaro}},
+    row{{1}} = {{bg=AzulEscuro, fg=white}},
+    cells = {{font=\fontsize{{9pt}}{{11pt}}\selectfont}},
+}}
+    \textbf{{Código}} & \textbf{{Componente}} & \textbf{{CH Total}} & \textbf{{Natureza}} \\
+"""
+    corpo = ""
+    for c in componentes:
+        corpo += _linha(escapar(c.codigo), escapar(c.nome), texto_ou_travessao(c.carga_total), "Optativa")
+
+    return cabecalho + corpo + r"\end{longtblr}" + "\n"
+
+
 def tabela_prerequisitos(
     componentes: list[ComponenteCurricular],
     titulo: str,
@@ -145,7 +238,8 @@ def tabela_prerequisitos(
     caption = {{{titulo}}},
     label = {{tab:{label}}},
 ]{{
-    colspec = {{Q[c,m,wd=12mm]Q[l,m,wd=55mm]Q[l,m,wd=22mm]Q[l,m,wd=35mm]Q[l,m,wd=35mm]}},
+    colspec = {{Q[c,m,wd=10mm]Q[l,m,wd=43mm]Q[l,m,wd=19mm]Q[l,m,wd=31mm]Q[l,m,wd=31mm]}},
+    colsep = 2pt,
     rowhead = 1,
     row{{odd}} = {{bg=CinzaClaro}},
     row{{1}} = {{bg=AzulEscuro, fg=white}},
@@ -176,7 +270,8 @@ def tabela_referencia(
     label = {{tab:{label}}},
     remark{{\small \textbf{{Referência}}}} = {{\small {escapar(nota_referencia)}}}
 ]{{
-    colspec = {{Q[c,m,wd=20mm]Q[l,m,wd=90mm]Q[l,m,wd=25mm]}},
+    colspec = {{Q[c,m,wd=17mm]Q[l,m,wd=91mm]Q[l,m,wd=23mm]}},
+    colsep = 2pt,
     rowhead = 1,
     row{{odd}} = {{bg=CinzaClaro}},
     row{{1}} = {{bg=AzulEscuro, fg=white}},
@@ -209,7 +304,8 @@ def tabela_equivalencias(
     caption = {{{titulo}}},
     label = {{tab:{label}}},
 ]{{
-    colspec = {{Q[l,m,wd=55mm]Q[l,m,wd=25mm]Q[c,m,wd=15mm]Q[l,m,wd=55mm]}},
+    colspec = {{Q[l,m,wd=43mm]Q[l,m,wd=22mm]Q[c,m,wd=13mm]Q[l,m,wd=53mm]}},
+    colsep = 2pt,
     rowhead = 1,
     row{{odd}} = {{bg=CinzaClaro}},
     row{{1}} = {{bg=AzulEscuro, fg=white}},

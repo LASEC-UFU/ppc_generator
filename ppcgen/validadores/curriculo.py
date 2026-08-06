@@ -24,6 +24,7 @@ from ppcgen.modelos import (
 from ppcgen.validadores.cargas import validar_cargas
 from ppcgen.validadores.codigos import validar_codigos
 from ppcgen.validadores.ead import validar_ead
+from ppcgen.validadores.enfases_formativas import validar_enfases_formativas
 from ppcgen.validadores.extensao import validar_extensao
 from ppcgen.validadores.fichas import SituacaoFichas, avaliar_fichas
 from ppcgen.validadores.prerequisitos import validar_equivalencias, validar_prerequisitos
@@ -75,6 +76,7 @@ def validar_curriculo(
     resultado.mesclar(validar_prerequisitos(curriculo, perfil))
     resultado.mesclar(validar_equivalencias(curriculo))
     resultado.mesclar(validar_referenciais(curriculo, referenciais))
+    resultado.mesclar(validar_enfases_formativas(curriculo, perfil, referenciais))
 
     situacao_fichas: SituacaoFichas | None = None
     if fichas is not None:

@@ -130,6 +130,29 @@ class Competencia:
 
 
 @dataclass
+class EnfaseFormativa:
+    """Ênfase/área de formação optativa (ex.: percursos de aprofundamento
+    entre os quais o curso exige a escolha de um número mínimo — ver
+    ``CurriculoConfig.enfases_formativas_minimas``). Não deve ser confundida
+    com :class:`AreaFormacao`, que é taxonomia de conteúdo sem exigência de
+    integralização associada.
+
+    Catálogo puramente descritivo: NÃO tem coluna/campo ``componentes`` —
+    ao contrário de ``NucleoCurricular``/``AreaFormacao``/etc., o vínculo
+    entre um componente e sua ênfase não é cadastrado aqui, para não criar
+    uma segunda fonte de verdade. É inferido do próprio nome do componente
+    (padrão ``SIGLA NÚMERO: Nome da disciplina`` — ver
+    ``ppcgen.utilitarios.textos.analisar_prefixo_enfase_formativa`` e
+    ``ComponenteCurricular.enfase_formativa_id``)."""
+
+    id: str
+    nome: str
+    sigla: str = ""
+    conteudos_estruturantes: str = ""
+    aderencia_profissional: str = ""
+
+
+@dataclass
 class Conteudo:
     """Conteúdo curricular específico exigido por um referencial (ex.: um
     item de uma DCN) — Seção 3. Análogo a :class:`Competencia`, mas para
@@ -238,6 +261,7 @@ class ReferenciaisCurso:
     autoridades: list[Autoridade] = field(default_factory=list)
     comissao_membros: list[str] = field(default_factory=list)
     bibliografia: list[EntradaBibliografica] = field(default_factory=list)
+    enfases_formativas: list[EnfaseFormativa] = field(default_factory=list)
 
     def ids_nucleos(self) -> set[str]:
         return {n.id for n in self.nucleos}
@@ -253,6 +277,9 @@ class ReferenciaisCurso:
 
     def ids_temas(self) -> set[str]:
         return {t.id for t in self.temas_transversais}
+
+    def ids_enfases_formativas(self) -> set[str]:
+        return {e.id for e in self.enfases_formativas}
 
 
 # ---------------------------------------------------------------------------
@@ -298,6 +325,14 @@ class ComponenteCurricular:
     competencias: list[str] = field(default_factory=list)
     conteudos: list[str] = field(default_factory=list)
     temas_transversais: list[str] = field(default_factory=list)
+    enfase_formativa_id: str | None = None
+    """Id da ênfase formativa (aba ``EnfasesFormativas``) inferido do nome
+    do componente pelo padrão ``SIGLA NÚMERO: Nome`` — cardinalidade 1
+    (cada componente tem no máximo um prefixo de ênfase), ao contrário de
+    ``areas``/``competencias``/``conteudos``/``temas_transversais`` acima,
+    que são N:N. Preenchido por
+    ``ppcgen.leitores.excel._atribuir_enfases_formativas_por_nome``, nunca
+    pela coluna ``componentes`` (que não existe em ``EnfaseFormativa``)."""
     pre_requisitos: list[PreRequisito] = field(default_factory=list)
     correquisitos: list[Correquisito] = field(default_factory=list)
     observacoes: str = ""

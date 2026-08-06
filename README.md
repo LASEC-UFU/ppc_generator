@@ -10,16 +10,16 @@ fixadas no código.
 O sistema suporta **múltiplos perfis simultâneos e independentes** no
 mesmo repositório: cursos diferentes, versões curriculares diferentes do
 mesmo curso, ou propostas alternativas em avaliação. Cada perfil é
-autocontido em `dados/perfis/<id>/` e todo comando exige um perfil
+autocontido em `dados/<id>/`, registrado em `dados/perfis.yaml`, e todo comando exige um perfil
 explícito (`--perfil <id>`) — não existe um curso "padrão" embutido no
 código. Ver `docs/PERFIS.md`.
 
-Este repositório traz três perfis de exemplo:
+Este repositório traz dois perfis de PPC em elaboração e um perfil sintético de teste:
 
-- `engenharia_computacao_2026_1` — curso real, migrado do gerador anterior,
-  com dados/currículo/fichas reais.
-- `controle_automacao_2027_1` — proposta de um Curso Superior de
-  Tecnologia em Controle e Automação, construído para este novo sistema.
+- `tecnologo_automacao_2027_1` — proposta do Curso Superior de Tecnologia
+  em Automação Industrial.
+- `engenharia_automacao_2027_1` — proposta de Engenharia de Automação,
+  Robótica e Inteligência Artificial.
 - `perfil_minimo` (em `testes/perfis_exemplo/`) — perfil mínimo sintético
   usado pelos testes automatizados.
 
@@ -34,7 +34,7 @@ para a referência de commit.
 ## 2. Arquitetura
 
 ```
-dados/perfis/<id>/matriz_curricular.xlsx (tudo: aba Perfil + Componentes + Competencias/Bibliografia/Legislacao)
+dados/<id>/matriz_curricular.xlsm (tudo: aba Perfil + Componentes + Competencias/Bibliografia/Legislacao)
   (+ extends: outro perfil)
      → ppcgen.leitores → ppcgen.validadores → ppcgen.geradores
      → ppcgen.compiladores → PDF em saida/<id>/
@@ -61,7 +61,8 @@ scripts/             setup de ambiente LaTeX
 ## 3. Requisitos
 
 - Python ≥ 3.11
-- Uma distribuição LaTeX com `latexmk`/`biber` (MiKTeX ou TeX Live) e os
+- Uma distribuição LaTeX com `latexmk` ou `pdflatex`, além de `biber`
+  quando houver bibliografia (MiKTeX ou TeX Live), e os
   pacotes usados por `templates/latex/` (`tabularray`, `biblatex`,
   `geometry`, `fancyhdr`... — lista completa e scripts de setup/
   verificação em `scripts/install-latex-minimal.ps1` e
@@ -172,7 +173,7 @@ nem dentro da própria pasta de dados do perfil — sempre em
 
 ## 14. Fluxo de trabalho recomendado
 
-1. Editar `dados/perfis/<id>/matriz_curricular.xlsx` (inclui as abas
+1. Editar `dados/<id>/matriz_curricular.xlsm` (inclui as abas
    Perfil/Competencias/Bibliografia/Legislacao) ou `textos/*.tex`.
 2. `python -m ppcgen validar --perfil <id>` até revisar todos os erros.
 3. `python -m ppcgen completo --perfil <id>` (ou `make complete

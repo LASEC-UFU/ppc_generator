@@ -32,6 +32,18 @@ def test_nota_com_caracteres_especiais_e_escapada():
     assert r"50\% dos casos \& revisada" in bib
 
 
+def test_nota_com_identificador_longo_permite_quebra_nos_sublinhados():
+    entrada = EntradaBibliografica(
+        chave="teste_identificador",
+        tipo="misc",
+        autor="A",
+        titulo="T",
+        nota="Parâmetro curriculo.percentual_minimo_extensao.",
+    )
+    bib = gerar_bibliografia_bib([entrada])
+    assert r"curriculo.percentual\_\allowbreak{}minimo\_\allowbreak{}extensao" in bib
+
+
 def test_campos_vazios_nao_aparecem_no_bib():
     entrada = EntradaBibliografica(chave="minimo", tipo="misc", autor="A", titulo="T")
     bib = gerar_bibliografia_bib([entrada])

@@ -65,6 +65,82 @@ def test_carregar_matriz_basica(tmp_path):
     assert referenciais.competencias == []
 
 
+def _adicionar_enfase_e_componente(caminho, nome_componente, codigo_componente="M1"):
+    """Acrescenta a aba ``EnfasesFormativas`` (id=MIAPI) e um componente
+    optativo extra, com o nome dado, a uma matriz já salva por
+    ``_matriz_minima`` — usado para testar o vínculo por nome (sem coluna
+    ``componentes``)."""
+
+    wb = openpyxl.load_workbook(caminho)
+    enfases = wb.create_sheet("EnfasesFormativas")
+    enfases.append(["id", "nome", "sigla", "conteudos_estruturantes", "aderencia_profissional"])
+    enfases.append(["MIAPI", "Máquinas Inteligentes e Acionamentos", "MIAPI", "Acionamentos, proteção", "Manutenção industrial"])
+    componentes = wb["Componentes"]
+    componentes.append(
+        [codigo_componente, nome_componente, "carga_optativa", None, True, 60, 0, 0, 0, 60, "", "", ""]
+    )
+    wb.save(caminho)
+
+
+def test_carregar_matriz_enfase_formativa_vinculada_pelo_nome(tmp_path):
+    """Sem nenhuma coluna ``componentes``: o vínculo vem só do nome do
+    componente, padrão ``SIGLA NÚMERO: Nome`` (Seção 6/8 do pedido)."""
+
+    caminho = tmp_path / "matriz.xlsx"
+    _matriz_minima(caminho)
+    _adicionar_enfase_e_componente(caminho, "MIAPI 1: Máquinas Elétricas Inteligentes")
+
+    curriculo, referenciais, _avisos = carregar_matriz(caminho)
+
+    assert referenciais.ids_enfases_formativas() == {"MIAPI"}
+    enfase = referenciais.enfases_formativas[0]
+    assert enfase.sigla == "MIAPI"
+    assert enfase.conteudos_estruturantes == "Acionamentos, proteção"
+    assert enfase.aderencia_profissional == "Manutenção industrial"
+    m1 = curriculo.por_codigo()["M1"]
+    assert m1.enfase_formativa_id == "MIAPI"
+
+
+def test_carregar_matriz_nome_malformado_nao_vincula(tmp_path):
+    """Leitor nunca falha nem decide severidade (Seção 29): sigla
+    inexistente ou número inválido no nome simplesmente não vincula —
+    quem reporta o problema é o validador (ver
+    ``ppcgen.validadores.enfases_formativas``)."""
+
+    caminho = tmp_path / "matriz.xlsx"
+    _matriz_minima(caminho)
+    _adicionar_enfase_e_componente(caminho, "RASC 1: Sigla Não Cadastrada", codigo_componente="M1")
+
+    curriculo, _referenciais, _avisos = carregar_matriz(caminho)
+    assert curriculo.por_codigo()["M1"].enfase_formativa_id is None
+
+
+def test_carregar_matriz_disciplina_comum_sem_prefixo_nao_e_erro(tmp_path):
+    """Disciplina sem o padrão ``SIGLA NÚMERO: Nome`` — a esmagadora
+    maioria dos componentes — fica sem ênfase, sem qualquer aviso."""
+
+    caminho = tmp_path / "matriz.xlsx"
+    _matriz_minima(caminho)
+    _adicionar_enfase_e_componente(caminho, "Cálculo Diferencial e Integral I", codigo_componente="M1")
+
+    curriculo, _referenciais, avisos = carregar_matriz(caminho)
+    assert curriculo.por_codigo()["M1"].enfase_formativa_id is None
+    assert avisos == []
+
+
+def test_carregar_matriz_sem_aba_enfases_formativas(tmp_path):
+    """Aba ``EnfasesFormativas`` é opcional — ausência vira catálogo vazio,
+    sem erro (mesmo tratamento das demais abas de catálogo opcionais)."""
+
+    caminho = tmp_path / "matriz.xlsx"
+    _matriz_minima(caminho)
+
+    curriculo, referenciais, _avisos = carregar_matriz(caminho)
+
+    assert referenciais.enfases_formativas == []
+    assert curriculo.por_codigo()["X1"].enfase_formativa_id is None
+
+
 def test_carregar_matriz_aba_obrigatoria_ausente(tmp_path):
     caminho = tmp_path / "matriz_invalida.xlsx"
     wb = openpyxl.Workbook()

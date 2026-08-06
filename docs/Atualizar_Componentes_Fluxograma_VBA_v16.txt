@@ -81,12 +81,13 @@ Private Const MAX_LINHAS_CABECALHO_PERIODO As Long = 8
 '   Q:U   = terceiro bloco; P = coluna de requisitos do terceiro bloco
 ' Entre os blocos existem duas colunas de separação.
 ' Cada novo bloco começa sete colunas após o anterior.
-' Tanto o macrobloco superior quanto o inferior percorrem dez posições:
-' C, J, Q, X, AE, AL, AS, AZ, BG e BN.
+' Tanto o macrobloco superior quanto o inferior percorrem onze posições:
+' C, J, Q, X, AE, AL, AS, AZ, BG, BN e BU — a última posição (BU:BY)
+' estende a varredura até a coluna BY (antes ia somente até BR).
 Private Const PRIMEIRA_COLUNA_BLOCO As Long = 3       ' C
 Private Const PASSO_COLUNAS_BLOCO As Long = 7
-Private Const QUANTIDADE_BLOCOS_SUPERIOR As Long = 10
-Private Const QUANTIDADE_BLOCOS_INFERIOR As Long = 10
+Private Const QUANTIDADE_BLOCOS_SUPERIOR As Long = 11
+Private Const QUANTIDADE_BLOCOS_INFERIOR As Long = 11
 
 ' -----------------------------------------------------------------------------
 ' GEOMETRIA DOS BLOCOS

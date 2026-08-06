@@ -1,0 +1,29 @@
+# Paleta de cores institucional (extraída de include/settings/Settings.tex,
+# onde já era genérica — sem nenhuma referência a um curso específico) e
+# mapa dos logos ao lado. Documentação/referência — as cores já estão
+# hardcoded em templates/latex/configuracoes/Estilos.tex e os caminhos de
+# logo abaixo são os mesmos usados diretamente em
+# ppcgen/geradores/latex.py (prefixo figuras/compartilhadas/, preservado
+# na migração para fora do antigo dados/compartilhados/).
+cores:
+  azul_escuro: "14,64,151"
+  azul_claro: "41,102,189"
+  cinza_claro: "232,231,231"
+  cinza_meio: "172,175,180"
+  cinza_escuro: "113,119,130"
+  verde: "1,66,10"
+  amarelo: "232,171,2"
+  laranja: "204,85,0"
+  azul_marca: "220,230,241"
+  amarelo_vivo: "255,255,0"
+
+logos:
+  # Variante larga (faixa/banner) — usada na capa, junto do cabeçalho.
+  ufu: "figuras/compartilhadas/logo_ufu.png"
+  # Variante quadrada/compacta — usada em blocos de endereço (ex.:
+  # capítulo "Endereços"), ao lado de texto, nunca a larga (fica
+  # espremida/ilegível num box estreito).
+  ufu_quadrado: "figuras/compartilhadas/logo_ufu_quadrado.png"
+  feelt: "figuras/compartilhadas/logo_feelt.png"
+  header_pattern: "figuras/compartilhadas/header_pattern.jpg"
+  selo_ccbynd: "figuras/compartilhadas/selo_ccbynd.png"

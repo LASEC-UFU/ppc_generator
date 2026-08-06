@@ -1,0 +1,350 @@
+PROMPT PARA ATUALIZAÇÃO DO PPC — MÓDULOS OPTATIVOS E ÁREAS DE FORMAÇÃO
+
+Faça uma revisão integral do Projeto Pedagógico do Curso de Automação, Robótica e Inteligência Artificial, inserindo e harmonizando em todo o documento a organização dos componentes curriculares optativos em módulos vinculados a áreas de formação.
+
+A alteração não deverá se limitar à inclusão de um parágrafo isolado. Revise o texto do PPC, a matriz curricular, os quadros de componentes, o fluxograma, as regras de integralização, as ementas, a distribuição da carga horária e todas as referências aos atuais “Componentes Curriculares Optativos I, II, III e IV”.
+
+1. CRIAR UM CAPÍTULO ESPECÍFICO SOBRE OS COMPONENTES OPTATIVOS
+
+Criar um capítulo ou seção própria, com título semelhante a:
+
+“Componentes Curriculares Optativos, Módulos Formativos e Áreas de Formação”
+
+Esse capítulo deverá explicar claramente que os componentes curriculares optativos do curso estão organizados em módulos formativos, estruturados segundo áreas de formação específicas.
+
+Não apresentar “Optativa I”, “Optativa II”, “Optativa III” e “Optativa IV” como disciplinas isoladas ou como simples espaços que possam ser preenchidos por qualquer disciplina escolhida individualmente.
+
+Explicar que:
+
+a) cada módulo corresponde a um conjunto estruturado e coerente de componentes curriculares optativos;
+
+b) os componentes de cada módulo estão organizados segundo uma determinada área de formação;
+
+c) as disciplinas não deverão ser escolhidas de forma aleatória, fragmentada ou desvinculada da estrutura formativa prevista no PPC;
+
+d) para integralizar uma área de formação, o discente deverá cursar e obter aprovação em todos os componentes curriculares que a constituem, conforme a matriz curricular e o elenco de componentes curriculares optativos do curso;
+
+e) o estudante deverá integralizar completamente, no mínimo, duas áreas de formação dentre aquelas oferecidas pelo curso;
+
+f) o curso deverá manter, no mínimo, três áreas de formação previstas em seu Projeto Pedagógico;
+
+g) a escolha de duas áreas pelo estudante não elimina a possibilidade de cursar componentes de uma terceira área, desde que haja oferta, disponibilidade de vagas, cumprimento dos pré-requisitos e compatibilidade de horários;
+
+h) componentes cursados isoladamente, sem a conclusão de todos os componentes da respectiva área, poderão ser registrados como componentes optativos adicionais, mas não caracterizarão a integralização daquela área de formação;
+
+i) um mesmo componente curricular não poderá ser contabilizado mais de uma vez para o cumprimento de áreas distintas, salvo previsão expressa e devidamente justificada no PPC;
+
+j) os módulos e as áreas de formação não constituem habilitações, graus acadêmicos ou diplomas autônomos, mas percursos de aprofundamento formativo no âmbito do curso, salvo disposição institucional expressa em sentido contrário.
+
+2. INSERIR A REGRA DE ESCOLHA E INTEGRALIZAÇÃO
+
+Incluir texto normativo com conteúdo equivalente ao seguinte:
+
+“Os componentes curriculares optativos do curso estão organizados em módulos vinculados a áreas de formação. O curso oferecerá, no mínimo, três áreas de formação, constituídas por conjuntos articulados de componentes curriculares. Para fins de integralização curricular, o discente deverá escolher e concluir integralmente, no mínimo, duas dessas áreas, cursando e obtendo aprovação em todos os componentes curriculares que compõem cada área selecionada. Não será admitida a substituição da integralização de uma área pela soma aleatória de componentes pertencentes a áreas distintas, salvo nos casos de equivalência, aproveitamento de estudos ou adaptação curricular expressamente aprovados pelo Colegiado do Curso.”
+
+Acrescentar que a escolha deverá ser formalizada no período definido pelo curso e registrada conforme os procedimentos acadêmicos adotados pela Universidade Federal de Uberlândia.
+
+Caso o PPC ainda não estabeleça o momento da escolha, propor uma regra coerente, preferencialmente antes do início da oferta dos módulos optativos, sem criar procedimentos institucionais inexistentes.
+
+3. ATUALIZAR O FLUXOGRAMA CURRICULAR
+
+No fluxograma, substituir as denominações genéricas atuais:
+
+– Componentes Curriculares Optativos I;
+– Componentes Curriculares Optativos II;
+– Componentes Curriculares Optativos III;
+– Componentes Curriculares Optativos IV.
+
+Adotar uma denominação que evidencie a estrutura modular, como:
+
+– Módulo Optativo I;
+– Módulo Optativo II;
+– Módulo Optativo III;
+– Módulo Optativo IV.
+
+Também poderá ser utilizada a forma:
+
+– Módulo de Formação Optativa I;
+– Módulo de Formação Optativa II;
+– Módulo de Formação Optativa III;
+– Módulo de Formação Optativa IV.
+
+Manter os módulos nos períodos correspondentes do fluxograma, mas revisar a coerência da carga horária, dos pré-requisitos e da vinculação entre cada módulo e as áreas de formação.
+
+Inserir no próprio fluxograma, em legenda ou nota explicativa, texto semelhante a:
+
+“Nota: os Módulos Optativos correspondem a conjuntos articulados de componentes curriculares pertencentes às áreas de formação previstas no PPC. O discente deverá concluir integralmente todos os componentes de, no mínimo, duas áreas de formação.”
+
+Não tratar cada módulo como se fosse uma única disciplina convencional. Deixar claro que o módulo representa uma unidade de organização e integralização curricular, composta por um ou mais componentes curriculares.
+
+4. ORGANIZAR O ELENCO DE COMPONENTES CURRICULARES OPTATIVOS POR ÁREA DE FORMAÇÃO
+
+Criar um quadro específico denominado:
+
+“Elenco de Componentes Curriculares Optativos por Área de Formação”
+
+Nesse quadro, distribuir todas as disciplinas optativas de acordo com as três áreas descritas a seguir.
+
+4.1 ÁREA DE FORMAÇÃO 1 — MÁQUINAS INTELIGENTES, ACIONAMENTOS E PROTEÇÃO INDUSTRIAL
+
+Conteúdos estruturantes:
+
+– máquinas elétricas inteligentes;
+– inversores;
+– acionamentos eletrônicos;
+– eficiência energética;
+– proteção de sistemas;
+– manutenção preditiva;
+– automação aplicada a plantas industriais.
+
+Aderência profissional:
+
+– manutenção industrial avançada;
+– sistemas de potência;
+– operação e proteção de plantas;
+– acionamentos;
+– eficiência energética em ambientes produtivos.
+
+4.2 ÁREA DE FORMAÇÃO 2 — ROBÓTICA AUTÔNOMA E SISTEMAS CIBERFÍSICOS
+
+Conteúdos estruturantes:
+
+– robótica móvel;
+– manipuladores;
+– percepção e visão computacional;
+– navegação autônoma;
+– sistemas ciberfísicos;
+– integração entre tecnologia operacional e tecnologia da informação — OT/IT;
+– gêmeos digitais.
+
+Aderência profissional:
+
+– robótica industrial e de serviços;
+– manufatura avançada;
+– integração de sistemas autônomos;
+– linhas de produção inteligentes.
+
+4.3 ÁREA DE FORMAÇÃO 3 — SISTEMAS EMBARCADOS, IoT E COMPUTAÇÃO INTELIGENTE
+
+Conteúdos estruturantes:
+
+– microcontroladores;
+– firmware;
+– Internet das Coisas industrial — IIoT;
+– inteligência artificial embarcada;
+– ciência de dados aplicada;
+– integração entre hardware e software.
+
+Aderência profissional:
+
+– soluções digitais industriais;
+– dispositivos conectados;
+– automação distribuída;
+– plataformas de computação inteligente.
+
+5. CRIAR UM QUADRO DETALHADO PARA CADA ÁREA
+
+Para cada área, apresentar uma tabela com, no mínimo, as seguintes colunas:
+
+Código | Componente curricular | Carga horária | Período de oferta | Pré-requisitos | Módulo | Unidade ofertante
+
+A tabela deverá permitir identificar:
+
+a) quais componentes curriculares pertencem a cada área;
+
+b) quais componentes deverão ser cursados para que a área seja considerada integralizada;
+
+c) a carga horária total de cada área;
+
+d) a correspondência entre os componentes e os Módulos Optativos I, II, III e IV;
+
+e) o encadeamento recomendado entre os componentes;
+
+f) os pré-requisitos e correquisitos aplicáveis.
+
+Não inventar códigos, cargas horárias, pré-requisitos, correquisitos ou unidades ofertantes. Utilizar os dados existentes na matriz curricular e nas fichas dos componentes. Quando determinada informação não estiver disponível, registrá-la explicitamente como pendência de definição.
+
+6. GARANTIR EQUILÍBRIO ENTRE AS ÁREAS DE FORMAÇÃO
+
+Verificar se as três áreas apresentam cargas horárias compatíveis entre si.
+
+Como o estudante deverá concluir duas áreas, a carga horária total resultante da escolha de quaisquer duas delas deverá ser compatível com a carga horária reservada aos módulos optativos no currículo.
+
+Caso as áreas possuam cargas horárias diferentes, não ocultar a divergência. Apresentar:
+
+a) a carga horária total de cada área;
+
+b) as combinações possíveis entre duas áreas;
+
+c) o impacto de cada combinação na carga horária total do curso;
+
+d) a necessidade de equalização ou de estabelecimento de uma carga horária mínima comum.
+
+Não permitir que a escolha de determinada combinação deixe o estudante abaixo da carga horária mínima exigida para a integralização curricular.
+
+7. REVISAR A RELAÇÃO ENTRE MÓDULOS E ÁREAS DE FORMAÇÃO
+
+Verificar, a partir da matriz existente, qual é a relação correta entre:
+
+– Módulo Optativo I;
+– Módulo Optativo II;
+– Módulo Optativo III;
+– Módulo Optativo IV;
+– as três áreas de formação;
+– a obrigação de concluir pelo menos duas áreas.
+
+Não presumir automaticamente que cada módulo corresponde a uma área completa.
+
+A estrutura deverá demonstrar claramente se:
+
+a) cada área é formada por mais de um módulo;
+
+b) cada módulo representa uma etapa de determinada área;
+
+c) os quatro módulos são utilizados para a conclusão de duas áreas;
+
+d) existem componentes comuns ou compartilhados entre as áreas;
+
+e) há módulos introdutórios e módulos de aprofundamento.
+
+Caso a matriz ainda não permita estabelecer essa correspondência, apresentar uma proposta de organização curricular coerente, identificando expressamente que se trata de sugestão sujeita à análise e à aprovação do Núcleo Docente Estruturante e do Colegiado do Curso.
+
+8. ESTABELECER REGRAS DE OFERTA
+
+Inserir regras que garantam a viabilidade da escolha do estudante:
+
+a) o curso deverá oferecer condições acadêmicas para que o discente conclua, no mínimo, duas áreas de formação;
+
+b) deverão ser mantidas, no mínimo, três áreas formativas no PPC;
+
+c) a oferta deverá observar o planejamento acadêmico, a disponibilidade docente, a infraestrutura e os critérios institucionais aplicáveis;
+
+d) o planejamento da oferta não poderá impedir que estudantes já vinculados a uma área concluam o respectivo percurso;
+
+e) caso um componente obrigatório de determinada área deixe de ser oferecido ou seja substituído, o Colegiado deverá definir equivalência, componente substitutivo ou plano de transição;
+
+f) alterações no elenco de componentes curriculares optativos deverão preservar as condições de integralização dos estudantes vinculados à matriz curricular vigente.
+
+Evitar redação que prometa a oferta simultânea de todos os componentes em todos os semestres, caso isso não seja operacionalmente possível.
+
+Diferenciar claramente:
+
+– a existência permanente das três áreas no PPC;
+– o planejamento periódico de oferta dos componentes;
+– a garantia de continuidade para os estudantes que já tenham iniciado uma área.
+
+9. ESTABELECER REGRAS PARA MUDANÇA DE ÁREA
+
+Inserir regra com conteúdo equivalente ao seguinte:
+
+“A alteração das áreas de formação escolhidas poderá ser solicitada pelo discente, observados os prazos, os pré-requisitos, a disponibilidade de oferta e as orientações da Coordenação do Curso. Os componentes já cursados serão aproveitados quando integrarem a nova área ou quando puderem ser contabilizados como componentes optativos adicionais, vedada a duplicidade de carga horária.”
+
+Não permitir que a mudança de área resulte em contagem duplicada de um mesmo componente curricular.
+
+10. DISCIPLINAR O REGISTRO ACADÊMICO E A EVENTUAL CERTIFICAÇÃO
+
+Explicar como a conclusão das áreas será registrada academicamente.
+
+Caso a UFU não permita o registro formal da área no diploma ou no histórico escolar, não afirmar que haverá habilitação ou certificação automática.
+
+Utilizar redação prudente, como:
+
+“A conclusão das áreas de formação poderá ser registrada ou certificada na forma admitida pelas normas institucionais e pelos sistemas acadêmicos da Universidade Federal de Uberlândia.”
+
+Diferenciar:
+
+– integralização curricular;
+– registro no histórico escolar;
+– eventual certificação complementar;
+– eventual menção no diploma.
+
+Não prometer inclusão no diploma sem fundamento normativo expresso.
+
+11. ADEQUAR TODAS AS PARTES DO PPC
+
+Após a criação do capítulo, revisar também:
+
+– apresentação e concepção do curso;
+– perfil do egresso;
+– objetivos gerais e específicos;
+– competências e habilidades;
+– organização curricular;
+– matriz curricular;
+– fluxograma;
+– quadro de integralização;
+– ementas;
+– fichas dos componentes curriculares;
+– carga horária total;
+– metodologia;
+– infraestrutura laboratorial;
+– corpo docente necessário;
+– mecanismos de orientação acadêmica;
+– regras de transição curricular;
+– anexos.
+
+As áreas de formação deverão dialogar diretamente com o perfil do egresso e com as competências profissionais previstas no PPC.
+
+12. TERMINOLOGIA A SER EMPREGADA
+
+Utilizar de maneira uniforme e tecnicamente consistente as seguintes expressões:
+
+– elenco de componentes curriculares optativos;
+– conjunto estruturado de componentes curriculares optativos;
+– módulo optativo;
+– módulo de formação optativa;
+– área de formação;
+– ênfase formativa;
+– integralização da área;
+– componentes curriculares integrantes da área;
+– percurso de aprofundamento formativo.
+
+Evitar:
+
+– “rol de optativas”;
+– “hall de optativas”;
+– “uma optativa corresponde a uma área”;
+– “o aluno escolhe livremente quaisquer disciplinas até completar horas”;
+– “habilitação”, quando não houver habilitação formal;
+– tratar os módulos como disciplinas isoladas;
+– afirmar que uma disciplina isolada conclui uma área;
+– misturar componentes de diversas áreas para considerar uma delas integralizada.
+
+13. TEXTO-BASE A SER INCORPORADO AO PPC
+
+Elabore e incorpore ao PPC, com adequação ao estilo institucional, texto equivalente ao seguinte:
+
+“Os componentes curriculares optativos do Curso de Automação, Robótica e Inteligência Artificial estão estruturados em módulos vinculados a áreas de formação. Essa organização tem por finalidade proporcionar ao estudante percursos coerentes de aprofundamento em campos estratégicos relacionados ao perfil profissional do curso.
+
+O curso contempla, no mínimo, três áreas de formação: Máquinas Inteligentes, Acionamentos e Proteção Industrial; Robótica Autônoma e Sistemas Ciberfísicos; e Sistemas Embarcados, IoT e Computação Inteligente.
+
+Para fins de integralização curricular, o discente deverá selecionar e concluir integralmente, no mínimo, duas dessas áreas. A conclusão de uma área exige aprovação em todos os componentes curriculares que a integram, conforme o elenco de componentes curriculares optativos e a organização modular estabelecidos neste Projeto Pedagógico.
+
+A carga horária não poderá ser integralizada mediante a combinação aleatória de componentes pertencentes a diferentes áreas. Componentes cursados fora das áreas selecionadas poderão ser reconhecidos como componentes optativos adicionais, desde que previstos no PPC, sem substituir a obrigação de conclusão integral de, no mínimo, duas áreas de formação.
+
+Os Módulos Optativos I, II, III e IV apresentados no fluxograma constituem unidades de organização curricular e são compostos pelos componentes vinculados às áreas de formação. Sua disposição no fluxo representa o percurso recomendado para a realização dos componentes optativos, observados os pré-requisitos, a oferta acadêmica e as regras de integralização previstas neste PPC.”
+
+14. RESULTADO ESPERADO
+
+Apresentar, ao final do trabalho:
+
+a) o novo capítulo completo;
+
+b) o texto revisado da seção de organização curricular;
+
+c) a proposta de alteração do fluxograma;
+
+d) o quadro das três áreas de formação;
+
+e) a distribuição dos componentes por área e por módulo;
+
+f) a carga horária total de cada área;
+
+g) as combinações possíveis entre duas áreas;
+
+h) as inconsistências identificadas na matriz atual;
+
+i) as pendências que deverão ser decididas pelo Núcleo Docente Estruturante ou pelo Colegiado do Curso;
+
+j) uma relação de todas as partes do PPC que foram modificadas.
+
+Preservar todas as informações corretas do documento original. Não alterar códigos, cargas horárias, nomes de componentes, pré-requisitos ou totais sem apresentar a justificativa e o impacto da alteração.

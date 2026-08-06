@@ -63,6 +63,29 @@ def test_geracao_de_um_perfil_nao_grava_em_outro(tmp_path):
     assert pasta_saida_a != pasta_saida_b
 
 
+def test_geracao_remove_apenas_artefato_automatico_obsoleto(tmp_path):
+    from ppcgen.geradores.latex import gerar_arquivos_latex
+    from ppcgen.modelos import Curriculo, ReferenciaisCurso
+    from testes.conftest import componente, construir_perfil
+
+    perfil = construir_perfil(tmp_path / "perfil")
+    pasta_saida = tmp_path / "saida" / "gerado"
+    pasta_saida.mkdir(parents=True)
+    obsoleto = pasta_saida / "tab_obsoleta.tex"
+    obsoleto.write_text(
+        "% ARQUIVO GERADO AUTOMATICAMENTE.\nconteúdo antigo\n",
+        encoding="utf-8",
+    )
+    manual = pasta_saida / "nota_manual.tex"
+    manual.write_text("conteúdo manual\n", encoding="utf-8")
+
+    curriculo = Curriculo(versao="t", componentes=[componente("X1")])
+    gerar_arquivos_latex(curriculo, perfil, ReferenciaisCurso(), pasta_saida)
+
+    assert not obsoleto.exists()
+    assert manual.read_text(encoding="utf-8") == "conteúdo manual\n"
+
+
 def test_cli_exige_selecao_explicita_de_perfil(monkeypatch, tmp_path):
     from ppcgen import cli
 

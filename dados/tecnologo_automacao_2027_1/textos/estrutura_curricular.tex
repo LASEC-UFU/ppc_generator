@@ -29,8 +29,10 @@ A seguir são apresentados cada um dos núcleos de formação e suas respectivas
 \section{Núcleo de Integração Curricular, Prática Profissional e Extensão}
 \input{gerado/tab_nucleo_integrador}
 
-\section{Núcleo de Formação Complementar e Optativa}
-\input{gerado/tab_nucleo_complementar}
+\IfFileExists{gerado/tab_nucleo_complementar.tex}{
+    \section{Núcleo de Formação Complementar e Optativa}
+    \input{gerado/tab_nucleo_complementar}
+}{}
 
 \section{Carga Horária por Núcleo e por Área de Formação}
 \input{gerado/tab_carga_horaria_por_nucleo}
@@ -57,7 +59,7 @@ O \ppccurso é organizado na ABI juntamente com o curso de Engenharia de Automa�
     \item trajetória de Engenharia: cinco períodos comuns mais cinco períodos específicos, totalizando dez períodos.
 \end{itemize}
 
-A duração de dez períodos pertence à Engenharia de Automação, Robótica e Inteligência Artificial e não substitui, em nenhuma hipótese, a duração de seis períodos deste curso. Concluída a primeira graduação escolhida, o estudante pode solicitar, antes da respectiva colação de grau, a permanência de vínculo acadêmico para prosseguir na outra graduação integrante da ABI, aproveitando os componentes comuns e as equivalências curriculares previamente definidas. O detalhamento completo desta organização — incluindo o momento e o procedimento da escolha, as duas trajetórias específicas, a permanência de vínculo, as equivalências, os requisitos residuais em cada sentido de continuidade e a inexistência de migração curricular — consta do \autoref{chp:abi}.
+A duração de dez períodos pertence à Engenharia de Automação, Robótica e Inteligência Artificial e não substitui a duração de seis períodos deste curso. A eventual continuidade na outra graduação, com aproveitamento formal de estudos, depende de ato institucional específico e não é direito criado por este PPC. O detalhamento e as pendências constam do \autoref{chp:abi}.
 
 \section{Fluxo Curricular}
 \label{sec:fluxo}
@@ -77,28 +79,144 @@ O Quadro a seguir apresenta a sequência recomendada dos componentes curriculare
 \section{Componentes Curriculares Obrigatórios}
 \input{gerado/tab_componentes_obrigatorios}
 
-\section{Atividades Curriculares de Extensão / ACE}
+\section{Organização Modular das Atividades Curriculares de Extensão}
 \label{sec:ace}
 
 A extensão universitária se destina a conectar a universidade à comunidade em que está inserida, compartilhando com o público externo o conhecimento obtido por meio do ensino e da pesquisa realizados internamente. Essa abordagem busca atuar na transformação da realidade social, intervindo para suprir deficiências identificadas, indo além da formação dos alunos regulares da instituição. Sobre extensão universitária, este projeto pedagógico atende às Diretrizes para a Extensão na Educação Superior Brasileira~\cite{cne_ces_7_2018} e, no âmbito institucional, à Resolução CONGRAD nº 177, de 20 de fevereiro de 2026~\cite{ufu_congrad_177_2026}, que regulamenta a inserção e a operacionalização das Atividades Curriculares de Extensão (ACEs) nos currículos de graduação da UFU e é, atualmente, a norma vigente sobre a matéria\footnote{A Resolução CONGRAD nº 177/2026 revogou os arts. 1º a 11 da Resolução CONGRAD nº 13/2019~\cite{ufu_congrad_13_2019}, que tratava do mesmo tema anteriormente.}.
 
-Nos termos do art.\ 4º da Resolução CONGRAD nº 177/2026, as ACEs correspondem a, no mínimo, 10\% da carga horária total do curso — piso historicamente associado à Meta 12.7 do PNE 2014--2024~\cite{mec_pne_2014}, hoje substituído pelo PNE 2026--2036~\cite{mec_pne_2026} — respeitado ainda o piso mínimo absoluto de 160 horas para cursos de Tecnologia quando a carga horária mínima não estiver definida em legislação superior (art.\ 4º, §3º, III). A carga de \textbf{\input{gerado/par_carga_horaria_extensao}} definida para este curso atende a ambos os critérios.
+As ACEs são organizadas, no âmbito deste curso, em \textbf{módulos curriculares de extensão} — identificados na matriz curricular pela sigla \textbf{ACE} seguida de algarismo romano (ACE I, ACE II e ACE III). A expressão ``módulo'' corresponde a uma opção de organização curricular adotada por este curso para dar unidade formativa às ACEs, e não a uma terminologia imposta pela Resolução CONGRAD nº 177/2026. Cada módulo possui carga horária, período recomendado, objetivos formativos, resultados de aprendizagem, eixo temático, formas de integralização, critérios de validação, forma de registro acadêmico, responsabilidades de acompanhamento e mecanismos de avaliação próprios, detalhados nesta seção.
 
-Este curso distribui a carga horária de extensão em três componentes curriculares obrigatórios, ofertados em períodos distintos, em conformidade com o art.\ 6º, §4º, da Resolução CONGRAD nº 177/2026: Atividades Curriculares de Extensão I (código \texttt{FEELT!ACE1}, 4º período, 90h), Atividades Curriculares de Extensão II (código \texttt{FEELT!ACE2}, 5º período, 90h) e Atividades Curriculares de Extensão III (código \texttt{FEELT!ACE3}, 6º período, 60h) — ver Seção~\ref{sec:fluxo}. Observa-se ainda que:
+A organização modular tem por finalidade proporcionar continuidade, progressão e flexibilidade à formação extensionista, permitindo que o(a) estudante desenvolva atividades articuladas ao perfil do egresso, às competências do curso (Seção~\ref{sec:ace_modulos}\unskip) e às demandas da comunidade externa. Cada módulo ACE pode ser integralizado por meio de \textbf{ações integradoras de extensão} ou de \textbf{disciplina de extensão}, conforme as formas previstas na Resolução CONGRAD nº 177/2026 e detalhadas na Seção~\ref{sec:ace_formas_integralizacao}. As duas vias não têm naturezas extensionistas distintas: ambas devem promover interação efetiva com a comunidade externa, articular ensino, pesquisa e extensão, contribuir para a formação acadêmica, cidadã e profissional, relacionar-se às competências e ao perfil do egresso, possuir caráter prático e interativo, promover troca de conhecimentos entre a Universidade e a sociedade e resultar em participação ativa do(a) estudante.
+
+Nos termos do art.\ 4º da Resolução CONGRAD nº 177/2026, as ACEs correspondem a, no mínimo, 10\% da carga horária total do curso — piso historicamente associado à Meta 12.7 do PNE 2014--2024~\cite{mec_pne_2014}, hoje substituído pelo PNE 2026--2036~\cite{mec_pne_2026} — respeitado ainda o piso mínimo absoluto de 160 horas para cursos de Tecnologia quando a carga horária mínima não estiver definida em legislação superior (art.\ 4º, §3º, III). A carga de \textbf{\input{gerado/par_carga_horaria_extensao}} definida para este curso corresponde a \input{gerado/par_percentual_extensao} da carga horária total oficial do curso (\ref{sec:regime}\unskip), atendendo a ambos os critérios.
+
+Observa-se ainda, quanto às ACEs em geral, independentemente da via de integralização escolhida, que:
 
 \begin{itemize}
-    \item as ACEs devem ser realizadas de forma \textbf{presencial}, independentemente da modalidade de oferta do curso — a mediação por tecnologias digitais só é admitida de forma complementar e, em caráter excepcional, para bacharelados com objeto intrinsecamente digital (art.\ 5º, §7º), exceção que não se aplica a este curso, de grau Tecnológico;
+    \item devem ser realizadas de forma \textbf{presencial}, independentemente da modalidade de oferta do curso — a mediação por tecnologias digitais só é admitida de forma complementar e, em caráter excepcional, para bacharelados com objeto intrinsecamente digital (art.\ 5º, §7º), exceção que não se aplica a este curso, de grau Tecnológico;
     \item estágio obrigatório, monitoria e tutoria não são considerados atividades de extensão para fins de aproveitamento curricular (art.\ 5º, §4º);
     \item a mesma carga horária não pode ser contabilizada simultaneamente como ACE e como outra natureza de atividade (art.\ 4º, §4º).
 \end{itemize}
 
-A aprovação nesses componentes está condicionada à comprovação, por meio de certificados emitidos via plataforma SIEX, da carga horária mínima exigida de atividades de extensão (\input{gerado/par_carga_horaria_extensao}\unskip). O registro dos projetos de extensão no SIEX, necessário para a emissão dos certificados, é de responsabilidade dos respectivos coordenadores vinculados à UFU. Os(as) estudantes têm liberdade para participar de quantos projetos desejarem, desde que cumpram integralmente a carga horária mínima prevista pelas diretrizes curriculares, vedada a participação como ouvinte ou espectador(a) para fins de composição dessa carga horária (art.\ 4º, §6º).
+\subsection{Módulos ACE do Curso}
+\label{sec:ace_modulos}
+
+Este curso distribui a carga horária de extensão em três módulos ACE, ofertados em períodos distintos, em conformidade com o art.\ 6º, §4º, da Resolução CONGRAD nº 177/2026, que exige no mínimo três componentes curriculares de extensão em períodos distintos — ver Seção~\ref{sec:fluxo}. Os três módulos deste curso — ACE I, ACE II e ACE III — são comuns à Área Básica de Ingresso (\autoref{chp:abi}): mesmo código, mesma carga horária e mesmo período nas matrizes deste curso e da Engenharia de Automação, Robótica e Inteligência Artificial, inclusive o módulo ACE III, ofertado no 6º período — já o primeiro período em que as demais disciplinas das duas matrizes se distinguem (\autoref{sec:etapa_comum}), mas no qual este módulo em particular foi mantido comum a ambos os cursos. Este curso não possui módulo ACE específico próprio — todos os seus módulos são compartilhados com a Engenharia (Seção~\ref{sec:ace_abi}). O Quadro~\ref{tab:modulos_ace} sintetiza os três módulos.
+
+\begin{longtblr}[
+    theme = ppc,
+    caption = {Módulos ACE do \ppccurso},
+    label = {tab:modulos_ace},
+]{
+    colspec = {Q[l,m,wd=16mm]Q[c,m,wd=14mm]Q[c,m,wd=12mm]X[l,m]Q[c,m,wd=17mm]Q[c,m,wd=14mm]X[l,m]},
+    rowhead = 1,
+    row{odd} = {bg=CinzaClaro},
+    row{1} = {bg=AzulEscuro, fg=white},
+    cells = {font=\fontsize{9pt}{11pt}\selectfont},
+}
+    \textbf{Módulo} & \textbf{Período} & \textbf{CH} & \textbf{Eixo temático} & \textbf{Ações integr.} & \textbf{Disciplina} & \textbf{Validação} \\
+    ACE I & 4º (comum ABI) & 90h & Integração Universidade--Comunidade e Diagnóstico de Demandas em Automação & Permitida & Permitida & Coordenação do Curso, ouvido o NDE \\
+    ACE II & 5º (comum ABI) & 90h & Automação e Inclusão Tecnológica & Permitida & Permitida & Coordenação do Curso, ouvido o NDE \\
+    ACE III & 6º (comum ABI) & 60h & Automação e Desenvolvimento Social & Permitida & Permitida & Coordenação do Curso, ouvido o NDE \\
+\end{longtblr}
+
+\subsubsection{Módulo ACE I --- Integração Universidade--Comunidade e Diagnóstico de Demandas em Automação}
+\label{sec:ace1}
+
+\textbf{Identificação.} Código \texttt{FEELT!ACE1}; carga horária de 90 horas; 4º período (comum à ABI com a Engenharia de Automação, Robótica e Inteligência Artificial); natureza obrigatória; vinculado ao núcleo de Integração Curricular, Prática Profissional e Extensão (Seção~\ref{sec:fluxo}) e à competência de atuação profissional com responsabilidade ética, social e ambiental (\autoref{tab:competencia_atuar_etica_sustentabilidade}\unskip).
+
+\textbf{Objetivos.} Promover o primeiro contato estruturado do(a) estudante com a comunidade externa, desenvolvendo a capacidade de identificar e caracterizar demandas sociais e tecnológicas passíveis de resposta pelos conhecimentos já disponíveis nesse estágio inicial da formação (fundamentos científicos e tecnológicos, Seção~\ref{sec:fluxo}).
+
+\textbf{Resultados de aprendizagem.} Ao final do módulo, o(a) estudante deve ser capaz de: identificar demandas da comunidade externa; dialogar com diferentes públicos; planejar, em conjunto com a comunidade, uma ação extensionista simples; e refletir criticamente sobre a responsabilidade social da tecnologia.
+
+\subsubsection{Módulo ACE II --- Automação e Inclusão Tecnológica}
+\label{sec:ace2}
+
+\textbf{Identificação.} Código \texttt{FEELT!ACE2}; carga horária de 90 horas; 5º período (comum à ABI); natureza obrigatória; mesma vinculação de núcleo e competência do módulo ACE I.
+
+\textbf{Objetivos.} Aplicar conhecimentos de eletricidade, eletrônica e informática industrial (Seção~\ref{sec:fluxo}) já integralizados até o 5º período no apoio técnico a comunidades, organizações e pequenos produtores, com ênfase em inclusão tecnológica e capacitação.
+
+\textbf{Resultados de aprendizagem.} Ao final do módulo, o(a) estudante deve ser capaz de: aplicar conhecimentos técnicos a problemas concretos da comunidade externa; trabalhar em equipe; desenvolver soluções de baixa e média complexidade; e comunicar resultados técnicos a públicos não especializados.
+
+\subsubsection{Módulo ACE III --- Automação e Desenvolvimento Social}
+\label{sec:ace3}
+
+\textbf{Identificação.} Código \texttt{FEELT!ACE3}; carga horária de 60 horas; 6º período; natureza obrigatória; comum, em código, carga horária e período, ao módulo ACE III da Engenharia de Automação, Robótica e Inteligência Artificial (Seção~\ref{sec:ace_abi}) — embora o 6º período seja, para as demais disciplinas, o primeiro período em que as duas matrizes se distinguem, este módulo foi mantido comum a ambos os cursos. Vinculado, além do núcleo Integração Curricular/Prática Profissional/Extensão, ao Projeto Interdisciplinar do mesmo período (Seção~\ref{sec:acc_conclusao}); para este curso, integra também a etapa de conclusão da formação tecnológica, junto ao Estágio Supervisionado Obrigatório do mesmo período.
+
+\textbf{Objetivos.} Consolidar, ao final da etapa comum de extensão da ABI, um projeto de maior autonomia voltado ao desenvolvimento social por meio da automação, aplicado à implantação ou à integração de soluções tecnológicas em organizações ou comunidades externas — servindo, para este curso, de síntese formativa extensionista.
+
+\textbf{Resultados de aprendizagem.} Ao final do módulo, o(a) estudante deve ser capaz de: planejar e executar, com autonomia intermediária, uma ação extensionista de automação voltada ao desenvolvimento social; avaliar os impactos técnicos e sociais da solução implantada; e produzir devolutiva estruturada à comunidade atendida.
+
+\subsection{Formas de Integralização dos Módulos ACE}
+\label{sec:ace_formas_integralizacao}
+
+Cada módulo ACE pode ser integralizado por meio de ações integradoras de extensão ou por meio de disciplina de extensão, observados a carga horária, os objetivos, os resultados de aprendizagem, o eixo temático e os critérios de validação estabelecidos para o módulo (Seção~\ref{sec:ace_modulos}\unskip). O módulo ACE corresponde à unidade curricular prevista na matriz; ações integradoras e disciplina de extensão são as duas formas pelas quais o(a) estudante pode desenvolver e integralizar essa unidade — não são atividades de naturezas distintas.
+
+\textbf{Modelo adotado.} O(a) estudante cumpre cada módulo ACE integralmente por meio de ações integradoras \textbf{ou} integralmente por meio de disciplina de extensão. A combinação parcial das duas vias em um mesmo módulo somente é admitida quando expressamente prevista e regulamentada pelo Colegiado do Curso, evitando-se que o(a) estudante cumpra parcialmente uma disciplina e tente completar a carga horária restante com certificados externos sem procedimento institucional definido.
+
+\subsubsection{Via A --- Ações Integradoras de Extensão}
+
+Nessa modalidade, a carga horária do módulo é cumprida de forma cumulativa por meio da participação ativa do(a) estudante em ações de extensão institucionalmente registradas e certificadas, nas modalidades reconhecidas institucionalmente: programas, projetos, cursos e oficinas, eventos e prestação de serviços de extensão (art.\ 6º, inciso I, da Resolução CONGRAD nº 177/2026). Não é considerada ACE a simples presença como ouvinte, espectador(a) ou participante passivo(a) (art.\ 4º, §6º).
+
+A carga horária do módulo pode ser formada por uma ou mais ações, desde que estejam devidamente registradas, possuam certificação institucional, tenham natureza extensionista, envolvam a comunidade externa, sejam compatíveis com os objetivos do módulo, não tenham sido contabilizadas para outra finalidade acadêmica e sejam validadas pela Coordenação do Curso, ouvido o Núcleo Docente Estruturante (NDE) quando a compatibilidade com os objetivos do módulo não for evidente. Horas excedentes de um módulo não são automaticamente aproveitadas em outro módulo, salvo regra expressa aprovada pelo Colegiado do Curso.
+
+A validação de cada ação considera, no mínimo: certificado ou declaração institucional; identificação da ação e sua modalidade extensionista; instituição responsável; período de realização; carga horária; descrição da participação do(a) estudante; público externo envolvido; relação com os objetivos do módulo; evidências ou produtos da atividade; e a inexistência de aproveitamento em duplicidade.
+
+\subsubsection{Via B --- Disciplina de Extensão}
+
+Nessa modalidade, o módulo é integralizado por meio de componente curricular de natureza prática, integralmente dedicado à extensão, desenvolvido com participação efetiva de docente responsável e articulado à comunidade externa. Não se classifica como disciplina de extensão um componente que apenas inclua uma atividade extensionista pontual em meio a conteúdos predominantemente teóricos: a disciplina deve ser integralmente concebida para diagnóstico de demandas, planejamento da ação, diálogo com a comunidade, desenvolvimento da intervenção, aplicação dos conhecimentos do curso, avaliação dos resultados, devolutiva à comunidade e reflexão crítica sobre a experiência. Momentos de estudo, planejamento, orientação ou sistematização devem estar diretamente vinculados à execução da ação extensionista, sem atribuição de carga horária teórica convencional sem justificativa.
+
+\textcolor{red}{[A FICHA DE COMPONENTE CURRICULAR (DENOMINAÇÃO, UNIDADE OFERTANTE, CARGA HORÁRIA PRÁTICA, OBJETIVOS, EMENTA, PROGRAMA, METODOLOGIA, FORMAS DE INTERAÇÃO COM A COMUNIDADE EXTERNA, CRITÉRIOS DE AVALIAÇÃO, RESULTADOS DE APRENDIZAGEM E BIBLIOGRAFIA) DE CADA MÓDULO ACE, PARA O CASO DE OFERTA NO FORMATO DE DISCIPLINA DE EXTENSÃO, AINDA NÃO FOI ELABORADA PELO NDE/COLEGIADO — A IDENTIFICAÇÃO, OS OBJETIVOS E OS RESULTADOS DE APRENDIZAGEM DE CADA MÓDULO CONSTAM DA SEÇÃO~\ref{sec:ace_modulos}, MAS A FICHA COMPLETA, EXIGIDA PELA RESOLUÇÃO CONGRAD Nº 177/2026 PARA ESTA VIA DE INTEGRALIZAÇÃO, É PENDÊNCIA A SER SANADA ANTES DA SUBMISSÃO DESTE PPC]}
+
+\subsubsection{Equivalência Formativa entre as Duas Vias}
+
+As duas vias não precisam utilizar exatamente as mesmas atividades, mas ambas devem assegurar interação com público externo, aplicação de conhecimentos do curso, participação ativa, trabalho colaborativo, reflexão sobre impactos sociais, produção de evidências, avaliação institucional e devolutiva à comunidade — de modo que proporcionem resultados de aprendizagem compatíveis com os descritos para cada módulo (Seção~\ref{sec:ace_modulos}\unskip).
+
+\subsection{Avaliação, Validação e Registro Acadêmico}
+\label{sec:ace_avaliacao_registro}
+
+Independentemente da via escolhida, a validação de cada módulo ACE considera, no mínimo, os critérios de acompanhamento, as evidências exigidas, os produtos ou resultados esperados e os mecanismos de avaliação descritos nas Seções~\ref{sec:ace_formas_integralizacao} para cada via. A mesma carga horária não pode ser contabilizada simultaneamente como ação integradora e como disciplina de extensão para o mesmo módulo, tampouco como ACE e como outra natureza de atividade curricular (art.\ 4º, §4º).
+
+Para ações integradoras, a aprovação está condicionada à comprovação institucional da carga horária e das atividades desenvolvidas. Ações da UFU devem observar o registro no sistema institucional de extensão; ações externas podem ser comprovadas por certificado ou declaração da instituição responsável, conforme procedimento complementar aprovado pelo Colegiado. Cabe ao(à) estudante apresentar os comprovantes à Coordenação do Curso, que confere os critérios da Seção~\ref{sec:ace_formas_integralizacao} e registra a carga horária validada no histórico escolar.
+
+Para disciplina de extensão, o registro segue o procedimento acadêmico regular de matrícula, frequência e avaliação de qualquer componente curricular, com o resultado (aprovação/reprovação e carga horária) lançado no histórico escolar do(a) estudante, vinculado ao módulo ACE correspondente.
+
+\textcolor{red}{[DEFINIR, EM NORMA COMPLEMENTAR PRÓPRIA A SER APROVADA PELO COLEGIADO DO CURSO, O PRAZO PARA APRESENTAÇÃO DOS COMPROVANTES DE AÇÕES INTEGRADORAS, O SISTEMA INSTITUCIONAL DE SOLICITAÇÃO (ALÉM DO SIEX) E O PROCEDIMENTO PARA TRATAMENTO DE SOLICITAÇÕES INDEFERIDAS]}
+
+Os(as) estudantes têm liberdade para participar de quantas ações integradoras desejarem, desde que cumpram integralmente a carga horária mínima prevista para o módulo, vedada a participação como ouvinte ou espectador(a) para fins de composição dessa carga horária (art.\ 4º, §6º).
+
+\subsection{Aproveitamento de Atividades de Extensão Realizadas Anteriormente}
+\label{sec:ace_aproveitamento}
+
+Para ações integradoras, podem ser analisadas atividades certificadas realizadas em outras instituições de ensino superior, em outras unidades acadêmicas da UFU, em outros cursos da UFU ou em ações de extensão do próprio curso ainda não vinculadas a um módulo específico, condicionado o aproveitamento à compatibilidade com os objetivos e a carga horária do módulo pretendido, mediante análise da Coordenação do Curso.
+
+Para disciplina de extensão, o aproveitamento ocorre por equivalência curricular, observando compatibilidade de ementa, objetivos, carga horária, resultados de aprendizagem, natureza extensionista e interação com comunidade externa, nos mesmos moldes das demais equivalências curriculares do curso (Seção~\ref{sec:equivalentes}\unskip). Não é admitida a complementação informal da carga horária de uma disciplina de extensão por meio de certificados de ações avulsas.
+
+\subsection{Governança das Atividades Curriculares de Extensão}
+\label{sec:ace_governanca}
+
+São responsabilidades, quanto às ACEs deste curso:
+
+\begin{itemize}
+    \item \textbf{Coordenação do Curso}: validar e registrar as ações integradoras (Seção~\ref{sec:ace_formas_integralizacao}\unskip); acompanhar a oferta das disciplinas de extensão; decidir, em primeira instância, os casos omissos relativos às ACEs;
+    \item \textbf{Núcleo Docente Estruturante (NDE)}: opinar sobre a compatibilidade de ações integradoras com os objetivos do módulo quando não evidente (Seção~\ref{sec:ace_formas_integralizacao}\unskip); revisar periodicamente os módulos ACE (eixos temáticos, objetivos e resultados de aprendizagem);
+    \item \textbf{Colegiado do Curso}: aprovar fichas de componente curricular das disciplinas de extensão; aprovar eventuais regras de combinação parcial entre vias (Seção~\ref{sec:ace_formas_integralizacao}\unskip); decidir, em última instância, os casos omissos;
+    \item \textbf{Docentes responsáveis}: acompanhar a execução das disciplinas de extensão e das ações integradoras sob sua orientação; produzir relatórios de acompanhamento quando solicitados pela Coordenação do Curso;
+    \item \textbf{Coordenadores de projetos de extensão vinculados à UFU}: registrar as ações no SIEX e emitir os certificados que instruem os pedidos de validação (Seção~\ref{sec:ace_avaliacao_registro}\unskip);
+    \item \textbf{Estudantes}: planejar sua trajetória extensionista, apresentar os comprovantes exigidos e requerer a validação de cada módulo à Coordenação do Curso.
+\end{itemize}
+
+No âmbito da FEELT, a articulação dessas responsabilidades deve observar o Regimento Interno da Unidade e a atuação de seu Colegiado de Extensão, sem afastar as competências da Coordenação e do Colegiado do Curso previstas na Resolução CONGRAD nº 177/2026.
+
+\subsection{Módulos ACE Comuns e Específicos na Área Básica de Ingresso}
+\label{sec:ace_abi}
+
+Os três módulos deste curso — ACE I, ACE II e ACE III (Seções~\ref{sec:ace1} a~\ref{sec:ace3}) — são comuns à Área Básica de Ingresso: mesmo código, mesma carga horária, mesmo período e mesmo eixo temático nas matrizes deste curso e da Engenharia de Automação, Robótica e Inteligência Artificial, o que permite o aproveitamento integral entre os dois cursos em caso de permanência de vínculo (\autoref{sec:permanencia}\unskip) sem repetição de atividades. Os módulos ACE I e ACE II situam-se nos dois últimos dos cinco períodos formalmente comuns da ABI (\autoref{sec:etapa_comum}); o módulo ACE III, embora ofertado no 6º período — já o primeiro período específico de cada trajetória para as demais disciplinas —, foi mantido comum a ambos os cursos. Este curso não possui, portanto, nenhum módulo ACE específico próprio: os dois módulos específicos existentes na ABI, ACE IV e ACE V, pertencem exclusivamente à Engenharia de Automação, Robótica e Inteligência Artificial, ofertados em seus períodos 7º e 8º, que não têm correspondência na matriz deste curso (de seis períodos). O detalhamento completo da distinção entre as formações e da organização em ABI consta do \autoref{chp:abi}.
 
 \section{Estágio Supervisionado e Projeto Interdisciplinar}
 \label{sec:acc_conclusao}
 
 A matriz curricular deste curso não prevê Trabalho de Conclusão de Curso (TCC) como componente curricular: a atividade de síntese formativa do curso é realizada por meio do Estágio Supervisionado Obrigatório, complementado pelo Projeto Interdisciplinar do último período.
-% REVISAR: caso o NDE/Colegiado do curso decida instituir um TCC como opção alternativa ao Estágio (como ocorre em outros cursos da FEELT), esse componente ainda precisa ser incluído na aba \texttt{Componentes} da matriz curricular (código, tipo \texttt{tcc}, carga horária, período, pré-requisito) antes de ser descrito neste capítulo — não descrito aqui por não haver, no momento, componente correspondente na matriz.
 
 \subsection{Estágio Supervisionado Obrigatório}
 
@@ -119,13 +237,13 @@ O Projeto Interdisciplinar (código \texttt{FEELT!PI}), componente curricular ob
 \section{Atividades Acadêmicas Complementares / AAC}
 \label{sec:AAC}
 
-De acordo com o Parecer do CNE/CES nº 136/2012~\cite{cne_ces_parecer_136_2012}, as atividades complementares são componentes curriculares que têm como objetivo principal enriquecer e expandir o perfil do egresso com atividades que privilegiem aspectos diversos da sua formação, incluindo atividades desenvolvidas fora do ambiente acadêmico. Tais atividades constituem instrumental importante para o desenvolvimento pleno do aluno, servindo de estímulo a uma formação prática independente e interdisciplinar, sobretudo nas relações com o mundo do trabalho.
+As Atividades Acadêmicas Complementares enriquecem e ampliam o perfil do egresso mediante experiências diversificadas, inclusive fora do ambiente acadêmico, e estimulam formação autônoma, prática e interdisciplinar. Sua integralização observa este PPC, as Normas Gerais da Graduação da UFU~\cite{ufu_congrad_46_2022} e a norma complementar do curso. O Parecer CNE/CES nº 136/2012 não é utilizado como fundamento, pois trata das Diretrizes Curriculares Nacionais da área de Computação, e não de uma regra geral de AAC.
 
 Ainda, as atividades podem ser cumpridas em diversos ambientes, como a instituição a que o estudante está vinculado, outras instituições e variados ambientes sociais, técnico-científicos ou profissionais, em modalidades tais como: formação profissional (cursos de formação profissional, experiências de trabalho ou estágios não obrigatórios), de pesquisa e publicação (iniciação científica e participação em eventos técnico-científicos, publicações científicas), de ensino (programas de monitoria e tutoria), de gestão e política (representação discente em comissões e comitês), de empreendedorismo e inovação (participação em incubadoras, \textit{startups} ou outros mecanismos), de qualificação e experiência internacional, entre outras. Essas atividades devem ser permanentemente incentivadas no cotidiano acadêmico, permitindo a diversificação das atividades complementares desenvolvidas pelos estudantes.
 
 No Quadro~\ref{tab:aac}, temos a relação de Atividades Acadêmicas Complementares (AAC) propostas neste projeto, com carga horária máxima a ser integralizada por tipo de atividade. A carga horária mínima a ser integralizada com essas atividades é de \input{gerado/par_carga_horaria_aac} São consideradas atividades válidas para a quitação desse componente as que \textbf{foram realizadas durante o período de vínculo do estudante ao curso}.
 
-% REVISAR: a carga horária máxima somada das AAC listadas no Quadro~\ref{tab:aac} (herdado de outro curso da FEELT) não foi conferida contra o valor de \texttt{curriculo.carga\_aac} configurado para este perfil na aba \texttt{Perfil} da matriz curricular — revisar antes da submissão deste PPC.
+Os limites do Quadro~\ref{tab:aac} são tetos por categoria e não devem ser somados como carga obrigatória; o estudante integraliza o total mínimo de AAC configurado para o curso, observadas as regras de diversidade e comprovação da norma complementar.
 
 % \renewcommand{\familydefault}{\sfdefault} \normalfont
 \begin{longtblr}[
@@ -206,12 +324,14 @@ No Quadro~\ref{tab:disciplinas_optativas}, apresenta-se a relação de disciplin
 
 \input{gerado/tab_disciplinas_optativas}
 
+\textcolor{red}{[A ABA \texttt{COMPONENTES} DA MATRIZ CURRICULAR DESTE PERFIL NÃO CADASTRA, NO MOMENTO, NENHUM COMPONENTE DO TIPO \texttt{carga\_optativa} — O ELENCO DE DISCIPLINAS OPTATIVAS ESTÁ VAZIO, INSUFICIENTE PARA A CARGA HORÁRIA OPTATIVA MÍNIMA EXIGIDA (\textbf{\input{gerado/par_carga_horaria_optativa}}). É NECESSÁRIO QUE O NDE/COLEGIADO CADASTRE OS COMPONENTES CURRICULARES OPTATIVOS DESTE CURSO ANTES DA SUBMISSÃO DESTE PPC]}
+
 Qualquer outra disciplina cursada em qualquer unidade acadêmica da UFU poderá ser incorporada a essa relação, mediante requerimento do interessado. Após a anuência do Núcleo Docente Estruturante (NDE) e a aprovação do Colegiado do Curso, a solicitação seguirá os trâmites institucionais necessários para efetivação da incorporação.
 
 \section{Relação de Disciplinas Equivalentes}
 \label{sec:equivalentes}
 
-No Quadro~\ref{tab:disciplinas_equivalentes}, apresenta-se a relação de disciplinas equivalentes pré-aprovadas para o \ppccurso, tipicamente referentes a componentes de currículos anteriores ou de outros cursos com conteúdo programático correspondente.
+A matriz atual não cadastra equivalências pré-aprovadas. Quando houver deliberação e registros na aba \texttt{Equivalencias}, o gerador produzirá automaticamente o quadro correspondente; até lá, pedidos de aproveitamento seguem a análise individual prevista nas normas acadêmicas da UFU.
 
 Entende-se por disciplinas equivalentes aquelas que compartilham conteúdos programáticos similares ou que, embora adotem abordagens distintas, promovem impactos formativos equivalentes na trajetória do estudante. A adoção de equivalências visa respeitar a dinamicidade do cenário tecnológico, reconhecendo que determinados conhecimentos podem ser transmitidos por diferentes caminhos pedagógicos, desde que se preservem os objetivos educacionais essenciais do curso. Essa abordagem confere flexibilidade curricular responsável, sem comprometer a coerência e a qualidade da formação no \ppccurso.
 
@@ -227,7 +347,7 @@ Outras disciplinas poderão ser incorporadas a essa relação, mediante requerim
 O \ppccurso da Universidade Federal de Uberlândia contempla, ao longo de sua estrutura curricular, diversos conteúdos de destaque e natureza transversal, alinhados às Diretrizes Curriculares Nacionais e às demandas contemporâneas da formação profissional. Esses conteúdos são abordados de maneira integrada, transversal ou interdisciplinar, permeando múltiplas unidades curriculares e projetos formativos. Dentre os principais, destacam-se:
 
 \begin{itemize}
-\item \textbf{Ética e Responsabilidade Profissional}: Discussões sobre responsabilidade técnica, segurança do trabalho e impactos sociais da automação estão presentes em componentes como Introdução à Formação Acadêmica e Profissional (\texttt{FEELT!IFAP}), Projeto Interdisciplinar (\texttt{FEELT!PI}) e nas Atividades Curriculares de Extensão.
+\item \textbf{Ética e Responsabilidade Profissional}: Discussões sobre responsabilidade técnica, segurança do trabalho e impactos sociais da automação estão presentes em componentes como Introdução à Área Básica de Ingresso em Automação, Robótica e IA (\texttt{FEELT!IABI}), Projeto Interdisciplinar (\texttt{FEELT!PI}) e nas Atividades Curriculares de Extensão.
 
 \item \textbf{Sustentabilidade e Eficiência Energética}: O curso promove a reflexão crítica sobre os impactos ambientais e energéticos dos processos industriais automatizados, com ênfase em eficiência energética, uso racional de recursos e redução de perdas em sistemas de acionamento e conversão de energia.
 
@@ -235,7 +355,7 @@ O \ppccurso da Universidade Federal de Uberlândia contempla, ao longo de sua es
 
 \item \textbf{Diversidade, Inclusão e Direitos Humanos}: A formação propicia espaços para o debate e valorização da diversidade cultural, de gênero, étnico-racial e de acessibilidade, conforme os temas transversais catalogados na aba \texttt{Temas} da matriz curricular (Seção~\ref{sec:temas_transversais}).
 
-\item \textbf{Extensão Universitária}: A curricularização da extensão, por meio das Atividades Curriculares de Extensão I, II e III (Seção~\ref{sec:ace}), assegura que os(as) estudantes interajam com demandas reais do setor produtivo e da sociedade, contribuindo para a formação cidadã e o fortalecimento da função social da universidade.
+\item \textbf{Extensão Universitária}: A curricularização da extensão, por meio dos módulos ACE I, ACE II e ACE III (Seção~\ref{sec:ace}), assegura que os(as) estudantes interajam com demandas reais do setor produtivo e da sociedade, contribuindo para a formação cidadã e o fortalecimento da função social da universidade.
 
 \item \textbf{Trabalho Colaborativo e Comunicação Técnica}: Estimulados pelo Projeto Interdisciplinar e pelas atividades práticas e experimentais do curso, esses conteúdos desenvolvem competências interpessoais fundamentais para o exercício profissional em equipes de engenharia, operação e manutenção industrial.
 
@@ -327,7 +447,7 @@ Com base no Catálogo Nacional de Cursos Superiores de Tecnologia~\cite{mec_cncs
 \IfFileExists{gerado/tab_conteudo_av_analitica_dados_industriais.tex}{\input{gerado/tab_conteudo_av_analitica_dados_industriais}}{}
 \IfFileExists{gerado/tab_conteudo_av_computacao_nuvem_borda.tex}{\input{gerado/tab_conteudo_av_computacao_nuvem_borda}}{}
 
-% REVISAR: diversos conteúdos obrigatórios acima (ex.: prefixos PROF_/HUM_/DIG_ e o conteúdo AV_IA_APLICADA_AUTOMACAO) estão cadastrados na aba \texttt{Conteudos} da matriz curricular sem nenhum componente curricular vinculado em sua coluna \texttt{componentes} — o relatório de validação (\texttt{python -m ppcgen validar}) aponta essa lacuna como \texttt{CONTEUDO\_OBRIGATORIO\_SEM\_COBERTURA}. Cabe ao NDE decidir se a cobertura já existe implicitamente em componentes não listados (e então atualizar a matriz) ou se são conteúdos ainda a desenvolver no currículo.
+\textbf{Pendência curricular:} o conteúdo obrigatório \texttt{HUM\_LIBRAS} não está vinculado a componente ativo. Como Libras deve ser ofertada como optativa nos demais cursos superiores, o elenco e a respectiva ficha devem ser formalmente cadastrados na matriz.
 
 \section{Aderência às Competências do Curso}
 

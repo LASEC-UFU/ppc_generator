@@ -63,7 +63,12 @@ def _entrada_para_bib(entrada: EntradaBibliografica) -> str:
         # nem embrulhar em \url{} manualmente aqui.
         linhas.append(_campo("url", entrada.url))
     if entrada.nota:
-        linhas.append(_campo("note", escapar(entrada.nota)))
+        # Identificadores de configuração em notas costumam conter vários
+        # sublinhados e, sem pontos de quebra, ultrapassam a margem na
+        # bibliografia. \allowbreak{} após cada sublinhado preserva o texto e
+        # permite ao LaTeX quebrar a linha com segurança.
+        nota = escapar(entrada.nota).replace(r"\_", r"\_\allowbreak{}")
+        linhas.append(_campo("note", nota))
 
     linhas.append("}\n")
     return "".join(linhas)

@@ -51,6 +51,29 @@ def test_pool_optativas_insuficiente():
     assert any(m.codigo_regra == "POOL_OPTATIVAS_INSUFICIENTE" for m in resultado.erros)
 
 
+def test_agregador_nao_mascara_pool_optativas_insuficiente():
+    perfil = construir_perfil(
+        curso=CursoConfig(numero_periodos=1),
+        curriculo=CurriculoConfig(carga_optativa_minima=120),
+    )
+    agregador = componente(
+        "OPT",
+        nome="MÓDULO OPTATIVO",
+        tipo=TipoComponente.CARGA_OPTATIVA,
+        periodo=None,
+        cht=120,
+        tot=120,
+    )
+    optativa_real = componente(
+        "OPT1", tipo=TipoComponente.CARGA_OPTATIVA, periodo=None, cht=60, tot=60
+    )
+    resultado = validar_cargas(Curriculo(versao="t", componentes=[agregador, optativa_real]), perfil)
+
+    codigos = {m.codigo_regra for m in resultado.erros}
+    assert "COMPONENTE_AGREGADOR_OPTATIVO" in codigos
+    assert "POOL_OPTATIVAS_INSUFICIENTE" in codigos
+
+
 def test_carga_maxima_por_periodo_excedida():
     perfil = construir_perfil(
         curso=CursoConfig(numero_periodos=1),

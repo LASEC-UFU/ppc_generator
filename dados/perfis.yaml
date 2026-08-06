@@ -6,5 +6,9 @@
 perfis:
   - id: tecnologo_automacao_2027_1
     caminho: "tecnologo_automacao_2027_1"
-    matriz: "matriz_curricular.xlsm"
+    matriz: "matriz_curricular_tec.xlsm"
+    ativo: true
+  - id: engenharia_automacao_2027_1
+    caminho: "engenharia_automacao_2027_1"
+    matriz: "matriz_curricular_eng.xlsm"
     ativo: true

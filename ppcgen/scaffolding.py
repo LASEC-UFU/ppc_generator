@@ -64,6 +64,8 @@ def _linhas_perfil_padrao(perfil_id: str, nome: str) -> list[tuple[str, object]]
         ("curriculo.carga_horaria_presencial_maxima_periodo", None),
         ("curriculo.periodo_minimo_tcc", None),
         ("curriculo.periodo_minimo_estagio", None),
+        ("curriculo.enfases_formativas_minimas", None),
+        ("curriculo.carga_horaria_minima_por_enfase", None),
         ("arquivos.textos", "textos"),
         ("arquivos.fichas", "fichas"),
         ("arquivos.figuras", "figuras"),
@@ -108,6 +110,10 @@ def _criar_matriz_vazia(caminho: Path, perfil_id: str, nome: str) -> None:
         ("Temas", ["id", "nome", "descricao", "fonte_normativa", "status", "componentes"]),
         ("Conteudos", ["id", "descricao", "obrigatorio", "fonte", "componentes"]),
         ("Competencias", ["id", "descricao", "obrigatoria", "fonte", "componentes"]),
+        (
+            "EnfasesFormativas",
+            ["id", "nome", "sigla", "conteudos_estruturantes", "aderencia_profissional"],
+        ),
         (
             "Bibliografia",
             [

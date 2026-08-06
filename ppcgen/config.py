@@ -95,6 +95,17 @@ class CurriculoConfig:
     ppcgen/validadores/cargas.py)."""
     periodo_minimo_tcc: int | None = None
     periodo_minimo_estagio: int | None = None
+    enfases_formativas_minimas: int | None = None
+    """Número mínimo de ênfases formativas (aba ``EnfasesFormativas``) que
+    o(a) estudante deve integralizar, quando o curso adota essa
+    organização de optativas — ``None`` quando não se aplica."""
+    carga_horaria_minima_por_enfase: int | None = None
+    """Carga horária mínima, em horas, a cursar EM CADA uma das
+    ``enfases_formativas_minimas`` ênfases escolhidas para que o(a)
+    estudante seja considerado(a) apto(a) nela — não é a carga horária
+    optativa mínima do curso (``carga_optativa_minima``, que pode exceder
+    ``enfases_formativas_minimas * carga_horaria_minima_por_enfase``,
+    sendo o excedente cursado livremente em qualquer ênfase)."""
 
 
 @dataclass

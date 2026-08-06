@@ -19,13 +19,15 @@ from ppcgen.geradores.representacao_grafica import gerar_representacao_grafica
 from ppcgen.geradores.tabelas import (
     tabela_carga_por_grupo,
     tabela_componentes,
+    tabela_enfase_formativa_componentes,
+    tabela_enfases_formativas,
     tabela_equivalencias,
     tabela_prerequisitos,
     tabela_referencia,
 )
 from ppcgen.modelos import ComponenteCurricular, Curriculo, ReferenciaisCurso, TipoComponente
 from ppcgen.utilitarios.latex import cabecalho_gerado, escapar
-from ppcgen.utilitarios.textos import slug
+from ppcgen.utilitarios.textos import analisar_prefixo_enfase_formativa, slug
 
 
 def _escrever(pasta: Path, nome_arquivo: str, corpo: str, fonte: str, versao: str) -> Path:
@@ -439,6 +441,34 @@ def gerar_arquivos_latex(
             ),
         )
 
+    # --- Ênfases formativas (áreas de formação optativa) -------------------
+    escrever(
+        "tab_enfases_formativas.tex",
+        tabela_enfases_formativas(
+            referenciais.enfases_formativas,
+            "Ênfases Formativas (Áreas de Formação Optativa)",
+            "enfases_formativas",
+        ),
+    )
+    for enfase in referenciais.enfases_formativas:
+        componentes_enfase = sorted(
+            (c for c in ativos if c.enfase_formativa_id == enfase.id),
+            # Ordena pelo número extraído do próprio nome (MIAPI 1, MIAPI 2...)
+            # — garantido válido aqui, pois só componentes com vínculo
+            # bem-sucedido chegam a ter enfase_formativa_id preenchido.
+            key=lambda c: analisar_prefixo_enfase_formativa(c.nome).numero_valido,
+        )
+        if not componentes_enfase:
+            continue
+        escrever(
+            f"tab_enfase_formativa_{slug(enfase.id)}.tex",
+            tabela_enfase_formativa_componentes(
+                componentes_enfase,
+                f"Componentes da Ênfase Formativa: {enfase.nome}",
+                f"enfase_formativa_{slug(enfase.id)}",
+            ),
+        )
+
     # --- Aderência aos conteúdos curriculares -------------------------------
     for conteudo in referenciais.conteudos:
         componentes_conteudo = sorted(
@@ -463,6 +493,16 @@ def gerar_arquivos_latex(
 
     escrever_indicador("par_carga_horaria_total.tex", f"{total_geral} horas")
     escrever_indicador("par_carga_horaria_optativa.tex", f"{optativa_minima} horas")
+    numero_enfases_minimas = perfil.curriculo.enfases_formativas_minimas
+    if numero_enfases_minimas is not None:
+        _POR_EXTENSO = {1: "uma", 2: "duas", 3: "três", 4: "quatro", 5: "cinco"}
+        escrever_indicador(
+            "par_enfases_formativas_minimas.tex",
+            _POR_EXTENSO.get(numero_enfases_minimas, str(numero_enfases_minimas)),
+        )
+    carga_minima_por_enfase = perfil.curriculo.carga_horaria_minima_por_enfase
+    if carga_minima_por_enfase is not None:
+        escrever_indicador("par_carga_horaria_minima_por_enfase.tex", f"{carga_minima_por_enfase} horas")
     for tipo, nome_arquivo in (
         (TipoComponente.EXTENSAO, "par_carga_horaria_extensao.tex"),
         (TipoComponente.ATIVIDADE_COMPLEMENTAR, "par_carga_horaria_aac.tex"),
@@ -484,5 +524,22 @@ def gerar_arquivos_latex(
     escrever_indicador("par_percentual_ead.tex", f"{percentual_ead:.1f}\\%".replace(".", ","))
     escrever_indicador("par_percentual_extensao.tex", f"{percentual_extensao:.1f}\\%".replace(".", ","))
     escrever_indicador("par_numero_componentes.tex", str(len(ativos)))
+
+    # Remove resíduos de gerações anteriores que deixariam \IfFileExists
+    # incluir tabelas já ausentes da matriz atual. A limpeza é deliberadamente
+    # restrita a .tex/.bib com o cabeçalho inequívoco do próprio gerador;
+    # qualquer arquivo manual ou de outra extensão é preservado.
+    nomes_atuais = {caminho.name for caminho in gerados}
+    if pasta_gerado.exists():
+        for caminho in pasta_gerado.iterdir():
+            if (
+                not caminho.is_file()
+                or caminho.name in nomes_atuais
+                or caminho.suffix.lower() not in {".tex", ".bib"}
+            ):
+                continue
+            primeira_linha = caminho.read_text(encoding="utf-8", errors="ignore").splitlines()[:1]
+            if primeira_linha == ["% ARQUIVO GERADO AUTOMATICAMENTE."]:
+                caminho.unlink()
 
     return gerados
