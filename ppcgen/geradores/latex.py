@@ -27,7 +27,7 @@ from ppcgen.geradores.tabelas import (
 )
 from ppcgen.modelos import ComponenteCurricular, Curriculo, ReferenciaisCurso, TipoComponente
 from ppcgen.utilitarios.latex import cabecalho_gerado, escapar
-from ppcgen.utilitarios.textos import analisar_prefixo_enfase_formativa, slug
+from ppcgen.utilitarios.textos import slug
 
 
 def _escrever(pasta: Path, nome_arquivo: str, corpo: str, fonte: str, versao: str) -> Path:
@@ -453,12 +453,12 @@ def gerar_arquivos_latex(
         ),
     )
     for enfase in referenciais.enfases_formativas:
+        ordem = {codigo: indice for indice, codigo in enumerate(enfase.componentes)}
         componentes_enfase = sorted(
-            (c for c in ativos if c.enfase_formativa_id == enfase.id),
-            # Ordena pelo número extraído do próprio nome (MIAPI 1, MIAPI 2...)
-            # — garantido válido aqui, pois só componentes com vínculo
-            # bem-sucedido chegam a ter enfase_formativa_id preenchido.
-            key=lambda c: analisar_prefixo_enfase_formativa(c.nome).numero_valido,
+            (c for c in ativos if enfase.id in c.enfases_formativas),
+            # Ordena pela posição do código na célula 'componentes' da aba
+            # EnfasesFormativas — quem cadastra controla a ordem de exibição.
+            key=lambda c: ordem.get(c.codigo, len(ordem)),
         )
         if not componentes_enfase:
             continue

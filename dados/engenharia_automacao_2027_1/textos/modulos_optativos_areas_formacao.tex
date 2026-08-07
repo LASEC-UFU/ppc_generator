@@ -7,7 +7,7 @@ Este capítulo trata exclusivamente da organização e das regras de integraliza
 
 As Ênfases Formativas constituem formas de organização e aprofundamento da formação optativa do curso. Não correspondem a habilitações autônomas, novos graus acadêmicos ou títulos profissionais distintos, nem implicam anotação obrigatória no diploma, salvo regulamentação institucional específica (\autoref{sec:registro_certificacao}).
 
-\textcolor{red}{[CAPÍTULO ELABORADO A PARTIR DOS COMPONENTES OPTATIVOS EFETIVAMENTE CADASTRADOS NA ABA \texttt{COMPONENTES} DA MATRIZ CURRICULAR DESTE PERFIL (\texttt{FEELT!TEC1}--\texttt{FEELT!TEC8} E \texttt{FEELT!TEI1}--\texttt{FEELT!TEI8}) — PENDENTE DE ANÁLISE E APROVAÇÃO PELO NÚCLEO DOCENTE ESTRUTURANTE (NDE) E PELO COLEGIADO DO CURSO ANTES DA SUBMISSÃO DESTE PPC, CONFORME DETALHADO AO LONGO DO CAPÍTULO]}
+\textcolor{red}{[CAPÍTULO ELABORADO A PARTIR DOS COMPONENTES OPTATIVOS EFETIVAMENTE CADASTRADOS NA ABA \texttt{COMPONENTES} DA MATRIZ CURRICULAR DESTE PERFIL E VINCULADOS ÀS ÊNFASES FORMATIVAS PELA COLUNA \texttt{componentes} DA ABA \texttt{EnfasesFormativas} — PENDENTE DE ANÁLISE E APROVAÇÃO PELO NÚCLEO DOCENTE ESTRUTURANTE (NDE) E PELO COLEGIADO DO CURSO ANTES DA SUBMISSÃO DESTE PPC, CONFORME DETALHADO AO LONGO DO CAPÍTULO]}
 
 \section{Ênfases Formativas}
 \label{sec:modulos_areas_conceito}
@@ -18,7 +18,7 @@ A organização curricular dos componentes optativos deste curso assenta-se nos 
     \item cada ênfase formativa corresponde a um conjunto estruturado e coerente de componentes curriculares optativos, articulados entre si por uma mesma linha de aprofundamento técnico;
     \item os componentes de cada ênfase formativa estão organizados segundo um eixo temático específico, diretamente relacionado ao perfil profissional do \ppccurso (\autoref{chp:perfil_egresso});
     \item os componentes curriculares optativos não devem ser escolhidos de forma aleatória, fragmentada ou desvinculada da estrutura formativa prevista neste PPC;
-    \item um mesmo componente curricular não pode ser contabilizado mais de uma vez para o cumprimento de ênfases distintas, salvo previsão expressa e devidamente justificada por equivalência aprovada pelo Colegiado do Curso;
+    \item um componente curricular pode estar vinculado a mais de uma ênfase formativa, quando seu conteúdo for pertinente a mais de um eixo temático; nesse caso, sua carga horária é computada integralmente para a integralização de cada uma das ênfases às quais está vinculado, sem duplicidade de matrícula ou de aprovação;
     \item as ênfases formativas não constituem habilitações, graus acadêmicos ou diplomas autônomos, mas percursos de aprofundamento formativo no âmbito do \ppccurso, salvo disposição institucional expressa em sentido contrário (\autoref{sec:registro_certificacao}).
 \end{enumerate}
 
@@ -26,28 +26,26 @@ O curso oferece atualmente \textbf{três} ênfases formativas, sintetizadas no Q
 
 \input{gerado/tab_enfases_formativas}
 
-A vinculação de um componente curricular optativo a uma ênfase formativa não depende de nenhum cadastro adicional na matriz curricular: é determinada exclusivamente pelo próprio nome do componente, no padrão \texttt{SIGLA NÚMERO: Nome da disciplina} — por exemplo, \texttt{MIAPI 1: Máquinas Elétricas Inteligentes} é automaticamente reconhecido como pertencente à ênfase MIAPI. A sigla deve ser uma das cadastradas na aba \texttt{EnfasesFormativas} (Quadro~\ref{tab:enfases_formativas}); o número é apenas identificador e organizacional dentro da ênfase — inicia em 1, é sequencial e independente entre as três ênfases, e não representa ordem de oferta, pré-requisito ou nível de dificuldade. Um componente cujo nome não segue esse padrão (a maioria das disciplinas do curso) simplesmente não pertence a nenhuma ênfase formativa, sem que isso constitua erro.
-
-\textcolor{red}{[OS 16 COMPONENTES OPTATIVOS ATUALMENTE CADASTRADOS NA ABA \texttt{COMPONENTES} (\texttt{FEELT!TEC1}--\texttt{FEELT!TEC8} E \texttt{FEELT!TEI1}--\texttt{FEELT!TEI8}) AINDA NÃO FORAM RENOMEADOS PARA O PADRÃO \texttt{SIGLA NÚMERO: Nome} — NENHUM DELES ESTÁ, NO MOMENTO, VINCULADO A QUALQUER DAS TRÊS ÊNFASES. CABE AO NDE/COLEGIADO RENOMEAR ESSES COMPONENTES (OU CADASTRAR NOVOS) SEGUINDO O PADRÃO \texttt{MIAPI Nº: Nome}, \texttt{RASC Nº: Nome} OU \texttt{SEICI Nº: Nome} — ASSIM QUE ISSO FOR FEITO NA PLANILHA, AS TABELAS DE COMPONENTES POR ÊNFASE (SEÇÃO~\ref{sec:elenco_areas}) E OS INDICADORES DE SUFICIÊNCIA DE CARGA HORÁRIA (\texttt{python -m ppcgen validar}) PASSAM A SER GERADOS AUTOMATICAMENTE, SEM NENHUMA ALTERAÇÃO NESTE PPC OU NO GERADOR]}
+A vinculação de um componente curricular optativo a uma ênfase formativa é cadastrada na própria aba \texttt{EnfasesFormativas} da matriz curricular deste perfil, na coluna \texttt{componentes} de cada ênfase — mesmo padrão já usado nas abas \texttt{Nucleos}, \texttt{Areas}, \texttt{Temas}, \texttt{Conteudos} e \texttt{Competencias}: uma lista de códigos de componente, separados por \texttt{|}. Essa coluna, e não o nome do componente, é a única fonte do vínculo; o nome de um componente optativo não precisa seguir nenhum padrão específico para pertencer a uma ênfase. Um componente pode ser listado em mais de uma ênfase, quando pertinente a mais de um eixo temático (Seção~\ref{sec:modulos_areas_conceito}).
 
 \section{Elenco de Componentes Curriculares Optativos por Ênfase Formativa}
 \label{sec:elenco_areas}
 
-Os quadros a seguir apresentam os componentes curriculares optativos atualmente cadastrados em cada Ênfase Formativa. A vinculação é determinada pela sigla e pela numeração que antecedem a denominação do componente, conforme os padrões ``MIAPI número: Nome da disciplina'', ``RASC número: Nome da disciplina'' e ``SEICI número: Nome da disciplina''. As tabelas são geradas automaticamente a partir da matriz curricular, evitando duplicidade de cadastro entre o PPC e a planilha: quando um componente é renomeado na aba \texttt{Componentes} para seguir esse padrão, a tabela da ênfase correspondente passa a incluí-lo na próxima geração deste PPC, sem qualquer edição manual deste capítulo. Os componentes de cada ênfase têm, atualmente, 60 horas e pré-requisito de 1.000 horas integralizadas do currículo; nenhum possui período fixo no fluxograma, sendo ofertados conforme o planejamento acadêmico do Colegiado do Curso (\autoref{sec:regras_oferta}).
+Os quadros a seguir apresentam os componentes curriculares optativos atualmente cadastrados em cada Ênfase Formativa. A vinculação é determinada pela coluna \texttt{componentes} da aba \texttt{EnfasesFormativas} (Seção~\ref{sec:modulos_areas_conceito}), listando o código de cada componente pertencente àquela ênfase; a ordem de exibição em cada quadro segue a ordem em que os códigos aparecem nessa coluna. As tabelas são geradas automaticamente a partir da matriz curricular, evitando duplicidade de cadastro entre o PPC e a planilha: quando um componente é incluído em \texttt{componentes}, a tabela da ênfase correspondente passa a incluí-lo na próxima geração deste PPC, sem qualquer edição manual deste capítulo. Os componentes de cada ênfase têm, atualmente, 60 horas e pré-requisito de 1.000 horas integralizadas do currículo; nenhum possui período fixo no fluxograma, sendo ofertados conforme o planejamento acadêmico do Colegiado do Curso (\autoref{sec:regras_oferta}).
 
 \subsection{Elenco de Componentes da Ênfase MIAPI}
 
-\IfFileExists{gerado/tab_enfase_formativa_miapi.tex}{\input{gerado/tab_enfase_formativa_miapi}}{\textcolor{red}{[NENHUM COMPONENTE ATIVO ESTÁ, NO MOMENTO, NOMEADO NO PADRÃO \texttt{MIAPI Nº: Nome} — QUADRO PENDENTE DA RENOMEAÇÃO DESCRITA NA SEÇÃO~\ref{sec:modulos_areas_conceito}]}}
+\IfFileExists{gerado/tab_enfase_formativa_miapi.tex}{\input{gerado/tab_enfase_formativa_miapi}}{\textcolor{red}{[NENHUM COMPONENTE ATIVO ESTÁ, NO MOMENTO, LISTADO EM \texttt{componentes} PARA A ÊNFASE MIAPI NA ABA \texttt{EnfasesFormativas} — QUADRO PENDENTE DO CADASTRO DESCRITO NA SEÇÃO~\ref{sec:modulos_areas_conceito}]}}
 
 \subsection{Elenco de Componentes da Ênfase RASC}
 
-\IfFileExists{gerado/tab_enfase_formativa_rasc.tex}{\input{gerado/tab_enfase_formativa_rasc}}{\textcolor{red}{[NENHUM COMPONENTE ATIVO ESTÁ, NO MOMENTO, NOMEADO NO PADRÃO \texttt{RASC Nº: Nome} — QUADRO PENDENTE DA RENOMEAÇÃO DESCRITA NA SEÇÃO~\ref{sec:modulos_areas_conceito}]}}
+\IfFileExists{gerado/tab_enfase_formativa_rasc.tex}{\input{gerado/tab_enfase_formativa_rasc}}{\textcolor{red}{[NENHUM COMPONENTE ATIVO ESTÁ, NO MOMENTO, LISTADO EM \texttt{componentes} PARA A ÊNFASE RASC NA ABA \texttt{EnfasesFormativas} — QUADRO PENDENTE DO CADASTRO DESCRITO NA SEÇÃO~\ref{sec:modulos_areas_conceito}]}}
 
 \subsection{Elenco de Componentes da Ênfase SEICI}
 
-\IfFileExists{gerado/tab_enfase_formativa_seici.tex}{\input{gerado/tab_enfase_formativa_seici}}{\textcolor{red}{[NENHUM COMPONENTE ATIVO ESTÁ, NO MOMENTO, NOMEADO NO PADRÃO \texttt{SEICI Nº: Nome} — QUADRO PENDENTE DA RENOMEAÇÃO DESCRITA NA SEÇÃO~\ref{sec:modulos_areas_conceito}]}}
+\IfFileExists{gerado/tab_enfase_formativa_seici.tex}{\input{gerado/tab_enfase_formativa_seici}}{\textcolor{red}{[NENHUM COMPONENTE ATIVO ESTÁ, NO MOMENTO, LISTADO EM \texttt{componentes} PARA A ÊNFASE SEICI NA ABA \texttt{EnfasesFormativas} — QUADRO PENDENTE DO CADASTRO DESCRITO NA SEÇÃO~\ref{sec:modulos_areas_conceito}]}}
 
-\textcolor{red}{[OS 16 COMPONENTES DE TÓPICOS ESPECIAIS TÊM APENAS CÓDIGO, NOME, CARGA HORÁRIA E PRÉ-REQUISITO CADASTRADOS NA MATRIZ CURRICULAR — SEM EMENTA, PERÍODO DE OFERTA OU UNIDADE OFERTANTE DEFINIDOS. PENDÊNCIAS EXPLÍCITAS A SEREM DEFINIDAS PELO NDE/COLEGIADO ANTES DA SUBMISSÃO DESTE PPC, ALÉM DA RENOMEAÇÃO PARA O PADRÃO DE ÊNFASE JÁ SINALIZADA: (1) EMENTA ESPECÍFICA DE CADA COMPONENTE; (2) SE HÁ PERÍODO(S) RECOMENDADO(S) NO FLUXOGRAMA PARA SUA OFERTA (ATUALMENTE SEM PERÍODO FIXO); (3) UNIDADE(S) ACADÊMICA(S) OFERTANTE(S), EM ESPECIAL PARA OS COMPONENTES QUE VIEREM A COMPOR A ÊNFASE SEICI, QUE PODEM ENVOLVER UNIDADES ALÉM DA FEELT]}
+\textcolor{red}{[OS 16 COMPONENTES DE TÓPICOS ESPECIAIS TÊM APENAS CÓDIGO, NOME, CARGA HORÁRIA E PRÉ-REQUISITO CADASTRADOS NA MATRIZ CURRICULAR — SEM EMENTA, PERÍODO DE OFERTA OU UNIDADE OFERTANTE DEFINIDOS. PENDÊNCIAS EXPLÍCITAS A SEREM DEFINIDAS PELO NDE/COLEGIADO ANTES DA SUBMISSÃO DESTE PPC: (1) EMENTA ESPECÍFICA DE CADA COMPONENTE; (2) SE HÁ PERÍODO(S) RECOMENDADO(S) NO FLUXOGRAMA PARA SUA OFERTA (ATUALMENTE SEM PERÍODO FIXO); (3) UNIDADE(S) ACADÊMICA(S) OFERTANTE(S), EM ESPECIAL PARA OS COMPONENTES QUE VIEREM A COMPOR A ÊNFASE SEICI, QUE PODEM ENVOLVER UNIDADES ALÉM DA FEELT]}
 
 \section{Regra de Escolha e Integralização}
 \label{sec:regra_escolha}
@@ -55,7 +53,7 @@ Os quadros a seguir apresentam os componentes curriculares optativos atualmente 
 Para integralizar o curso, o(a) estudante deverá cumprir a carga horária total de optativas e atingir a carga horária mínima definida no Perfil da matriz curricular em, pelo menos, duas das três Ênfases Formativas. São três grandezas distintas, e o cumprimento de uma não substitui as demais:
 
 \begin{itemize}
-    \item \textbf{carga horária total de optativas} — \textbf{\input{gerado/par_carga_horaria_optativa}}, lida diretamente do componente agregador \texttt{MÓDULO OPTATIVO} cadastrado (inativo) na aba \texttt{Componentes} da matriz curricular — sem duplicar esse valor na aba \texttt{Perfil} —, exigida para a integralização curricular do curso como um todo (\autoref{chp:estrutura_curricular});
+    \item \textbf{carga horária total de optativas} — \textbf{\input{gerado/par_carga_horaria_optativa}}, lida diretamente do componente agregador \texttt{MÓDULO OPTATIVO} cadastrado na aba \texttt{Componentes} da matriz curricular — sem duplicar esse valor na aba \texttt{Perfil} —, exigida para a integralização curricular do curso como um todo (\autoref{chp:estrutura_curricular});
     \item \textbf{quantidade mínima de ênfases} — \textbf{\input{gerado/par_enfases_formativas_minimas}} das três ênfases (\path{curriculo.enfases_formativas_minimas});
     \item \textbf{carga horária mínima por ênfase} — \textbf{\input{gerado/par_carga_horaria_minima_por_enfase}} (\path{curriculo.carga_horaria_minima_por_enfase}), necessária EM CADA uma das \input{gerado/par_enfases_formativas_minimas} ênfases mínimas para que ela seja considerada integralizada.
 \end{itemize}
@@ -76,9 +74,9 @@ o requisito de ênfases é atendido quando
 \path{curriculo.enfases_formativas_minimas}.
 \end{quote}
 
-\textcolor{red}{[CONFIRMAR SE HÁ, ALÉM DA CARGA HORÁRIA MÍNIMA POR ÊNFASE, ALGUM CONJUNTO ESPECÍFICO DE COMPONENTES DE CADA ÊNFASE CUJA CONCLUSÃO SEJA OBRIGATÓRIA (EM VEZ DE LIVRE ESCOLHA DENTRO DA ÊNFASE ATÉ ATINGIR A CARGA MÍNIMA) — PENDENTE DA RENOMEAÇÃO DOS 16 COMPONENTES PARA O PADRÃO DE ÊNFASE (SEÇÃO~\ref{sec:modulos_areas_conceito})]}
+\textcolor{red}{[CONFIRMAR SE HÁ, ALÉM DA CARGA HORÁRIA MÍNIMA POR ÊNFASE, ALGUM CONJUNTO ESPECÍFICO DE COMPONENTES DE CADA ÊNFASE CUJA CONCLUSÃO SEJA OBRIGATÓRIA (EM VEZ DE LIVRE ESCOLHA DENTRO DA ÊNFASE ATÉ ATINGIR A CARGA MÍNIMA) — DECISÃO DO NDE/COLEGIADO, INDEPENDENTE DO MECANISMO DE VÍNCULO (SEÇÃO~\ref{sec:modulos_areas_conceito})]}
 
-\textcolor{red}{[SUFICIÊNCIA ARITMÉTICA: A CADA EXECUÇÃO DE \texttt{python -m ppcgen validar}, O SISTEMA CONFERE AUTOMATICAMENTE SE CADA ÊNFASE TEM CARGA HORÁRIA DISPONÍVEL (SOMA DOS COMPONENTES ATIVOS VINCULADOS A ELA) SUFICIENTE PARA O MÍNIMO CONFIGURADO, E SE HÁ ÊNFASES SUFICIENTES COM ESSA CARGA PARA ATENDER \input{gerado/par_enfases_formativas_minimas} (REGRAS \path{ENFASE_FORMATIVA_CARGA_INSUFICIENTE} E \path{ENFASES_FORMATIVAS_INTEGRALIZACAO_INVIAVEL}). NO ESTADO ATUAL DA MATRIZ (COMPONENTES AINDA NÃO RENOMEADOS PARA O PADRÃO DE ÊNFASE, SEÇÃO~\ref{sec:modulos_areas_conceito}), ESSA VALIDAÇÃO ACUSA ERRO — RODE O VALIDADOR APÓS A RENOMEAÇÃO PARA CONFIRMAR QUE OS COMPONENTES DE CADA ÊNFASE SOMAM, PELO MENOS, \input{gerado/par_carga_horaria_minima_por_enfase} E QUE A CARGA HORÁRIA OPTATIVA TOTAL (\textbf{\input{gerado/par_carga_horaria_optativa}}, LIDA DO COMPONENTE \texttt{MÓDULO OPTATIVO}) É COMPATÍVEL COM OS COMPONENTES DISPONÍVEIS]}
+\textcolor{red}{[SUFICIÊNCIA ARITMÉTICA: A CADA EXECUÇÃO DE \texttt{python -m ppcgen validar}, O SISTEMA CONFERE AUTOMATICAMENTE SE CADA ÊNFASE TEM CARGA HORÁRIA DISPONÍVEL (SOMA DOS COMPONENTES ATIVOS VINCULADOS A ELA PELA COLUNA \texttt{componentes}) SUFICIENTE PARA O MÍNIMO CONFIGURADO, E SE HÁ ÊNFASES SUFICIENTES COM ESSA CARGA PARA ATENDER \input{gerado/par_enfases_formativas_minimas} (REGRAS \path{ENFASE_FORMATIVA_CARGA_INSUFICIENTE} E \path{ENFASES_FORMATIVAS_INTEGRALIZACAO_INVIAVEL}). RODE O VALIDADOR A CADA ATUALIZAÇÃO DO ELENCO DE COMPONENTES PARA CONFIRMAR QUE OS COMPONENTES DE CADA ÊNFASE CONTINUAM SOMANDO, PELO MENOS, \input{gerado/par_carga_horaria_minima_por_enfase} E QUE A CARGA HORÁRIA OPTATIVA TOTAL (\textbf{\input{gerado/par_carga_horaria_optativa}}, LIDA DO COMPONENTE \texttt{MÓDULO OPTATIVO}) É COMPATÍVEL COM OS COMPONENTES DISPONÍVEIS]}
 
 Não é admitida a substituição da integralização da carga horária optativa mínima por componentes de natureza distinta (obrigatórios, de extensão ou de atividades complementares), salvo nos casos de equivalência, aproveitamento de estudos ou adaptação curricular expressamente aprovados pelo Colegiado do Curso. Componentes optativos cursados além da carga horária mínima exigida — inclusive de uma terceira ênfase, cursada além das duas mínimas exigidas — são registrados como carga optativa excedente, sem prejuízo do cômputo da carga horária mínima.
 
@@ -127,3 +125,33 @@ Distinguem-se, para os fins deste capítulo:
 \end{itemize}
 
 \textcolor{red}{[CONFIRMAR JUNTO À PROGRAD/REGISTRO ACADÊMICO DA UFU SE HÁ MECANISMO INSTITUCIONAL DE CERTIFICAÇÃO COMPLEMENTAR OU MENÇÃO NO HISTÓRICO ESCOLAR PARA A CONCENTRAÇÃO DE COMPONENTES OPTATIVOS EM UMA ÊNFASE FORMATIVA DENTRO DE UM CURSO DE GRADUAÇÃO — NÃO IDENTIFICADO NOS DOCUMENTOS DISPONÍVEIS DESTE PERFIL]}
+
+\section{Direito Adquirido e Regras de Transição}
+\label{sec:enfases_transicao}
+
+Toda alteração superveniente no rol de componentes, na carga horária mínima, na quantidade mínima de ênfases exigida ou na própria existência de uma Ênfase Formativa -- seja por Norma Complementar (Seção~\ref{sec:enfases_norma_complementar}), seja por revisão deste PPC -- observará os seguintes princípios, em favor do(a) estudante já matriculado(a) no curso:
+
+\begin{itemize}
+    \item os componentes curriculares já cursados e aprovados pelo(a) estudante em uma ênfase permanecem válidos para sua integralização, ainda que a ênfase venha a ser posteriormente reorganizada, renomeada ou tenha seu rol de componentes alterado;
+    \item caso um componente deixe de ser oferecido ou seja substituído após o início da trajetória do(a) estudante, cabe ao Colegiado do Curso definir equivalência ou componente substitutivo, sem prejuízo da carga horária já integralizada (\autoref{sec:regras_oferta});
+    \item a carga horária mínima por ênfase e a quantidade mínima de ênfases exigidas para a integralização curricular são aquelas vigentes no momento da matrícula do(a) estudante na respectiva versão curricular, salvo se a alteração superveniente lhe for mais favorável e o(a) estudante optar expressamente por ela;
+    \item a extinção de uma Ênfase Formativa não invalida os componentes nela já cursados e aprovados, que passam a ser considerados, para fins de integralização, como pertencentes à ênfase remanescente com a qual guardem maior afinidade temática, mediante deliberação do Colegiado do Curso, ouvido o NDE;
+    \item em nenhuma hipótese uma alteração superveniente no sistema de ênfases formativas poderá resultar em prejuízo acadêmico ao(à) estudante que, sob a configuração vigente ao tempo de sua matrícula ou opção, já tenha cumprido os requisitos então aplicáveis.
+\end{itemize}
+
+Compete à Norma Complementar referida na Seção~\ref{sec:enfases_norma_complementar} disciplinar o detalhamento operacional dessas regras de transição, sempre que uma alteração no sistema de ênfases formativas puder afetar estudantes já vinculados(as) a uma trajetória em curso.
+
+\section{Regulamentação Complementar}
+\label{sec:enfases_norma_complementar}
+
+O rol de ênfases formativas, os componentes curriculares vinculados a cada uma delas e os parâmetros de integralização descritos neste capítulo (Seção~\ref{sec:regra_escolha}) representam a configuração vigente na data de aprovação deste PPC, cadastrada nas abas \texttt{EnfasesFormativas} e \texttt{Perfil} da matriz curricular deste perfil. Sua atualização posterior observa a seguinte repartição de competências, nos termos das Normas Gerais da Graduação da UFU~\cite{ufu_congrad_46_2022}:
+
+\begin{enumerate}
+    \item \textbf{inclusão, exclusão ou substituição de componentes curriculares optativos no rol de uma ênfase formativa} -- por constituir alteração do conjunto de componentes curriculares optativos do curso, poderá ser realizada mediante Norma Complementar aprovada pelo Colegiado do Curso, com anuência do Núcleo Docente Estruturante (NDE), e encaminhada à PROGRAD, sem necessidade de aprovação do Conselho da Unidade Acadêmica ou do CONGRAD (art. 19 da Resolução CONGRAD nº 46/2022);
+    \item \textbf{alteração da carga horária mínima por ênfase formativa ou da quantidade mínima de ênfases a integralizar} -- por constituir alteração da carga horária exigida para componentes curriculares optativos, depende de aprovação do Colegiado do Curso, do Conselho da Faculdade de Engenharia Elétrica e do CONGRAD (art. 17, IV, da Resolução CONGRAD nº 46/2022), não podendo ser disciplinada por mera Norma Complementar;
+    \item \textbf{criação, fusão ou extinção de uma Ênfase Formativa} -- matéria equiparada pela Resolução CONGRAD nº 46/2022 à criação de novos cursos ou graus (art. 12, I), depende de aprovação do Colegiado do Curso, do Conselho da Faculdade de Engenharia Elétrica e do CONGRAD, não podendo ser disciplinada por mera Norma Complementar.
+\end{enumerate}
+
+Respeitados esses limites de competência, a Norma Complementar referida no inciso I poderá ainda disciplinar os critérios de enquadramento de novos componentes curriculares nas ênfases existentes, o aproveitamento e a equivalência de componentes cursados em outra ênfase ou instituição, e as regras de transição de que trata a Seção~\ref{sec:enfases_transicao}.
+
+Este PPC não é alterado pela atualização do rol de componentes de que trata o inciso I: a vinculação de cada componente à sua ênfase é determinada exclusivamente pela coluna \texttt{componentes} da aba \texttt{EnfasesFormativas} da matriz curricular (Seção~\ref{sec:modulos_areas_conceito}), de modo que as tabelas deste capítulo (Seção~\ref{sec:elenco_areas}) são atualizadas automaticamente a cada nova geração deste documento, sem necessidade de reforma textual do PPC.

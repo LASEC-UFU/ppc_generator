@@ -5,6 +5,7 @@ from ppcgen.modelos import (
     Competencia,
     Conteudo,
     Curriculo,
+    EnfaseFormativa,
     NucleoCurricular,
     ReferenciaisCurso,
     TemaTransversal,
@@ -71,6 +72,31 @@ def test_competencia_componente_inexistente_gera_erro():
     curriculo = Curriculo(versao="t", componentes=[componente("A1")])
     resultado = validar_referenciais(curriculo, referenciais)
     assert any(m.codigo_regra == "COMPETENCIA_COMPONENTE_INEXISTENTE" for m in resultado.erros)
+
+
+def test_enfase_formativa_componente_inexistente_gera_erro():
+    referenciais = ReferenciaisCurso(
+        enfases_formativas=[EnfaseFormativa(id="MIAPI", nome="teste", componentes=["INEXISTENTE"])]
+    )
+    curriculo = Curriculo(versao="t", componentes=[componente("A1")])
+    resultado = validar_referenciais(curriculo, referenciais)
+    assert any(m.codigo_regra == "ENFASE_FORMATIVA_COMPONENTE_INEXISTENTE" for m in resultado.erros)
+
+
+def test_componente_em_mais_de_uma_enfase_nao_gera_erro_de_conflito():
+    """Ao contrário de núcleo, ênfase formativa é N:N — um componente
+    pertencer a mais de uma linha de ``EnfasesFormativas`` é válido, sem
+    checagem de conflito equivalente a ``NUCLEO_MULTIPLO_PARA_COMPONENTE``."""
+
+    referenciais = ReferenciaisCurso(
+        enfases_formativas=[
+            EnfaseFormativa(id="MIAPI", nome="teste", componentes=["A1"]),
+            EnfaseFormativa(id="RASC", nome="teste", componentes=["A1"]),
+        ]
+    )
+    curriculo = Curriculo(versao="t", componentes=[componente("A1")])
+    resultado = validar_referenciais(curriculo, referenciais)
+    assert resultado.mensagens == []
 
 
 def test_componente_em_mais_de_um_nucleo_gera_erro():

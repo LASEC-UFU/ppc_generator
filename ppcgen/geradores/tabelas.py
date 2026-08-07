@@ -198,11 +198,10 @@ def tabela_enfase_formativa_componentes(
     decide isso, mesmo padrão de pular a escrita do arquivo usado por
     Competências/Conteúdos/Temas) — não tem guarda de lista vazia própria.
 
-    ``componentes`` já deve vir ordenado por quem chama, pela posição
-    numérica extraída do nome (``MIAPI 1``, ``MIAPI 2``...— ver
-    ``ppcgen.utilitarios.textos.analisar_prefixo_enfase_formativa``); esta
+    ``componentes`` já deve vir ordenado por quem chama, pela posição do
+    código na célula ``componentes`` da aba ``EnfasesFormativas``; esta
     função só formata, não ordena. O nome exibido é o nome completo
-    cadastrado (com o prefixo da ênfase), sem reescrever nem esconder nada."""
+    cadastrado, sem reescrever nem esconder nada."""
 
     cabecalho = rf"""\begin{{longtblr}}[
     theme = ppc,

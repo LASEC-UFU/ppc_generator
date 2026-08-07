@@ -111,7 +111,7 @@ def _criar_matriz_vazia(caminho: Path, perfil_id: str, nome: str) -> None:
         ("Competencias", ["id", "descricao", "obrigatoria", "fonte", "componentes"]),
         (
             "EnfasesFormativas",
-            ["id", "nome", "sigla", "conteudos_estruturantes", "aderencia_profissional"],
+            ["id", "nome", "sigla", "conteudos_estruturantes", "aderencia_profissional", "componentes"],
         ),
         (
             "Bibliografia",

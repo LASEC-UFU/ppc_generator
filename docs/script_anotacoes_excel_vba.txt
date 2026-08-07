@@ -1,0 +1,912 @@
+﻿SCRIPT VBA — EDITAR / INSERIR ANOTAÇÃO POR FORMULÁRIO
+======================================================
+
+OBJETIVO
+--------
+Este script cria/edita uma NOTA CLÁSSICA do Excel (comentário legado) na célula selecionada.
+Ele:
+- aceita célula normal ou mesclada;
+- usa a célula superior esquerda da mesclagem como referência;
+- carrega opções dinamicamente das abas:
+    Núcleo
+    Área
+    Tema
+    Conteúdo
+    Competência
+- procura, em cada aba, a coluna cujo cabeçalho seja exatamente "Componentes";
+- permite selecionar um ou mais itens de cada grupo;
+- remove itens duplicados;
+- ignora células vazias;
+- edita uma anotação já existente;
+- salva a anotação em formato padronizado;
+- força SEMPRE o tamanho automático da anotação;
+- não altera valor, fórmula, mesclagem ou formatação das células.
+
+IMPORTANTE
+----------
+O código abaixo trabalha com NOTAS CLÁSSICAS do Excel (Comment/Note),
+não com os comentários modernos em formato de conversa.
+
+======================================================================
+PASSO 1 — CRIAR O USERFORM
+======================================================================
+
+No Editor VBA (ALT + F11):
+
+1. Vá em Inserir > UserForm.
+2. Altere a propriedade (Name) do formulário para:
+
+    frmAnotacao
+
+3. Crie 5 ListBox com os seguintes nomes:
+
+    lstNucleo
+    lstArea
+    lstTema
+    lstConteudo
+    lstCompetencia
+
+4. Para TODOS os ListBox, defina:
+
+    MultiSelect = 1 - fmMultiSelectMulti
+
+5. Crie 2 CommandButton:
+
+    cmdSalvar
+    cmdCancelar
+
+6. Caption sugerido:
+
+    cmdSalvar   = Salvar
+    cmdCancelar = Cancelar
+
+7. Opcionalmente, adicione Labels com os textos:
+
+    Núcleo
+    Área
+    Tema
+    Conteúdo
+    Competência
+
+
+======================================================================
+PASSO 2 — CÓDIGO DO MÓDULO PADRÃO
+======================================================================
+
+Crie um Módulo padrão, por exemplo:
+
+    modAnotacoes
+
+Cole TODO o código abaixo:
+
+
+Option Explicit
+
+' ==============================================================
+' CONFIGURAÇÃO
+' ==============================================================
+
+Public Const NOME_FORMULARIO As String = "frmAnotacao"
+Public Const CABECALHO_COMPONENTES As String = "Componentes"
+
+' ==============================================================
+' VARIÁVEIS PÚBLICAS
+' ==============================================================
+
+Public gCelulaAnotacao As Range
+
+' ==============================================================
+' MACRO PRINCIPAL
+' ==============================================================
+
+Public Sub EditarInserirAnotacao()
+
+    On Error GoTo TrataErro
+
+    Dim alvo As Range
+
+    If TypeName(Selection) <> "Range" Then
+        MsgBox "Selecione uma célula ou uma área da planilha antes de continuar.", _
+               vbExclamation, "Editar / Inserir Anotação"
+        Exit Sub
+    End If
+
+    Set alvo = ObterCelulaReferencia(Selection)
+
+    If alvo Is Nothing Then
+        MsgBox "Não foi possível identificar a célula de referência.", _
+               vbExclamation, "Editar / Inserir Anotação"
+        Exit Sub
+    End If
+
+    Set gCelulaAnotacao = alvo
+
+    frmAnotacao.Show
+
+    Exit Sub
+
+TrataErro:
+    MsgBox "Não foi possível abrir o formulário." & vbCrLf & vbCrLf & _
+           "Erro: " & Err.Description, _
+           vbCritical, "Editar / Inserir Anotação"
+
+End Sub
+
+' ==============================================================
+' IDENTIFICAR CÉLULA DE REFERÊNCIA
+' ==============================================================
+
+Public Function ObterCelulaReferencia(ByVal rng As Range) As Range
+
+    On Error GoTo Fim
+
+    Dim cel As Range
+
+    Set cel = rng.Cells(1, 1)
+
+    If cel.MergeCells Then
+        Set ObterCelulaReferencia = cel.MergeArea.Cells(1, 1)
+    Else
+        Set ObterCelulaReferencia = cel
+    End If
+
+    Exit Function
+
+Fim:
+    Set ObterCelulaReferencia = Nothing
+
+End Function
+
+' ==============================================================
+' LOCALIZAR A COLUNA "COMPONENTES"
+' ==============================================================
+
+Public Function LocalizarColunaComponentes(ByVal ws As Worksheet) As Long
+
+    On Error GoTo Fim
+
+    Dim ultimaLinha As Long
+    Dim ultimaColuna As Long
+    Dim r As Long
+    Dim c As Long
+    Dim texto As String
+
+    If Application.WorksheetFunction.CountA(ws.Cells) = 0 Then
+        LocalizarColunaComponentes = 0
+        Exit Function
+    End If
+
+    ultimaLinha = ws.Cells.Find(What:="*", _
+                                After:=ws.Cells(1, 1), _
+                                LookAt:=xlPart, _
+                                LookIn:=xlFormulas, _
+                                SearchOrder:=xlByRows, _
+                                SearchDirection:=xlPrevious, _
+                                MatchCase:=False).Row
+
+    ultimaColuna = ws.Cells.Find(What:="*", _
+                                 After:=ws.Cells(1, 1), _
+                                 LookAt:=xlPart, _
+                                 LookIn:=xlFormulas, _
+                                 SearchOrder:=xlByColumns, _
+                                 SearchDirection:=xlPrevious, _
+                                 MatchCase:=False).Column
+
+    ' Procura o cabeçalho em toda a área utilizada.
+    For r = 1 To ultimaLinha
+        For c = 1 To ultimaColuna
+
+            texto = Trim$(CStr(ws.Cells(r, c).Value))
+
+            If StrComp(texto, CABECALHO_COMPONENTES, vbTextCompare) = 0 Then
+                LocalizarColunaComponentes = c
+                Exit Function
+            End If
+
+        Next c
+    Next r
+
+Fim:
+    If LocalizarColunaComponentes < 0 Then
+        LocalizarColunaComponentes = 0
+    End If
+
+End Function
+
+' ==============================================================
+' LOCALIZAR A LINHA DO CABEÇALHO "COMPONENTES"
+' ==============================================================
+
+Public Function LocalizarLinhaCabecalhoComponentes(ByVal ws As Worksheet, _
+                                                    ByVal coluna As Long) As Long
+
+    On Error GoTo Fim
+
+    Dim ultimaLinha As Long
+    Dim r As Long
+    Dim texto As String
+
+    ultimaLinha = ws.Cells(ws.Rows.Count, coluna).End(xlUp).Row
+
+    For r = 1 To ultimaLinha
+
+        texto = Trim$(CStr(ws.Cells(r, coluna).Value))
+
+        If StrComp(texto, CABECALHO_COMPONENTES, vbTextCompare) = 0 Then
+            LocalizarLinhaCabecalhoComponentes = r
+            Exit Function
+        End If
+
+    Next r
+
+Fim:
+
+End Function
+
+' ==============================================================
+' CARREGAR COMPONENTES DE UMA ABA
+' ==============================================================
+
+Public Function ObterComponentesDaAba(ByVal nomeAba As String) As Collection
+
+    On Error GoTo TrataErro
+
+    Dim ws As Worksheet
+    Dim itens As New Collection
+
+    Dim coluna As Long
+    Dim linhaCabecalho As Long
+    Dim ultimaLinha As Long
+    Dim r As Long
+
+    Dim valor As String
+    Dim chave As String
+
+    Dim dict As Object
+
+    Set dict = CreateObject("Scripting.Dictionary")
+    dict.CompareMode = vbTextCompare
+
+    If Not PlanilhaExiste(nomeAba) Then
+        Err.Raise vbObjectError + 1001, , _
+                  "A aba '" & nomeAba & "' não foi encontrada."
+    End If
+
+    Set ws = ThisWorkbook.Worksheets(nomeAba)
+
+    coluna = LocalizarColunaComponentes(ws)
+
+    If coluna = 0 Then
+        Err.Raise vbObjectError + 1002, , _
+                  "A coluna '" & CABECALHO_COMPONENTES & _
+                  "' não foi encontrada na aba '" & nomeAba & "'."
+    End If
+
+    linhaCabecalho = LocalizarLinhaCabecalhoComponentes(ws, coluna)
+
+    If linhaCabecalho = 0 Then
+        Err.Raise vbObjectError + 1003, , _
+                  "Não foi possível identificar a linha do cabeçalho '" & _
+                  CABECALHO_COMPONENTES & "' na aba '" & nomeAba & "'."
+    End If
+
+    ultimaLinha = ws.Cells(ws.Rows.Count, coluna).End(xlUp).Row
+
+    For r = linhaCabecalho + 1 To ultimaLinha
+
+        valor = Trim$(CStr(ws.Cells(r, coluna).Value))
+
+        If Len(valor) > 0 Then
+
+            chave = LCase$(valor)
+
+            If Not dict.Exists(chave) Then
+                dict.Add chave, valor
+                itens.Add valor
+            End If
+
+        End If
+
+    Next r
+
+    Set ObterComponentesDaAba = itens
+    Exit Function
+
+TrataErro:
+    Err.Raise Err.Number, "ObterComponentesDaAba", Err.Description
+
+End Function
+
+' ==============================================================
+' VERIFICAR SE ABA EXISTE
+' ==============================================================
+
+Public Function PlanilhaExiste(ByVal nomeAba As String) As Boolean
+
+    Dim ws As Worksheet
+
+    On Error Resume Next
+    Set ws = ThisWorkbook.Worksheets(nomeAba)
+    On Error GoTo 0
+
+    PlanilhaExiste = Not ws Is Nothing
+
+End Function
+
+' ==============================================================
+' PREENCHER UM LISTBOX
+' ==============================================================
+
+Public Sub PreencherListBox(ByVal lista As Object, _
+                            ByVal nomeAba As String)
+
+    Dim itens As Collection
+    Dim item As Variant
+
+    lista.Clear
+
+    Set itens = ObterComponentesDaAba(nomeAba)
+
+    For Each item In itens
+        lista.AddItem CStr(item)
+    Next item
+
+End Sub
+
+' ==============================================================
+' OBTER ITENS SELECIONADOS
+' ==============================================================
+
+Public Function ObterSelecionados(ByVal lista As Object) As Collection
+
+    Dim resultado As New Collection
+    Dim i As Long
+
+    For i = 0 To lista.ListCount - 1
+
+        If lista.Selected(i) Then
+            resultado.Add Trim$(CStr(lista.List(i)))
+        End If
+
+    Next i
+
+    Set ObterSelecionados = resultado
+
+End Function
+
+' ==============================================================
+' GERAR BLOCO DE TEXTO DA ANOTAÇÃO
+' ==============================================================
+
+Public Function GerarBloco(ByVal titulo As String, _
+                           ByVal itens As Collection) As String
+
+    Dim item As Variant
+    Dim texto As String
+
+    If itens Is Nothing Then Exit Function
+    If itens.Count = 0 Then Exit Function
+
+    texto = UCase$(titulo) & ":" & vbCrLf
+
+    For Each item In itens
+        texto = texto & ChrW(&H2022) & " " & CStr(item) & vbCrLf
+    Next item
+
+    GerarBloco = RTrim$(texto)
+
+End Function
+
+' ==============================================================
+' GERAR TEXTO COMPLETO
+' ==============================================================
+
+Public Function GerarTextoAnotacao( _
+        ByVal nucleos As Collection, _
+        ByVal areas As Collection, _
+        ByVal temas As Collection, _
+        ByVal conteudos As Collection, _
+        ByVal competencias As Collection) As String
+
+    Dim blocos As Collection
+    Dim bloco As Variant
+    Dim texto As String
+
+    Set blocos = New Collection
+
+    AdicionarBlocoSeExistir blocos, GerarBloco("Núcleo", nucleos)
+    AdicionarBlocoSeExistir blocos, GerarBloco("Área", areas)
+    AdicionarBlocoSeExistir blocos, GerarBloco("Tema", temas)
+    AdicionarBlocoSeExistir blocos, GerarBloco("Conteúdo", conteudos)
+    AdicionarBlocoSeExistir blocos, GerarBloco("Competência", competencias)
+
+    For Each bloco In blocos
+
+        If Len(texto) > 0 Then
+            texto = texto & vbCrLf & vbCrLf
+        End If
+
+        texto = texto & CStr(bloco)
+
+    Next bloco
+
+    GerarTextoAnotacao = texto
+
+End Function
+
+Private Sub AdicionarBlocoSeExistir(ByRef blocos As Collection, _
+                                    ByVal texto As String)
+
+    If Len(Trim$(texto)) > 0 Then
+        blocos.Add texto
+    End If
+
+End Sub
+
+' ==============================================================
+' SALVAR / ATUALIZAR ANOTAÇÃO
+' ==============================================================
+
+Public Sub SalvarAnotacao(ByVal texto As String)
+
+    On Error GoTo TrataErro
+
+    If gCelulaAnotacao Is Nothing Then
+        Err.Raise vbObjectError + 1010, , _
+                  "A célula de destino da anotação não foi identificada."
+    End If
+
+    Application.ScreenUpdating = False
+
+    ' Se a anotação ficou vazia, remove a anotação existente.
+    If Len(Trim$(texto)) = 0 Then
+
+        If Not gCelulaAnotacao.Comment Is Nothing Then
+            gCelulaAnotacao.Comment.Delete
+        End If
+
+        Application.ScreenUpdating = True
+        Exit Sub
+
+    End If
+
+    ' Cria ou atualiza a nota clássica.
+    If gCelulaAnotacao.Comment Is Nothing Then
+
+        gCelulaAnotacao.AddComment Text:=texto
+
+    Else
+
+        gCelulaAnotacao.Comment.Text Text:=texto
+
+    End If
+
+    ' REQUISITO OBRIGATÓRIO:
+    ' força sempre o tamanho automático da caixa.
+    AplicarTamanhoAutomatico gCelulaAnotacao
+
+    Application.ScreenUpdating = True
+    Exit Sub
+
+TrataErro:
+
+    Application.ScreenUpdating = True
+
+    MsgBox "Erro ao salvar a anotação:" & vbCrLf & _
+           Err.Description, _
+           vbCritical, "Editar / Inserir Anotação"
+
+End Sub
+
+' ==============================================================
+' FORÇAR TAMANHO AUTOMÁTICO DA ANOTAÇÃO
+' ==============================================================
+
+Public Sub AplicarTamanhoAutomatico(ByVal cel As Range)
+
+    On Error GoTo TrataErro
+
+    If cel Is Nothing Then Exit Sub
+    If cel.Comment Is Nothing Then Exit Sub
+
+    With cel.Comment.Shape
+
+        ' AutoSize da caixa conforme o texto.
+        .TextFrame.AutoSize = True
+
+    End With
+
+    Exit Sub
+
+TrataErro:
+
+    ' Segunda tentativa para versões do Excel que respondam
+    ' de forma diferente ao TextFrame.
+    On Error Resume Next
+
+    cel.Comment.Shape.TextFrame2.AutoSize = _
+        msoAutoSizeShapeToFitText
+
+    On Error GoTo 0
+
+End Sub
+
+' ==============================================================
+' LER ANOTAÇÃO EXISTENTE E MARCAR ITENS
+' ==============================================================
+
+Public Sub CarregarSelecoesDaAnotacao( _
+        ByVal lista As Object, _
+        ByVal titulo As String, _
+        ByVal textoCompleto As String)
+
+    Dim itens As Collection
+    Dim item As Variant
+    Dim i As Long
+
+    Set itens = ExtrairItensDoGrupo(textoCompleto, titulo)
+
+    For i = 0 To lista.ListCount - 1
+        lista.Selected(i) = False
+    Next i
+
+    For Each item In itens
+
+        For i = 0 To lista.ListCount - 1
+
+            If StrComp(Trim$(CStr(lista.List(i))), _
+                       Trim$(CStr(item)), _
+                       vbTextCompare) = 0 Then
+
+                lista.Selected(i) = True
+                Exit For
+
+            End If
+
+        Next i
+
+    Next item
+
+End Sub
+
+' ==============================================================
+' EXTRAIR ITENS DE UM GRUPO DA ANOTAÇÃO
+' ==============================================================
+
+Public Function ExtrairItensDoGrupo(ByVal texto As String, _
+                                    ByVal titulo As String) As Collection
+
+    Dim resultado As New Collection
+
+    Dim linhas() As String
+    Dim linha As Variant
+
+    Dim dentroGrupo As Boolean
+    Dim tituloBuscado As String
+    Dim atual As String
+
+    tituloBuscado = UCase$(Trim$(titulo)) & ":"
+
+    texto = Replace(texto, vbCrLf, vbLf)
+    texto = Replace(texto, vbCr, vbLf)
+
+    linhas = Split(texto, vbLf)
+
+    For Each linha In linhas
+
+        atual = Trim$(CStr(linha))
+
+        If EhTituloDeGrupo(atual) Then
+
+            dentroGrupo = _
+                (StrComp(UCase$(atual), tituloBuscado, vbTextCompare) = 0)
+
+        ElseIf dentroGrupo Then
+
+            If Len(atual) > 0 Then
+
+                atual = RemoverMarcadorItem(atual)
+
+                If Len(atual) > 0 Then
+                    resultado.Add atual
+                End If
+
+            End If
+
+        End If
+
+    Next linha
+
+    Set ExtrairItensDoGrupo = resultado
+
+End Function
+
+' ==============================================================
+' IDENTIFICAR TÍTULOS
+' ==============================================================
+
+Private Function EhTituloDeGrupo(ByVal texto As String) As Boolean
+
+    Dim t As String
+
+    t = UCase$(Trim$(texto))
+
+    Select Case t
+
+        Case "NÚCLEO:", "NUCLEO:", _
+             "ÁREA:", "AREA:", _
+             "TEMA:", _
+             "CONTEÚDO:", "CONTEUDO:", _
+             "COMPETÊNCIA:", "COMPETENCIA:"
+
+            EhTituloDeGrupo = True
+
+        Case Else
+            EhTituloDeGrupo = False
+
+    End Select
+
+End Function
+
+' ==============================================================
+' REMOVER MARCADOR DE ITEM
+' ==============================================================
+
+Private Function RemoverMarcadorItem(ByVal texto As String) As String
+
+    Dim t As String
+
+    t = Trim$(texto)
+
+    If Left$(t, 1) = ChrW(&H2022) Then
+        t = Trim$(Mid$(t, 2))
+    ElseIf Left$(t, 1) = "-" Then
+        t = Trim$(Mid$(t, 2))
+    End If
+
+    RemoverMarcadorItem = t
+
+End Function
+
+
+======================================================================
+PASSO 3 — CÓDIGO DO USERFORM "frmAnotacao"
+======================================================================
+
+Abra o código do formulário frmAnotacao e cole:
+
+
+Option Explicit
+
+Private Sub UserForm_Initialize()
+
+    On Error GoTo TrataErro
+
+    Me.Caption = "Editar / Inserir Anotação"
+
+    ConfigurarLista Me.lstNucleo
+    ConfigurarLista Me.lstArea
+    ConfigurarLista Me.lstTema
+    ConfigurarLista Me.lstConteudo
+    ConfigurarLista Me.lstCompetencia
+
+    ' Carrega dinamicamente os componentes.
+    PreencherListBox Me.lstNucleo, "Núcleo"
+    PreencherListBox Me.lstArea, "Área"
+    PreencherListBox Me.lstTema, "Tema"
+    PreencherListBox Me.lstConteudo, "Conteúdo"
+    PreencherListBox Me.lstCompetencia, "Competência"
+
+    ' Se já existir anotação, carrega os itens atuais.
+    CarregarAnotacaoExistente
+
+    Exit Sub
+
+TrataErro:
+
+    MsgBox "Erro ao carregar o formulário:" & vbCrLf & vbCrLf & _
+           Err.Description, _
+           vbCritical, "Editar / Inserir Anotação"
+
+    Unload Me
+
+End Sub
+
+Private Sub ConfigurarLista(ByVal lista As Object)
+
+    lista.MultiSelect = fmMultiSelectMulti
+
+End Sub
+
+Private Sub CarregarAnotacaoExistente()
+
+    Dim texto As String
+
+    If gCelulaAnotacao Is Nothing Then Exit Sub
+    If gCelulaAnotacao.Comment Is Nothing Then Exit Sub
+
+    texto = gCelulaAnotacao.Comment.Text
+
+    CarregarSelecoesDaAnotacao Me.lstNucleo, _
+                               "Núcleo", texto
+
+    CarregarSelecoesDaAnotacao Me.lstArea, _
+                               "Área", texto
+
+    CarregarSelecoesDaAnotacao Me.lstTema, _
+                               "Tema", texto
+
+    CarregarSelecoesDaAnotacao Me.lstConteudo, _
+                               "Conteúdo", texto
+
+    CarregarSelecoesDaAnotacao Me.lstCompetencia, _
+                               "Competência", texto
+
+End Sub
+
+Private Sub cmdSalvar_Click()
+
+    On Error GoTo TrataErro
+
+    Dim nucleos As Collection
+    Dim areas As Collection
+    Dim temas As Collection
+    Dim conteudos As Collection
+    Dim competencias As Collection
+
+    Dim texto As String
+
+    Set nucleos = ObterSelecionados(Me.lstNucleo)
+    Set areas = ObterSelecionados(Me.lstArea)
+    Set temas = ObterSelecionados(Me.lstTema)
+    Set conteudos = ObterSelecionados(Me.lstConteudo)
+    Set competencias = ObterSelecionados(Me.lstCompetencia)
+
+    texto = GerarTextoAnotacao( _
+                nucleos, _
+                areas, _
+                temas, _
+                conteudos, _
+                competencias)
+
+    SalvarAnotacao texto
+
+    Unload Me
+
+    Exit Sub
+
+TrataErro:
+
+    MsgBox "Não foi possível salvar a anotação." & vbCrLf & vbCrLf & _
+           "Erro: " & Err.Description, _
+           vbCritical, "Editar / Inserir Anotação"
+
+End Sub
+
+Private Sub cmdCancelar_Click()
+
+    Unload Me
+
+End Sub
+
+
+======================================================================
+PASSO 4 — CRIAR O BOTÃO NA PLANILHA
+======================================================================
+
+Na planilha:
+
+1. Vá em Desenvolvedor > Inserir.
+2. Escolha "Botão (Controle de Formulário)".
+3. Desenhe o botão.
+4. Quando o Excel solicitar a macro, selecione:
+
+    EditarInserirAnotacao
+
+5. Altere o texto do botão para:
+
+    Editar / Inserir Anotação
+
+
+======================================================================
+FORMATO GERADO NA ANOTAÇÃO
+======================================================================
+
+Exemplo:
+
+NÚCLEO:
+• Formação Básica
+• Formação Profissional
+
+ÁREA:
+• Automação
+• Controle
+
+TEMA:
+• Sistemas Dinâmicos
+
+CONTEÚDO:
+• Modelagem matemática
+• Função de transferência
+• Espaço de estados
+
+COMPETÊNCIA:
+• Projetar sistemas
+• Analisar sistemas
+
+
+======================================================================
+OBSERVAÇÕES IMPORTANTES
+======================================================================
+
+1. CÉLULAS MESCLADAS
+--------------------
+Se a célula selecionada fizer parte de uma mesclagem, o script utiliza
+automaticamente a célula superior esquerda da área mesclada.
+
+2. TAMANHO AUTOMÁTICO
+---------------------
+Toda vez que a anotação for criada ou alterada, o código executa:
+
+    .TextFrame.AutoSize = True
+
+e possui uma tentativa alternativa usando TextFrame2.
+
+Assim, uma anotação anteriormente configurada com tamanho manual volta
+a ter dimensionamento automático quando for salva pelo formulário.
+
+3. DADOS DINÂMICOS
+------------------
+Não existem componentes gravados diretamente no código.
+
+A cada abertura do formulário, o Excel consulta novamente as abas:
+
+    Núcleo
+    Área
+    Tema
+    Conteúdo
+    Competência
+
+e busca a coluna:
+
+    Componentes
+
+Portanto, novos componentes adicionados às abas passam a aparecer
+automaticamente no formulário.
+
+4. POSIÇÃO DA COLUNA
+--------------------
+A coluna "Componentes" pode ser deslocada para outra posição.
+O script procura o cabeçalho pelo nome, em vez de assumir coluna A,
+B, C etc.
+
+5. DUPLICIDADES
+---------------
+Componentes repetidos na mesma aba são exibidos apenas uma vez.
+
+6. EDIÇÃO
+---------
+Se a célula já possuir uma anotação criada no padrão do script,
+o formulário abre com os itens já selecionados.
+
+O usuário pode marcar ou desmarcar opções e salvar novamente.
+
+7. ANOTAÇÃO VAZIA
+-----------------
+Se o usuário desmarcar todos os componentes e clicar em Salvar,
+a anotação existente será removida.
+
+8. SEGURANÇA DA PLANILHA
+------------------------
+O script não altera:
+- valores;
+- fórmulas;
+- formatação;
+- largura de coluna;
+- altura de linha;
+- mesclagem das células.
+
+Ele atua apenas na Nota clássica associada à célula.
+
+
+FIM DO SCRIPT

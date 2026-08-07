@@ -30,9 +30,31 @@
 '   - cada requisito pode ser um ID de disciplina ou uma exigência em horas;
 '   - exigências como "100 horas" são preservadas literalmente na saída.
 '
-' Campos sincronizados:
+' Campos sincronizados na aba Componentes:
 '   codigo, nome, periodo, cht, chd, chp, che, tot, tipo,
 '   ativo, pre_requisitos e correquisitos.
+'
+' Além disso, a macro lê as NOTAS/ANOTAÇÕES de cada bloco de disciplina
+' no Fluxograma e reconstrói integralmente a coluna "componentes" das abas:
+'   Nucleos
+'   Areas
+'   Temas
+'   Conteudos
+'   Competencias
+'   EnfasesFormativas
+'
+' Formato esperado das anotações:
+'   Nucleo: BASICO
+'   Area: MATEMATICA_MODELAGEM
+'   Tema:
+'   Conteudo: ITEM1; ITEM2; ITEM3
+'   Competencia: COMP1; COMP2
+'   EnfasesFormativas: RASC; SEICI
+'
+' Para cada ID citado na anotação, o código da disciplina é incluído
+' na coluna "componentes" da aba correspondente. Antes da reconstrução,
+' o conteúdo antigo dessa coluna é apagado, preservando cabeçalhos,
+' formatação, validações e demais colunas.
 '
 ' Não existe mais coluna "obrigatorio" na aba Componentes (Seção 9): um
 ' componente é obrigatório sse tipo <> carga_optativa — critério único,
@@ -41,9 +63,7 @@
 ' pelo nome do componente:
 '   - macrobloco superior: tipo = DeterminarTipo(nome) (extensao,
 '     atividade_complementar, estagio, projeto ou disciplina, por
-'     palavra-chave no nome; ou "outro" quando o nome é o do componente
-'     agregador de optativas, ex. "MÓDULO OPTATIVO" — ver comentário em
-'     DeterminarTipo);
+'     palavra-chave no nome);
 '   - macrobloco inferior (optativas): tipo = "carga_optativa" sempre,
 '     independente do nome.
 ' Todo componente encontrado no Fluxograma recebe ativo = VERDADEIRO.
@@ -56,9 +76,10 @@
 ' Regras de preservação:
 '   - o código é a chave única na aba Componentes;
 '   - uma linha existente nunca é recriada;
-'   - somente os campos acima podem ser alterados;
-'   - id, nucleo_id, areas, temas e competencias não são lidos nem modificados;
-'   - colunas não sincronizadas, fórmulas, estilos e validações são preservados;
+'   - somente os campos acima podem ser alterados na aba Componentes;
+'   - as classificações curriculares são obtidas das anotações do Fluxograma;
+'   - nas abas de classificação, somente a coluna "componentes" é reconstruída;
+'   - colunas não sincronizadas, estilos e validações são preservados;
 '   - componentes existentes apenas na aba Componentes não são alterados;
 '   - componentes novos recebem uma nova linha sem apagar dados de outras linhas;
 '   - a macro não cria nem modifica botão.
@@ -70,6 +91,16 @@
 
 Private Const ABA_FLUXOGRAMA As String = "Fluxograma"
 Private Const ABA_COMPONENTES As String = "Componentes"
+
+Private Const ABA_NUCLEOS As String = "Nucleos"
+Private Const ABA_AREAS As String = "Areas"
+Private Const ABA_TEMAS As String = "Temas"
+Private Const ABA_CONTEUDOS As String = "Conteudos"
+Private Const ABA_COMPETENCIAS As String = "Competencias"
+Private Const ABA_ENFASES_FORMATIVAS As String = "EnfasesFormativas"
+
+Private Const CABECALHO_ID_CLASSIFICACAO As String = "id"
+Private Const CABECALHO_COMPONENTES_CLASSIFICACAO As String = "componentes"
 
 Private Const LINHA_CABECALHO_COMPONENTES As Long = 1
 Private Const DESLOCAMENTO_LINHA_CARGAS As Long = 3
@@ -174,6 +205,7 @@ Public Sub btnAtualizarComponentes()
     Dim totalCor As Long
     Dim totalMantidosForaFluxo As Long
     Dim totalInalterados As Long
+    Dim totalCelulasClassificacaoAtualizadas As Long
 
     On Error GoTo TratarErro
 
@@ -224,7 +256,7 @@ Public Sub btnAtualizarComponentes()
     componentesAntes.CompareMode = vbTextCompare
 
     For Each id In linhasComponentes.Keys
-        componentesAntes.Add CStr(id), CLng(linhasComponentes.Item(id))
+        componentesAntes.Add CStr(id), CLng(linhasComponentes.item(id))
     Next id
 
     Set offsetsCarga = MapearOffsetsCarga( _
@@ -310,15 +342,15 @@ Public Sub btnAtualizarComponentes()
 
     For Each id In componentesFluxo.Keys
 
-        Set dados = componentesFluxo.Item(id)
-        codigo = NormalizarCodigo(dados.Item("codigo"))
+        Set dados = componentesFluxo.item(id)
+        codigo = NormalizarCodigo(dados.item("codigo"))
 
         novoComponente = False
         alteracoesLocais = 0
 
         If linhasComponentes.Exists(codigo) Then
 
-            linhaDestino = CLng(linhasComponentes.Item(codigo))
+            linhaDestino = CLng(linhasComponentes.item(codigo))
 
         Else
 
@@ -352,9 +384,9 @@ Public Sub btnAtualizarComponentes()
 
     For Each id In componentesFluxo.Keys
 
-        Set dados = componentesFluxo.Item(id)
-        codigo = NormalizarCodigo(dados.Item("codigo"))
-        linhaDestino = CLng(linhasComponentes.Item(codigo))
+        Set dados = componentesFluxo.item(id)
+        codigo = NormalizarCodigo(dados.item("codigo"))
+        linhaDestino = CLng(linhasComponentes.item(codigo))
         alteracoesLocais = 0
 
         alteracoesLocais = alteracoesLocais + _
@@ -388,6 +420,17 @@ Public Sub btnAtualizarComponentes()
         End If
 
     Next id
+
+    Application.StatusBar = _
+        "Lendo anotações e reconstruindo as colunas componentes..."
+
+    totalCelulasClassificacaoAtualizadas = _
+        ReconstruirComponentesDasClassificacoes( _
+            wsFlux, _
+            componentesFluxo)
+
+    totalCelulasAlteradas = _
+        totalCelulasAlteradas + totalCelulasClassificacaoAtualizadas
 
     totalPre = ContarRelacoes(mapaPre)
     totalCor = ContarRelacoes(mapaCor)
@@ -437,7 +480,9 @@ Public Sub btnAtualizarComponentes()
             totalPre & vbNewLine & _
         "Correquisitos identificados: " & _
             totalCor & vbNewLine & _
-        "Células alteradas: " & _
+        "Células reconstruídas nas abas de classificação: " & _
+            totalCelulasClassificacaoAtualizadas & vbNewLine & _
+        "Total de células alteradas: " & _
             totalCelulasAlteradas
 
 
@@ -581,7 +626,7 @@ Private Sub LerBlocosDoFluxograma( _
                               "ID duplicado no Fluxograma: """ & id & """." & _
                               vbNewLine & _
                               "Primeira ocorrência: " & _
-                                  enderecosFluxo.Item(id) & vbNewLine & _
+                                  enderecosFluxo.item(id) & vbNewLine & _
                               "Nova ocorrência: " & endereco
 
                 End If
@@ -593,8 +638,8 @@ Private Sub LerBlocosDoFluxograma( _
                               "Código duplicado no Fluxograma: """ & codigo & """." & _
                               vbNewLine & _
                               "Primeiro bloco: " & _
-                                  enderecosFluxo.Item( _
-                                      codigosFluxo.Item(codigo)) & _
+                                  enderecosFluxo.item( _
+                                      codigosFluxo.item(codigo)) & _
                                   vbNewLine & _
                               "Novo bloco: " & endereco
 
@@ -627,7 +672,7 @@ Private Sub LerBlocosDoFluxograma( _
 
                 For Each campo In offsetsCarga.Keys
 
-                    offsetColuna = CLng(offsetsCarga.Item(campo))
+                    offsetColuna = CLng(offsetsCarga.item(campo))
 
                     dados.Add _
                         CStr(campo), _
@@ -785,12 +830,12 @@ Private Sub InterpretarTituloDoBloco( _
 
     If partes.Count >= 3 Then
 
-        id = NormalizarId(partes.Item(1))
-        codigo = NormalizarCodigo(partes.Item(2))
-        nome = CStr(partes.Item(3))
+        id = NormalizarId(partes.item(1))
+        codigo = NormalizarCodigo(partes.item(2))
+        nome = CStr(partes.item(3))
 
         For indice = 4 To partes.Count
-            nome = nome & " " & CStr(partes.Item(indice))
+            nome = nome & " " & CStr(partes.item(indice))
         Next indice
 
         nome = LimparEspacosInternos(nome)
@@ -801,8 +846,8 @@ Private Sub InterpretarTituloDoBloco( _
     ' Compatibilidade: ID em uma linha e CODIGO + NOME na linha seguinte.
     If partes.Count = 2 Then
 
-        primeiraLinha = CStr(partes.Item(1))
-        segundaLinha = CStr(partes.Item(2))
+        primeiraLinha = CStr(partes.item(1))
+        segundaLinha = CStr(partes.item(2))
 
         If TentarSepararIdCodigoNome( _
             primeiraLinha & " " & segundaLinha, _
@@ -818,7 +863,7 @@ Private Sub InterpretarTituloDoBloco( _
     If partes.Count = 1 Then
 
         Call TentarSepararIdCodigoNome( _
-            CStr(partes.Item(1)), _
+            CStr(partes.item(1)), _
             id, _
             codigo, _
             nome)
@@ -932,21 +977,7 @@ Private Function DeterminarTipo(ByVal nome As String) As String
 
     nomeNormalizado = NormalizarTextoComparacao(nome)
 
-    ' Componente agregador (ex.: "MÓDULO OPTATIVO") — linha-resumo que
-    ' carrega a carga horária optativa mínima do curso
-    ' (ppcgen.calculo.carga_optativa_minima), nunca uma disciplina
-    ' cursável. Comparação por IGUALDADE (não por prefixo, ao contrário
-    ' dos outros casos abaixo): mesmo conjunto de nomes reconhecido por
-    ' ppcgen.calculo.eh_agregador_optativo (Python) — mantenha os dois
-    ' sincronizados se esse conjunto mudar.
-    If nomeNormalizado = "modulo optativo" _
-        Or nomeNormalizado = "carga optativa" _
-        Or nomeNormalizado = "pool optativo" _
-        Or nomeNormalizado = "bloco optativo" Then
-
-        DeterminarTipo = "outro"
-
-    ElseIf ComecaCom( _
+    If ComecaCom( _
         nomeNormalizado, _
         "atividades curriculares de extensao") Then
 
@@ -1014,9 +1045,8 @@ Private Function MapearOffsetsCarga( _
     '   deslocamento 3 = che
     '   deslocamento 4 = tot
     '
-    ' Os parâmetros da função são mantidos somente para preservar a interface
-    ' usada pela macro principal. Não é feita leitura de anotações, comentários,
-    ' cabeçalhos ou do bloco ID = 1.
+    ' Os parâmetros da função são mantidos para preservar a interface
+    ' usada pela macro principal. O mapeamento das cargas é fixo.
 
     Set mapa = CreateObject("Scripting.Dictionary")
     mapa.CompareMode = vbTextCompare
@@ -1031,125 +1061,542 @@ Private Function MapearOffsetsCarga( _
 
 End Function
 
-Private Function LocalizarBlocoPorId( _
-    ByVal ws As Worksheet, _
-    ByVal idProcurado As String, _
-    ByVal colunasBase As Variant, _
-    ByVal linhasNome As Variant, _
-    ByRef colunaBaseEncontrada As Long, _
-    ByRef linhaNomeEncontrada As Long) As Boolean
 
-    Dim indiceColuna As Long
-    Dim indiceLinha As Long
-    Dim texto As String
-    Dim id As String
+
+
+
+' -----------------------------------------------------------------------------
+' ANOTAÇÕES DAS DISCIPLINAS -> ABAS DE CLASSIFICAÇÃO
+' -----------------------------------------------------------------------------
+Private Function ReconstruirComponentesDasClassificacoes( _
+    ByVal wsFlux As Worksheet, _
+    ByVal componentesFluxo As Object) As Long
+
+    Dim mapaNucleos As Object
+    Dim mapaAreas As Object
+    Dim mapaTemas As Object
+    Dim mapaConteudos As Object
+    Dim mapaCompetencias As Object
+    Dim mapaEnfases As Object
+
+    Dim chave As Variant
+    Dim dados As Object
     Dim codigo As String
-    Dim nome As String
+    Dim anotacao As String
+    Dim total As Long
 
-    For indiceColuna = LBound(colunasBase) To UBound(colunasBase)
+    Set mapaNucleos = NovoMapaDeClassificacao()
+    Set mapaAreas = NovoMapaDeClassificacao()
+    Set mapaTemas = NovoMapaDeClassificacao()
+    Set mapaConteudos = NovoMapaDeClassificacao()
+    Set mapaCompetencias = NovoMapaDeClassificacao()
+    Set mapaEnfases = NovoMapaDeClassificacao()
 
-        For indiceLinha = LBound(linhasNome) To UBound(linhasNome)
+    For Each chave In componentesFluxo.Keys
 
-            LerTituloDoBlocoNaPlanilha _
-                ws, _
-                CLng(linhasNome(indiceLinha)), _
-                CLng(colunasBase(indiceColuna)), _
-                id, _
+        Set dados = componentesFluxo.item(chave)
+
+        codigo = NormalizarCodigo(dados.item("codigo"))
+
+        anotacao = ObterAnotacaoDoBloco( _
+            wsFlux, _
+            CLng(dados.item("linha_nome")), _
+            CLng(dados.item("coluna_base")))
+
+        If Trim$(anotacao) <> vbNullString Then
+
+            AdicionarCampoDaAnotacaoAoMapa _
+                anotacao, _
+                "Nucleo", _
                 codigo, _
-                nome, _
-                texto
+                mapaNucleos
 
-            If Trim$(texto) <> vbNullString Then
+            AdicionarCampoDaAnotacaoAoMapa _
+                anotacao, _
+                "Area", _
+                codigo, _
+                mapaAreas
+
+            AdicionarCampoDaAnotacaoAoMapa _
+                anotacao, _
+                "Tema", _
+                codigo, _
+                mapaTemas
+
+            AdicionarCampoDaAnotacaoAoMapa _
+                anotacao, _
+                "Conteudo", _
+                codigo, _
+                mapaConteudos
+
+            AdicionarCampoDaAnotacaoAoMapa _
+                anotacao, _
+                "Competencia", _
+                codigo, _
+                mapaCompetencias
+
+            AdicionarCampoDaAnotacaoAoMapa _
+                anotacao, _
+                "EnfasesFormativas", _
+                codigo, _
+                mapaEnfases
+
+        End If
+
+    Next chave
+
+    total = total + ReconstruirColunaComponentesDaAba( _
+        ABA_NUCLEOS, _
+        mapaNucleos)
+
+    total = total + ReconstruirColunaComponentesDaAba( _
+        ABA_AREAS, _
+        mapaAreas)
+
+    total = total + ReconstruirColunaComponentesDaAba( _
+        ABA_TEMAS, _
+        mapaTemas)
+
+    total = total + ReconstruirColunaComponentesDaAba( _
+        ABA_CONTEUDOS, _
+        mapaConteudos)
+
+    total = total + ReconstruirColunaComponentesDaAba( _
+        ABA_COMPETENCIAS, _
+        mapaCompetencias)
+
+    total = total + ReconstruirColunaComponentesDaAba( _
+        ABA_ENFASES_FORMATIVAS, _
+        mapaEnfases)
+
+    ReconstruirComponentesDasClassificacoes = total
+
+End Function
+
+Private Function NovoMapaDeClassificacao() As Object
+
+    Dim mapa As Object
+
+    Set mapa = CreateObject("Scripting.Dictionary")
+    mapa.CompareMode = vbTextCompare
+
+    Set NovoMapaDeClassificacao = mapa
+
+End Function
+
+Private Sub AdicionarCampoDaAnotacaoAoMapa( _
+    ByVal anotacao As String, _
+    ByVal nomeCampo As String, _
+    ByVal codigoDisciplina As String, _
+    ByVal mapa As Object)
+
+    Dim valores As Collection
+    Dim valor As Variant
+    Dim idClassificacao As String
+    Dim conjuntoCodigos As Object
+
+    Set valores = ObterValoresDaAnotacao( _
+        anotacao, _
+        nomeCampo)
+
+    For Each valor In valores
+
+        idClassificacao = Trim$(CStr(valor))
+
+        If idClassificacao <> vbNullString Then
+
+            If Not mapa.Exists(idClassificacao) Then
+
+                Set conjuntoCodigos = CreateObject("Scripting.Dictionary")
+                conjuntoCodigos.CompareMode = vbTextCompare
+
+                mapa.Add idClassificacao, conjuntoCodigos
+
+            Else
+
+                Set conjuntoCodigos = mapa.item(idClassificacao)
+
+            End If
+
+            If Not conjuntoCodigos.Exists(codigoDisciplina) Then
+                conjuntoCodigos.Add codigoDisciplina, True
+            End If
+
+        End If
+
+    Next valor
+
+End Sub
+
+Private Function ObterValoresDaAnotacao( _
+    ByVal anotacao As String, _
+    ByVal nomeCampoProcurado As String) As Collection
+
+    Dim resultado As New Collection
+    Dim linhas As Variant
+    Dim partes As Variant
+
+    Dim linha As Variant
+    Dim parte As Variant
+
+    Dim textoLinha As String
+    Dim nomeCampo As String
+    Dim conteudoCampo As String
+    Dim valor As String
+
+    Dim posDoisPontos As Long
+    Dim dentroDoCampo As Boolean
+    Dim campoProcurado As String
+
+    campoProcurado = NormalizarNomeCampoAnotacao(nomeCampoProcurado)
+
+    anotacao = Replace(anotacao, vbCrLf, vbLf)
+    anotacao = Replace(anotacao, vbCr, vbLf)
+
+    linhas = Split(anotacao, vbLf)
+
+    For Each linha In linhas
+
+        textoLinha = Trim$(CStr(linha))
+
+        If textoLinha <> vbNullString Then
+
+            posDoisPontos = InStr(1, textoLinha, ":", vbBinaryCompare)
+
+            If posDoisPontos > 0 Then
+
+                nomeCampo = Trim$( _
+                    Left$(textoLinha, posDoisPontos - 1))
+
+                dentroDoCampo = _
+                    (StrComp( _
+                        NormalizarNomeCampoAnotacao(nomeCampo), _
+                        campoProcurado, _
+                        vbTextCompare) = 0)
+
+                If dentroDoCampo Then
+
+                    conteudoCampo = Trim$( _
+                        Mid$(textoLinha, posDoisPontos + 1))
+
+                    AdicionarValoresSeparados _
+                        resultado, _
+                        conteudoCampo
+
+                End If
+
+            ElseIf dentroDoCampo Then
+
+                ' Compatibilidade com anotações antigas em várias linhas:
+                ' CONTEUDO:
+                ' • ITEM1
+                ' • ITEM2
+                valor = RemoverMarcadorDeAnotacao(textoLinha)
+
+                AdicionarValoresSeparados _
+                    resultado, _
+                    valor
+
+            End If
+
+        End If
+
+    Next linha
+
+    Set ObterValoresDaAnotacao = resultado
+
+End Function
+
+Private Sub AdicionarValoresSeparados( _
+    ByRef destino As Collection, _
+    ByVal texto As String)
+
+    Dim partes As Variant
+    Dim parte As Variant
+    Dim valor As String
+
+    texto = Trim$(texto)
+
+    If texto = vbNullString Then Exit Sub
+
+    partes = Split(texto, ";")
+
+    For Each parte In partes
+
+        valor = Trim$(CStr(parte))
+        valor = RemoverMarcadorDeAnotacao(valor)
+
+        If valor <> vbNullString Then
+            destino.Add valor
+        End If
+
+    Next parte
+
+End Sub
+
+Private Function RemoverMarcadorDeAnotacao( _
+    ByVal texto As String) As String
+
+    Dim resultado As String
+
+    resultado = Trim$(texto)
+
+    If resultado = vbNullString Then
+        RemoverMarcadorDeAnotacao = vbNullString
+        Exit Function
+    End If
+
+    If Left$(resultado, 1) = ChrW(&H2022) Then
+        resultado = Trim$(Mid$(resultado, 2))
+    ElseIf Left$(resultado, 1) = "-" Then
+        resultado = Trim$(Mid$(resultado, 2))
+    End If
+
+    RemoverMarcadorDeAnotacao = resultado
+
+End Function
+
+Private Function NormalizarNomeCampoAnotacao( _
+    ByVal texto As String) As String
+
+    Dim resultado As String
+
+    resultado = NormalizarTextoComparacao(texto)
+
+    resultado = Replace(resultado, " ", vbNullString)
+    resultado = Replace(resultado, "_", vbNullString)
+    resultado = Replace(resultado, "-", vbNullString)
+
+    NormalizarNomeCampoAnotacao = resultado
+
+End Function
+
+Private Function ObterAnotacaoDoBloco( _
+    ByVal ws As Worksheet, _
+    ByVal linhaNome As Long, _
+    ByVal colunaBase As Long) As String
+
+    Dim linha As Long
+    Dim coluna As Long
+
+    Dim celula As Range
+    Dim alvo As Range
+    Dim chave As String
+
+    Dim areasLidas As Object
+    Dim textoComentario As String
+
+    Set areasLidas = CreateObject("Scripting.Dictionary")
+    areasLidas.CompareMode = vbTextCompare
+
+    ' O título pode ocupar até três linhas e cinco colunas.
+    ' A nota pode estar vinculada a qualquer célula/área mesclada desse título.
+    For linha = linhaNome To linhaNome + 2
+
+        For coluna = colunaBase To colunaBase + LARGURA_BLOCO - 1
+
+            Set celula = ws.Cells(linha, coluna)
+
+            If celula.MergeCells Then
+                Set alvo = celula.MergeArea.Cells(1, 1)
+            Else
+                Set alvo = celula
+            End If
+
+            chave = alvo.Address(False, False)
+
+            If Not areasLidas.Exists(chave) Then
+
+                areasLidas.Add chave, True
+
+                textoComentario = vbNullString
+
+                On Error Resume Next
+
+                If Not alvo.Comment Is Nothing Then
+                    textoComentario = CStr(alvo.Comment.Text)
+                End If
+
+                On Error GoTo 0
+
+                If Trim$(textoComentario) <> vbNullString Then
+                    ObterAnotacaoDoBloco = textoComentario
+                    Exit Function
+                End If
+
+            End If
+
+        Next coluna
+
+    Next linha
+
+    ObterAnotacaoDoBloco = vbNullString
+
+End Function
+
+Private Function ReconstruirColunaComponentesDaAba( _
+    ByVal nomeAba As String, _
+    ByVal mapaClassificacao As Object) As Long
+
+    Dim ws As Worksheet
+    Dim cabecalhos As Object
+
+    Dim colunaID As Long
+    Dim colunaComponentes As Long
+    Dim ultimaLinha As Long
+    Dim linha As Long
+
+    Dim idLinha As String
+    Dim idMapa As Variant
+
+    Dim idsExistentes As Object
+    Dim conjuntoCodigos As Object
+
+    Dim alvo As Range
+    Dim enderecoAlvo As String
+    Dim alvosProcessados As Object
+
+    Dim novoTexto As String
+    Dim valorAnterior As String
+    Dim totalAlteradas As Long
+
+    Set ws = ObterPlanilhaObrigatoria( _
+        ThisWorkbook, _
+        nomeAba)
+
+    Set cabecalhos = MapearCabecalhos( _
+        ws, _
+        LINHA_CABECALHO_COMPONENTES)
+
+    If Not cabecalhos.Exists(CABECALHO_ID_CLASSIFICACAO) Then
+
+        Err.Raise vbObjectError + 1110, _
+                  "ReconstruirColunaComponentesDaAba", _
+                  "A aba """ & nomeAba & _
+                  """ não possui a coluna ""id""."
+
+    End If
+
+    If Not cabecalhos.Exists(CABECALHO_COMPONENTES_CLASSIFICACAO) Then
+
+        Err.Raise vbObjectError + 1111, _
+                  "ReconstruirColunaComponentesDaAba", _
+                  "A aba """ & nomeAba & _
+                  """ não possui a coluna ""componentes""."
+
+    End If
+
+    colunaID = CLng(cabecalhos.item(CABECALHO_ID_CLASSIFICACAO))
+    colunaComponentes = _
+        CLng(cabecalhos.item(CABECALHO_COMPONENTES_CLASSIFICACAO))
+
+    ultimaLinha = UltimaLinhaPorColuna(ws, colunaID)
+
+    Set idsExistentes = CreateObject("Scripting.Dictionary")
+    idsExistentes.CompareMode = vbTextCompare
+
+    Set alvosProcessados = CreateObject("Scripting.Dictionary")
+    alvosProcessados.CompareMode = vbTextCompare
+
+    ' Primeiro valida e indexa todos os IDs existentes na aba.
+    For linha = LINHA_CABECALHO_COMPONENTES + 1 To ultimaLinha
+
+        idLinha = NormalizarId( _
+            ValorDaCelulaMesclada( _
+                ws.Cells(linha, colunaID)))
+
+        If idLinha <> vbNullString Then
+
+            If idsExistentes.Exists(idLinha) Then
+
+                Err.Raise vbObjectError + 1112, _
+                          "ReconstruirColunaComponentesDaAba", _
+                          "ID duplicado na aba """ & nomeAba & _
+                          """: """ & idLinha & """."
+
+            End If
+
+            idsExistentes.Add idLinha, linha
+
+        End If
+
+    Next linha
+
+    ' Se a anotação mencionar um ID inexistente, interrompe em vez de
+    ' descartar silenciosamente a classificação.
+    For Each idMapa In mapaClassificacao.Keys
+
+        If Not idsExistentes.Exists(CStr(idMapa)) Then
+
+            Err.Raise vbObjectError + 1113, _
+                      "ReconstruirColunaComponentesDaAba", _
+                      "A anotação de uma disciplina referencia o ID """ & _
+                      CStr(idMapa) & """ em """ & nomeAba & _
+                      """, mas esse ID não existe na coluna ""id"" dessa aba."
+
+        End If
+
+    Next idMapa
+
+    ' Sempre apaga e recompõe a coluna componentes.
+    For linha = LINHA_CABECALHO_COMPONENTES + 1 To ultimaLinha
+
+        idLinha = NormalizarId( _
+            ValorDaCelulaMesclada( _
+                ws.Cells(linha, colunaID)))
+
+        If idLinha <> vbNullString Then
+
+            Set alvo = ws.Cells(linha, colunaComponentes)
+
+            If alvo.MergeCells Then
+                Set alvo = alvo.MergeArea.Cells(1, 1)
+            End If
+
+            enderecoAlvo = alvo.Address(False, False)
+
+            If Not alvosProcessados.Exists(enderecoAlvo) Then
+
+                alvosProcessados.Add enderecoAlvo, True
+
+                valorAnterior = CStr(alvo.Value2)
+
+                ' Apaga sempre o conteúdo antigo antes de montar o novo.
+                alvo.ClearContents
+
+                novoTexto = vbNullString
+
+                If mapaClassificacao.Exists(idLinha) Then
+
+                    Set conjuntoCodigos = _
+                        mapaClassificacao.item(idLinha)
+
+                    novoTexto = JuntarConjuntoOrdenado( _
+                        conjuntoCodigos, _
+                        " | ")
+
+                End If
+
+                If novoTexto <> vbNullString Then
+                    alvo.Value = novoTexto
+                End If
 
                 If StrComp( _
-                    id, _
-                    idProcurado, _
-                    vbTextCompare) = 0 Then
+                    Trim$(valorAnterior), _
+                    Trim$(novoTexto), _
+                    vbBinaryCompare) <> 0 Then
 
-                    colunaBaseEncontrada = _
-                        CLng(colunasBase(indiceColuna))
-
-                    linhaNomeEncontrada = _
-                        CLng(linhasNome(indiceLinha))
-
-                    LocalizarBlocoPorId = True
-                    Exit Function
+                    totalAlteradas = totalAlteradas + 1
 
                 End If
 
             End If
 
-        Next indiceLinha
-
-    Next indiceColuna
-
-    LocalizarBlocoPorId = False
-
-End Function
-
-Private Function TextoDaCelulaEAnotacao( _
-    ByVal celula As Range) As String
-
-    Dim resultado As String
-    Dim textoComentario As String
-
-    resultado = CStr(ValorDaCelulaMesclada(celula))
-
-    On Error Resume Next
-
-    If Not celula.Comment Is Nothing Then
-        textoComentario = celula.Comment.Text
-    End If
-
-    On Error GoTo 0
-
-    If textoComentario <> vbNullString Then
-
-        If resultado <> vbNullString Then
-            resultado = resultado & " "
         End If
 
-        resultado = resultado & textoComentario
+    Next linha
 
-    End If
-
-    TextoDaCelulaEAnotacao = resultado
-
-End Function
-
-Private Function IdentificarCampoCargaNoTexto( _
-    ByVal texto As String) As String
-
-    Dim normalizado As String
-
-    normalizado = " " & NormalizarTextoParaTokens(texto) & " "
-
-    If InStr(1, normalizado, " chp ", vbTextCompare) > 0 Then
-
-        IdentificarCampoCargaNoTexto = "chp"
-
-    ElseIf InStr(1, normalizado, " chd ", vbTextCompare) > 0 Then
-
-        IdentificarCampoCargaNoTexto = "chd"
-
-    ElseIf InStr(1, normalizado, " che ", vbTextCompare) > 0 Then
-
-        IdentificarCampoCargaNoTexto = "che"
-
-    ElseIf InStr(1, normalizado, " cht ", vbTextCompare) > 0 Then
-
-        IdentificarCampoCargaNoTexto = "cht"
-
-    ElseIf InStr(1, normalizado, " total ", vbTextCompare) > 0 _
-        Or InStr(1, normalizado, " tot ", vbTextCompare) > 0 Then
-
-        IdentificarCampoCargaNoTexto = "tot"
-
-    Else
-
-        IdentificarCampoCargaNoTexto = vbNullString
-
-    End If
+    ReconstruirColunaComponentesDaAba = totalAlteradas
 
 End Function
 
@@ -1374,7 +1821,7 @@ Private Sub ValidarMapaDeRelacoes( _
 
     For Each idDono In mapa.Keys
 
-        Set lista = mapa.Item(idDono)
+        Set lista = mapa.item(idDono)
 
         For Each idReq In lista.Keys
 
@@ -1442,7 +1889,7 @@ Private Function MapearCabecalhos( _
                           "Cabeçalho duplicado na aba " & _
                           ws.Name & ": """ & nome & _
                           """ nas colunas " & _
-                          mapa.Item(nome) & " e " & coluna & "."
+                          mapa.item(nome) & " e " & coluna & "."
 
             End If
 
@@ -1526,7 +1973,7 @@ Private Function CarregarLinhasComponentes( _
                           "Código duplicado na aba Componentes: """ & _
                           codigo & """." & vbNewLine & _
                           "Linhas: " & _
-                          mapa.Item(codigo) & " e " & linha & "."
+                          mapa.item(codigo) & " e " & linha & "."
 
             End If
 
@@ -1572,18 +2019,18 @@ Private Function SincronizarCamposDoComponente( _
         total = total + AtualizarCelulaSeDiferente( _
             ws.Cells( _
                 linhaDestino, _
-                cabecalhos.Item(CStr(campo))), _
-            dados.Item(CStr(campo)))
+                cabecalhos.item(CStr(campo))), _
+            dados.item(CStr(campo)))
 
     Next campo
 
     total = total + AtualizarCampoLogico( _
         ws.Cells( _
             linhaDestino, _
-            cabecalhos.Item("ativo")), _
-        CBool(dados.Item("ativo")), _
+            cabecalhos.item("ativo")), _
+        CBool(dados.item("ativo")), _
         "ativo", _
-        CStr(dados.Item("codigo")))
+        CStr(dados.item("codigo")))
 
     SincronizarCamposDoComponente = total
 
@@ -1993,7 +2440,7 @@ Private Sub AdicionarRelacaoUnica( _
 
     Else
 
-        Set lista = mapa.Item(idDono)
+        Set lista = mapa.item(idDono)
 
     End If
 
@@ -2019,7 +2466,7 @@ Private Function ObterListaCodigosOrdenada( _
         Exit Function
     End If
 
-    Set listaRequisitos = mapa.Item(idDono)
+    Set listaRequisitos = mapa.item(idDono)
 
     Set valoresSaida = CreateObject("Scripting.Dictionary")
     valoresSaida.CompareMode = vbTextCompare
@@ -2043,10 +2490,10 @@ Private Function ObterListaCodigosOrdenada( _
             End If
 
             Set dadosRequisito = _
-                componentesFluxo.Item(CStr(requisito))
+                componentesFluxo.item(CStr(requisito))
 
             valorSaida = _
-                NormalizarCodigo(dadosRequisito.Item("codigo"))
+                NormalizarCodigo(dadosRequisito.item("codigo"))
 
             If valorSaida = vbNullString Then
 
@@ -2083,7 +2530,7 @@ Private Function ContarRelacoes( _
 
     For Each idDono In mapa.Keys
 
-        Set lista = mapa.Item(idDono)
+        Set lista = mapa.item(idDono)
         total = total + lista.Count
 
     Next idDono
@@ -2748,4 +3195,3 @@ Private Function JuntarConjuntoOrdenado( _
     JuntarConjuntoOrdenado = resultado
 
 End Function
-

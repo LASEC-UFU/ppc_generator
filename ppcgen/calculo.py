@@ -44,10 +44,13 @@ _NOMES_AGREGADOR_OPTATIVO = {"modulo optativo", "carga optativa", "pool optativo
 
 def eh_agregador_optativo(nome: str) -> bool:
     """Identifica a linha-resumo (ex.: "MÓDULO OPTATIVO") que representa a
-    carga horária optativa mínima do curso — não é uma disciplina cursável,
-    por isso deve estar sempre ``ativo=False`` na aba ``Componentes``
-    (``ppcgen.validadores.cargas.COMPONENTE_AGREGADOR_OPTATIVO`` reporta
-    erro caso apareça ativa e do tipo ``carga_optativa``)."""
+    carga horária optativa mínima do curso — não é uma disciplina cursável.
+    O que a distingue de uma disciplina real é o **nome** (reconhecido
+    aqui), não o campo ``ativo`` nem o ``tipo``: ela pode estar cadastrada
+    como ``ativo=True`` (é uma decisão de cada perfil) sem que isso afete
+    nenhum cálculo — :func:`componentes_oficiais` e a soma do pool real de
+    optativas (``ppcgen.validadores.cargas``) sempre a excluem por nome,
+    para que sua carga só entre uma vez, via :func:`carga_optativa_minima`."""
 
     normalizado = "".join(
         caractere
@@ -63,8 +66,10 @@ def carga_optativa_minima(curriculo: Curriculo) -> int | None:
     ``carga_total`` do componente agregador ("MÓDULO OPTATIVO" ou
     equivalente) cadastrado na aba ``Componentes`` — única fonte deste
     valor (não há campo correspondente na aba ``Perfil``). Busca em todos
-    os componentes, ativos ou não, já que o agregador é deliberadamente
-    inativo. ``None`` quando nenhum componente agregador está cadastrado."""
+    os componentes, ativos ou não — o agregador pode estar ``ativo=True``
+    ou ``False`` livremente, o que importa é o nome (ver
+    :func:`eh_agregador_optativo`). ``None`` quando nenhum componente
+    agregador está cadastrado."""
 
     for c in curriculo.componentes:
         if eh_agregador_optativo(c.nome):
@@ -79,9 +84,21 @@ def carga_por_tipo(curriculo: Curriculo, tipo: TipoComponente) -> int:
 def componentes_oficiais(curriculo: Curriculo) -> list[ComponenteCurricular]:
     """Componentes ativos que contam integralmente no total do curso — todo
     tipo exceto ``carga_optativa`` (cujo pool só entra pelo mínimo exigido,
-    ver :func:`carga_horaria_oficial`)."""
+    ver :func:`carga_horaria_oficial`).
 
-    return [c for c in curriculo.ativos() if c.tipo != TipoComponente.CARGA_OPTATIVA]
+    Exclui também o componente agregador ("MÓDULO OPTATIVO") por nome,
+    esteja ele ``ativo=True`` ou ``False`` e qualquer que seja seu
+    ``tipo``: sem essa exclusão por nome, um agregador ativo (estado
+    plenamente válido — o campo ``ativo`` não o distingue de uma
+    disciplina real, o nome distingue) seria contado aqui E de novo via
+    :func:`carga_optativa_minima`, inflando a carga horária oficial em
+    exatamente a carga do agregador (bug real já visto neste projeto)."""
+
+    return [
+        c
+        for c in curriculo.ativos()
+        if c.tipo != TipoComponente.CARGA_OPTATIVA and not eh_agregador_optativo(c.nome)
+    ]
 
 
 def carga_horaria_oficial(curriculo: Curriculo) -> int:

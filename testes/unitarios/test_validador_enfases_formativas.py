@@ -6,9 +6,13 @@ from ppcgen.validadores.enfases_formativas import validar_enfases_formativas
 from testes.conftest import componente, construir_perfil
 
 
-def _referenciais(*siglas_nomes: tuple[str, str]) -> ReferenciaisCurso:
+def _referenciais(*siglas_nomes: tuple[str, str], componentes: dict[str, list[str]] | None = None) -> ReferenciaisCurso:
+    componentes = componentes or {}
     return ReferenciaisCurso(
-        enfases_formativas=[EnfaseFormativa(id=sigla, nome=nome, sigla=sigla) for sigla, nome in siglas_nomes]
+        enfases_formativas=[
+            EnfaseFormativa(id=sigla, nome=nome, sigla=sigla, componentes=componentes.get(sigla, []))
+            for sigla, nome in siglas_nomes
+        ]
     )
 
 
@@ -23,53 +27,6 @@ def test_sem_enfases_cadastradas_nao_valida_nada():
     curriculo = Curriculo(versao="t", componentes=[componente("A1", nome="Cálculo I")])
     resultado = validar_enfases_formativas(curriculo, perfil, ReferenciaisCurso())
     assert resultado.mensagens == []
-
-
-def test_nomenclatura_invalida_nome_ausente_apos_dois_pontos():
-    referenciais = _referenciais(("MIAPI", "Máquinas Inteligentes"))
-    curriculo = Curriculo(versao="t", componentes=[componente("M1", nome="MIAPI 1:")])
-    resultado = validar_enfases_formativas(curriculo, _perfil(), referenciais)
-    assert any(m.codigo_regra == "ENFASE_FORMATIVA_NOMENCLATURA_INVALIDA" for m in resultado.erros)
-
-
-def test_sigla_inexistente_gera_erro():
-    referenciais = _referenciais(("MIAPI", "Máquinas Inteligentes"))
-    curriculo = Curriculo(versao="t", componentes=[componente("M1", nome="RASC 1: Controle Robusto")])
-    resultado = validar_enfases_formativas(curriculo, _perfil(), referenciais)
-    assert any(m.codigo_regra == "ENFASE_FORMATIVA_SIGLA_INEXISTENTE" for m in resultado.erros)
-
-
-def test_numero_invalido_gera_erro():
-    referenciais = _referenciais(("MIAPI", "Máquinas Inteligentes"))
-    curriculo = Curriculo(versao="t", componentes=[componente("M1", nome="MIAPI 0: Nome Qualquer")])
-    resultado = validar_enfases_formativas(curriculo, _perfil(), referenciais)
-    assert any(m.codigo_regra == "ENFASE_FORMATIVA_NUMERO_INVALIDO" for m in resultado.erros)
-
-
-def test_numero_duplicado_gera_erro():
-    referenciais = _referenciais(("MIAPI", "Máquinas Inteligentes"))
-    curriculo = Curriculo(
-        versao="t",
-        componentes=[
-            componente("M1", nome="MIAPI 1: Primeira"),
-            componente("M2", nome="MIAPI 1: Segunda"),
-        ],
-    )
-    resultado = validar_enfases_formativas(curriculo, _perfil(), referenciais)
-    assert any(m.codigo_regra == "ENFASE_FORMATIVA_NUMERO_DUPLICADO" for m in resultado.erros)
-
-
-def test_sequencia_inconsistente_gera_alerta():
-    referenciais = _referenciais(("MIAPI", "Máquinas Inteligentes"))
-    curriculo = Curriculo(
-        versao="t",
-        componentes=[
-            componente("M1", nome="MIAPI 1: Primeira"),
-            componente("M2", nome="MIAPI 3: Terceira"),
-        ],
-    )
-    resultado = validar_enfases_formativas(curriculo, _perfil(), referenciais)
-    assert any(m.codigo_regra == "ENFASE_FORMATIVA_SEQUENCIA_INCONSISTENTE" for m in resultado.alertas)
 
 
 def test_enfase_sem_componentes_gera_alerta():
@@ -100,35 +57,55 @@ def test_carga_minima_ausente_gera_erro():
 
 
 def test_carga_insuficiente_gera_erro():
-    referenciais = _referenciais(("MIAPI", "Máquinas Inteligentes"))
+    referenciais = _referenciais(("MIAPI", "Máquinas Inteligentes"), componentes={"MIAPI": ["M1"]})
     curriculo = Curriculo(
         versao="t",
-        componentes=[componente("M1", nome="MIAPI 1: Primeira", tot=60, enfase_formativa_id="MIAPI")],
+        componentes=[componente("M1", nome="Primeira", tot=60, enfases_formativas=["MIAPI"])],
     )
     resultado = validar_enfases_formativas(curriculo, _perfil(minimas=1, carga_minima=400), referenciais)
     assert any(m.codigo_regra == "ENFASE_FORMATIVA_CARGA_INSUFICIENTE" for m in resultado.erros)
 
 
 def test_integralizacao_inviavel_gera_erro():
-    referenciais = _referenciais(("MIAPI", "Máquinas Inteligentes"), ("RASC", "Robótica"))
+    referenciais = _referenciais(
+        ("MIAPI", "Máquinas Inteligentes"), ("RASC", "Robótica"), componentes={"MIAPI": ["M1"]}
+    )
     curriculo = Curriculo(
         versao="t",
-        componentes=[componente("M1", nome="MIAPI 1: Primeira", tot=60, enfase_formativa_id="MIAPI")],
+        componentes=[componente("M1", nome="Primeira", tot=60, enfases_formativas=["MIAPI"])],
     )
     resultado = validar_enfases_formativas(curriculo, _perfil(minimas=2, carga_minima=400), referenciais)
     assert any(m.codigo_regra == "ENFASES_FORMATIVAS_INTEGRALIZACAO_INVIAVEL" for m in resultado.erros)
 
 
 def test_caminho_feliz_sem_mensagens():
-    referenciais = _referenciais(("MIAPI", "Máquinas Inteligentes"), ("RASC", "Robótica"))
+    referenciais = _referenciais(
+        ("MIAPI", "Máquinas Inteligentes"),
+        ("RASC", "Robótica"),
+        componentes={"MIAPI": ["M1", "M2"], "RASC": ["R1", "R2"]},
+    )
     curriculo = Curriculo(
         versao="t",
         componentes=[
-            componente("M1", nome="MIAPI 1: Primeira", tot=60, enfase_formativa_id="MIAPI"),
-            componente("M2", nome="MIAPI 2: Segunda", tot=60, enfase_formativa_id="MIAPI"),
-            componente("R1", nome="RASC 1: Primeira", tot=60, enfase_formativa_id="RASC"),
-            componente("R2", nome="RASC 2: Segunda", tot=60, enfase_formativa_id="RASC"),
+            componente("M1", nome="Primeira", tot=60, enfases_formativas=["MIAPI"]),
+            componente("M2", nome="Segunda", tot=60, enfases_formativas=["MIAPI"]),
+            componente("R1", nome="Primeira", tot=60, enfases_formativas=["RASC"]),
+            componente("R2", nome="Segunda", tot=60, enfases_formativas=["RASC"]),
         ],
+    )
+    resultado = validar_enfases_formativas(curriculo, _perfil(minimas=2, carga_minima=120), referenciais)
+    assert resultado.mensagens == []
+
+
+def test_componente_pertence_a_mais_de_uma_enfase_conta_para_ambas():
+    referenciais = _referenciais(
+        ("MIAPI", "Máquinas Inteligentes"),
+        ("RASC", "Robótica"),
+        componentes={"MIAPI": ["M1"], "RASC": ["M1"]},
+    )
+    curriculo = Curriculo(
+        versao="t",
+        componentes=[componente("M1", nome="Compartilhada", tot=120, enfases_formativas=["MIAPI", "RASC"])],
     )
     resultado = validar_enfases_formativas(curriculo, _perfil(minimas=2, carga_minima=120), referenciais)
     assert resultado.mensagens == []

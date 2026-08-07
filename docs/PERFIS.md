@@ -74,7 +74,9 @@ curso.municipio                             ...
 curso.estado                                ...
 
 curriculo.carga_horaria_total               3450
-curriculo.carga_optativa_minima             90
+# curriculo.carga_optativa_minima NÃO existe mais como campo daqui — é lida
+# direto da carga_total do componente agregador "MÓDULO OPTATIVO" (inativo)
+# na aba Componentes; ver docs/DICIONARIO_DADOS.md.
 curriculo.carga_extensao                    345
 curriculo.carga_aac                         90
 curriculo.percentual_minimo_extensao        10                 # pontos percentuais (0-100), não fração

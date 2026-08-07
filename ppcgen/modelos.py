@@ -137,19 +137,21 @@ class EnfaseFormativa:
     com :class:`AreaFormacao`, que é taxonomia de conteúdo sem exigência de
     integralização associada.
 
-    Catálogo puramente descritivo: NÃO tem coluna/campo ``componentes`` —
-    ao contrário de ``NucleoCurricular``/``AreaFormacao``/etc., o vínculo
-    entre um componente e sua ênfase não é cadastrado aqui, para não criar
-    uma segunda fonte de verdade. É inferido do próprio nome do componente
-    (padrão ``SIGLA NÚMERO: Nome da disciplina`` — ver
-    ``ppcgen.utilitarios.textos.analisar_prefixo_enfase_formativa`` e
-    ``ComponenteCurricular.enfase_formativa_id``)."""
+    Ver :attr:`AreaFormacao.componentes` — mesmo papel para
+    ``ComponenteCurricular.enfases_formativas`` (N:N: um componente pode
+    pertencer a mais de uma ênfase)."""
 
     id: str
     nome: str
     sigla: str = ""
     conteudos_estruturantes: str = ""
     aderencia_profissional: str = ""
+    componentes: list[str] = field(default_factory=list)
+    """Códigos de componente declarados na célula ``componentes`` desta
+    linha (aba ``EnfasesFormativas``), brutos — não filtrados contra a aba
+    ``Componentes``; ``ppcgen.validadores.referenciais`` reporta os que não
+    existem. Usado para montar ``ComponenteCurricular.enfases_formativas``
+    no leitor (``ppcgen.leitores.excel``)."""
 
 
 @dataclass
@@ -325,14 +327,14 @@ class ComponenteCurricular:
     competencias: list[str] = field(default_factory=list)
     conteudos: list[str] = field(default_factory=list)
     temas_transversais: list[str] = field(default_factory=list)
-    enfase_formativa_id: str | None = None
-    """Id da ênfase formativa (aba ``EnfasesFormativas``) inferido do nome
-    do componente pelo padrão ``SIGLA NÚMERO: Nome`` — cardinalidade 1
-    (cada componente tem no máximo um prefixo de ênfase), ao contrário de
-    ``areas``/``competencias``/``conteudos``/``temas_transversais`` acima,
-    que são N:N. Preenchido por
-    ``ppcgen.leitores.excel._atribuir_enfases_formativas_por_nome``, nunca
-    pela coluna ``componentes`` (que não existe em ``EnfaseFormativa``)."""
+    enfases_formativas: list[str] = field(default_factory=list)
+    """Ids das ênfases formativas (aba ``EnfasesFormativas``) a que este
+    componente pertence — N:N, mesmo padrão de
+    ``areas``/``competencias``/``conteudos``/``temas_transversais`` acima:
+    um componente pode ser pertinente a mais de uma ênfase, e sua carga
+    horária conta integralmente para cada uma. Preenchido em
+    ``ppcgen.leitores.excel._aplicar_vinculos_catalogo`` a partir da coluna
+    ``componentes`` da aba ``EnfasesFormativas``."""
     pre_requisitos: list[PreRequisito] = field(default_factory=list)
     correquisitos: list[Correquisito] = field(default_factory=list)
     observacoes: str = ""

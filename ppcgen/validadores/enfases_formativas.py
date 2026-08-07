@@ -1,14 +1,15 @@
 """Validação das Ênfases Formativas (áreas de formação optativa) — Seção 9.
 
-A vinculação entre um componente curricular e sua ênfase é inferida do
-próprio nome do componente (padrão ``SIGLA NÚMERO: Nome``, ver
-``ppcgen.utilitarios.textos.analisar_prefixo_enfase_formativa``), não de
-nenhuma coluna cadastrada separadamente — este módulo reaplica o mesmo
-parser usado pelo leitor (``ppcgen.leitores.excel``) para reportar, de
-forma fina, os casos em que um componente parece pretender pertencer a uma
-ênfase mas o nome está malformado, além de conferir se a carga horária
-disponível em cada ênfase é suficiente para o mínimo configurado na aba
-``Perfil``.
+A vinculação entre um componente curricular e sua ênfase vem da coluna
+``componentes`` da aba ``EnfasesFormativas`` (mesmo padrão de
+``Nucleos``/``Areas``/``Temas``/``Competencias``) — ver
+``ppcgen.leitores.excel._aplicar_vinculos_catalogo``. As checagens sobre
+essa relação (código inexistente, componente reivindicado por mais de uma
+ênfase) vivem em ``ppcgen.validadores.referenciais``, junto das checagens
+equivalentes dos demais catálogos; este módulo cuida apenas do que é
+específico de ênfases: se a carga horária disponível em cada uma é
+suficiente para o mínimo configurado na aba ``Perfil``, e se esse mínimo é
+alcançável em número suficiente de ênfases.
 """
 
 from __future__ import annotations
@@ -17,7 +18,6 @@ from collections import defaultdict
 
 from ppcgen.config import Perfil
 from ppcgen.modelos import AlertaValidacao, Curriculo, ErroValidacao, ReferenciaisCurso, ResultadoValidacao
-from ppcgen.utilitarios.textos import analisar_prefixo_enfase_formativa
 
 
 def validar_enfases_formativas(
@@ -27,78 +27,11 @@ def validar_enfases_formativas(
     if not referenciais.enfases_formativas:
         return resultado  # curso não usa o mecanismo (ex.: Tecnólogo) — nada a checar
 
-    siglas_cadastradas = {e.sigla: e for e in referenciais.enfases_formativas if e.sigla}
     ativos = curriculo.ativos()
-
-    contagem_numeros: dict[tuple[str, int], list[str]] = defaultdict(list)
-    numeros_por_sigla: dict[str, list[int]] = defaultdict(list)
-
-    for c in ativos:
-        prefixo = analisar_prefixo_enfase_formativa(c.nome)
-        if prefixo is None:
-            continue  # disciplina comum, sem prefixo de ênfase — não é erro
-
-        if not prefixo.nome_disciplina:
-            resultado.adicionar(
-                ErroValidacao(
-                    "ENFASE_FORMATIVA_NOMENCLATURA_INVALIDA",
-                    f"componente '{c.codigo}' (nome '{c.nome}') parece ter prefixo de ênfase "
-                    "formativa, mas não tem denominação após os dois-pontos.",
-                    componente=c.codigo,
-                )
-            )
-            continue
-
-        if prefixo.sigla not in siglas_cadastradas:
-            resultado.adicionar(
-                ErroValidacao(
-                    "ENFASE_FORMATIVA_SIGLA_INEXISTENTE",
-                    f"componente '{c.codigo}' (nome '{c.nome}') usa a sigla '{prefixo.sigla}', que "
-                    "não está cadastrada na aba EnfasesFormativas.",
-                    componente=c.codigo,
-                )
-            )
-            continue
-
-        if prefixo.numero_valido is None:
-            resultado.adicionar(
-                ErroValidacao(
-                    "ENFASE_FORMATIVA_NUMERO_INVALIDO",
-                    f"componente '{c.codigo}' (nome '{c.nome}') tem número de ênfase inválido "
-                    f"('{prefixo.numero_bruto}') — deve ser um inteiro positivo (1, 2, 3...).",
-                    componente=c.codigo,
-                )
-            )
-            continue
-
-        contagem_numeros[(prefixo.sigla, prefixo.numero_valido)].append(c.codigo)
-        numeros_por_sigla[prefixo.sigla].append(prefixo.numero_valido)
-
-    for (sigla, numero), codigos in contagem_numeros.items():
-        if len(codigos) > 1:
-            resultado.adicionar(
-                ErroValidacao(
-                    "ENFASE_FORMATIVA_NUMERO_DUPLICADO",
-                    f"mais de um componente usa '{sigla} {numero}': {', '.join(sorted(codigos))}.",
-                )
-            )
-
-    for sigla, numeros in numeros_por_sigla.items():
-        numeros_unicos = sorted(set(numeros))
-        esperado = list(range(1, len(numeros_unicos) + 1))
-        if numeros_unicos != esperado:
-            resultado.adicionar(
-                AlertaValidacao(
-                    "ENFASE_FORMATIVA_SEQUENCIA_INCONSISTENTE",
-                    f"numeração da ênfase '{sigla}' tem lacunas ou não começa em 1: "
-                    f"{numeros_unicos} (esperado {esperado}).",
-                )
-            )
-
     carga_por_enfase: dict[str, int] = defaultdict(int)
     for c in ativos:
-        if c.enfase_formativa_id is not None:
-            carga_por_enfase[c.enfase_formativa_id] += c.carga_total
+        for enfase_id in c.enfases_formativas:
+            carga_por_enfase[enfase_id] += c.carga_total
 
     for enfase in referenciais.enfases_formativas:
         if carga_por_enfase.get(enfase.id, 0) == 0:
@@ -106,7 +39,7 @@ def validar_enfases_formativas(
                 AlertaValidacao(
                     "ENFASE_FORMATIVA_SEM_COMPONENTES",
                     f"ênfase formativa '{enfase.id}' ({enfase.nome}) não tem nenhum componente "
-                    "ativo vinculado pelo nome (padrão 'SIGLA NÚMERO: Nome').",
+                    "ativo vinculado na coluna 'componentes' da aba EnfasesFormativas.",
                 )
             )
 

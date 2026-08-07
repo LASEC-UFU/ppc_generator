@@ -9,8 +9,10 @@ def test_carga_horaria_oficial_exclui_pool_de_optativas_nao_escolhidas():
     componentes = [
         componente("A1", cht=100, tot=100),  # obrigatória
         # "MÓDULO OPTATIVO" é o componente agregador que carrega a carga
-        # horária optativa mínima do curso — sempre inativo, nunca uma
-        # disciplina cursável (ver ppcgen.calculo.carga_optativa_minima).
+        # horária optativa mínima do curso — nunca uma disciplina cursável,
+        # mas isso é reconhecido pelo NOME (ver
+        # ppcgen.calculo.eh_agregador_optativo), não pelo campo `ativo`: ele
+        # pode estar ativo=True ou False livremente, sem afetar o cálculo.
         componente("OPT", nome="MÓDULO OPTATIVO", tipo=TipoComponente.CARGA_OPTATIVA, periodo=None, cht=60, tot=60, ativo=False),
         componente("OPT1", tipo=TipoComponente.CARGA_OPTATIVA, periodo=None, cht=60, tot=60),
         componente("OPT2", tipo=TipoComponente.CARGA_OPTATIVA, periodo=None, cht=60, tot=60),
@@ -23,6 +25,34 @@ def test_carga_horaria_oficial_exclui_pool_de_optativas_nao_escolhidas():
     # é bem maior que o total oficial
     assert curriculo.carga_horaria_total() == 100 + 60 * 3
     assert carga_horaria_oficial(curriculo) == 100 + 60  # só o mínimo exigido
+
+
+def test_carga_horaria_oficial_nao_duplica_agregador_ativo_ou_com_outro_tipo():
+    """Regressão: o componente agregador pode estar ``ativo=True`` e com
+    qualquer ``tipo`` — nenhum dos dois campos o torna uma disciplina real,
+    só o nome (ver ``ppcgen.calculo.eh_agregador_optativo``). Mesmo assim,
+    ele não pode ser contado tanto em ``componentes_oficiais`` (por ter
+    ``tipo != carga_optativa``) quanto de novo via
+    ``carga_optativa_minima`` — ``componentes_oficiais`` precisa excluí-lo
+    por nome, não só por tipo/ativo."""
+
+    componentes = [
+        componente("A1", cht=100, tot=100),
+        componente(
+            "OPT",
+            nome="MÓDULO OPTATIVO",
+            tipo=TipoComponente.DISCIPLINA,
+            periodo=None,
+            cht=45,
+            tot=45,
+            ativo=True,
+        ),
+    ]
+    curriculo = Curriculo(versao="t", componentes=componentes)
+
+    assert carga_optativa_minima(curriculo) == 45
+    # 100 (A1) + 45 (mínimo optativo, contado uma única vez) — nunca 190
+    assert carga_horaria_oficial(curriculo) == 145
 
 
 def test_carga_por_tipo_soma_apenas_ativos():

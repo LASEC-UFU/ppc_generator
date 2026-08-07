@@ -46,12 +46,6 @@ Campos adicionais em `instituicao.*` continuam aceitos e ficam disponíveis em
 | `NOME_COM_ASPAS` | INFORMACAO | nome contém `"` (possível artefato de exportação) |
 | `PERIODO_FORA_DO_INTERVALO` | ERRO | `periodo` fora de `1..numero_periodos` |
 
-## Estrutura curricular (`ppcgen.validadores.curriculo.validar_estrutura`)
-
-| Código | Severidade | Condição |
-|---|---|---|
-| `COMPONENTE_OBRIGATORIO_SEM_PERIODO` | ERRO | ativo, tipo que deveria ter período fixo (disciplina/projeto integrador/extensão/certificação — ou seja, `obrigatorio` derivado é `True`), mas `periodo` vazio |
-
 ## Carga horária (`ppcgen.validadores.cargas`)
 
 | Código | Severidade | Condição |
@@ -59,8 +53,7 @@ Campos adicionais em `instituicao.*` continuam aceitos e ficam disponíveis em
 | `CARGA_NEGATIVA` | ERRO | qualquer de CHT/CHP/CHD/CHE/TOT `< 0` |
 | `CARGA_TOTAL_INCONSISTENTE` | ERRO | `TOT ≠ CHT+CHP+CHD+CHE` quando todas as parcelas estão informadas |
 | `CARGA_TOTAL_CURSO_DIVERGENTE` | ERRO | carga oficial calculada (ver `ppcgen/calculo.py`) ≠ `curriculo.carga_horaria_total` configurado |
-| `POOL_OPTATIVAS_INSUFICIENTE` | ERRO | soma dos componentes `tipo=carga_optativa` < carga horária do componente agregador (ver `ppcgen.calculo.carga_optativa_minima`) |
-| `COMPONENTE_AGREGADOR_OPTATIVO` | ERRO | linha **ativa** `tipo=carga_optativa` usa nome agregador (por exemplo, `Módulo Optativo`) em lugar de uma disciplina cursável — o agregador deve estar sempre `ativo=False`; sua `carga_total` é a única fonte da carga horária optativa mínima do curso (não há campo correspondente na aba `Perfil`) |
+| `POOL_OPTATIVAS_INSUFICIENTE` | ERRO | soma dos componentes `tipo=carga_optativa` (excluído o agregador, por nome) < carga horária do componente agregador (ver `ppcgen.calculo.carga_optativa_minima`) |
 | `CARGA_TIPO_DIVERGENTE` | ALERTA | soma de AAC/estágio/TCC na matriz ≠ configurado na aba `Perfil` |
 | `CARGA_MAXIMA_PERIODO_EXCEDIDA` | ERRO | soma de CHT+CHP (carga presencial) de um período > `curriculo.carga_horaria_presencial_maxima_periodo` |
 
@@ -125,10 +118,30 @@ contrário. Ver "Padrão `componentes`" em `docs/DICIONARIO_DADOS.md`.
 | `TEMA_TRANSVERSAL_COMPONENTE_INEXISTENTE` | ERRO | código em `componentes` de uma linha de `Temas` não existe na aba `Componentes` |
 | `CONTEUDO_COMPONENTE_INEXISTENTE` | ERRO | código em `componentes` de uma linha de `Conteudos` não existe na aba `Componentes` |
 | `COMPETENCIA_COMPONENTE_INEXISTENTE` | ERRO | código em `componentes` de uma linha de `Competencias` não existe na aba `Componentes` |
-| `NUCLEO_MULTIPLO_PARA_COMPONENTE` | ERRO | mesmo código aparece em `componentes` de mais de uma linha da aba `Nucleos` — núcleo é cardinalidade 1 |
+| `ENFASE_FORMATIVA_COMPONENTE_INEXISTENTE` | ERRO | código em `componentes` de uma linha de `EnfasesFormativas` não existe na aba `Componentes` |
+| `NUCLEO_MULTIPLO_PARA_COMPONENTE` | ERRO | mesmo código aparece em `componentes` de mais de uma linha da aba `Nucleos` — núcleo é cardinalidade 1 (única relação N:1 deste grupo; área/tema/conteúdo/competência/ênfase formativa são N:N e não geram este tipo de erro) |
 | `COMPETENCIA_OBRIGATORIA_SEM_COBERTURA` | ALERTA | competência com `obrigatoria: true` sem nenhum componente ativo em `componentes` |
 | `TEMA_TRANSVERSAL_OBRIGATORIO_SEM_COBERTURA` | ALERTA | tema com `status: obrigatorio` sem cobertura |
 | `CONTEUDO_OBRIGATORIO_SEM_COBERTURA` | ALERTA | conteúdo com `obrigatorio: true` sem nenhum componente ativo em `componentes` |
+
+## Ênfases formativas (`ppcgen.validadores.enfases_formativas`)
+
+Áreas de formação optativa (aba `EnfasesFormativas`) entre as quais o curso
+pode exigir a integralização de um número mínimo (`curriculo.enfases_formativas_minimas`),
+cada uma com uma carga horária mínima própria (`curriculo.carga_horaria_minima_por_enfase`).
+O vínculo componente ↔ ênfase segue o mesmo padrão `componentes` das demais
+abas de referencial (ver seção anterior) — inclusive a cardinalidade N:N: um
+componente pode contar integralmente para mais de uma ênfase. Curso que não
+cadastra nenhuma linha em `EnfasesFormativas` (ex.: o Tecnólogo) não sofre
+nenhuma destas checagens.
+
+| Código | Severidade | Condição |
+|---|---|---|
+| `ENFASE_FORMATIVA_SEM_COMPONENTES` | ALERTA | ênfase cadastrada sem nenhum componente ativo vinculado em `componentes` |
+| `ENFASES_FORMATIVAS_MINIMAS_INVALIDAS` | ERRO | `curriculo.enfases_formativas_minimas` ausente, `< 1` ou maior que o número de ênfases cadastradas |
+| `ENFASE_FORMATIVA_CARGA_MINIMA_INVALIDA` | ERRO | `curriculo.carga_horaria_minima_por_enfase` ausente ou `<= 0` |
+| `ENFASE_FORMATIVA_CARGA_INSUFICIENTE` | ERRO | soma de `carga_total` dos componentes ativos vinculados a uma ênfase é menor que `carga_horaria_minima_por_enfase` |
+| `ENFASES_FORMATIVAS_INTEGRALIZACAO_INVIAVEL` | ERRO | menos ênfases têm carga suficiente do que `enfases_formativas_minimas` exige |
 
 ## Equivalências (`ppcgen.validadores.prerequisitos.validar_equivalencias`)
 

@@ -102,8 +102,8 @@ class CurriculoConfig:
     """Carga horária mínima, em horas, a cursar EM CADA uma das
     ``enfases_formativas_minimas`` ênfases escolhidas para que o(a)
     estudante seja considerado(a) apto(a) nela — não é a carga horária
-    optativa mínima do curso (``carga_optativa_minima``, que pode exceder
-    ``enfases_formativas_minimas * carga_horaria_minima_por_enfase``,
+    optativa mínima do curso (``ppcgen.calculo.carga_optativa_minima``, que
+    pode exceder ``enfases_formativas_minimas * carga_horaria_minima_por_enfase``,
     sendo o excedente cursado livremente em qualquer ênfase)."""
 
 

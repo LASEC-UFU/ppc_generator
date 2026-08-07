@@ -90,7 +90,7 @@ integrador, estágio, TCC, atividade complementar, optativa...).
 | `codigo` | texto | sim, único | letras/números/`_`/`-`/`!`/`?` | `CTR401` | `CODIGO_DUPLICADO`, `CODIGO_CARACTERES_INVALIDOS` |
 | `nome` | texto | sim | — | `Sistemas de Controle I` | `NOME_OBRIGATORIO` |
 | `tipo` | texto (enum) | sim | `disciplina`, `projeto_integrador`, `extensao`, `estagio`, `tcc`, `atividade_complementar`, `carga_optativa`, `certificacao`, `outro` | `disciplina` | leitor rejeita valor fora do enum (`FormatoInvalido`) |
-| `periodo` | inteiro ou vazio | condicional | `1`..`numero_periodos` | `4` | `PERIODO_FORA_DO_INTERVALO`, `COMPONENTE_OBRIGATORIO_SEM_PERIODO` |
+| `periodo` | inteiro ou vazio | condicional | `1`..`numero_periodos` | `4` | `PERIODO_FORA_DO_INTERVALO` — vazio não é erro: um componente sem período é sempre tratado como `outro` na lógica de tipo (`ComponenteCurricular.tipo_efetivo`), qualquer que seja o `tipo` cadastrado |
 | `ativo` | booleano | sim (recomendado explícito) | `TRUE`/`FALSE` | `TRUE` | célula em branco gera aviso `LEITURA_DADO_OMITIDO` (assume `TRUE`) |
 | `cht` | inteiro ou vazio | não | ≥ 0 | `45` | `CARGA_NEGATIVA`, soma entra em `CARGA_TOTAL_INCONSISTENTE` |
 | `chp` | inteiro ou vazio | não | ≥ 0 | `15` | idem |
@@ -131,11 +131,12 @@ optativa mínima do curso não é um parâmetro da aba `Perfil` — é lida
 diretamente da `carga_total` de um componente-resumo cadastrado na aba
 `Componentes`, cujo `nome` (normalizado, sem acento) seja um de "módulo
 optativo", "carga optativa", "pool optativo" ou "bloco optativo" (ver
-`ppcgen.calculo.eh_agregador_optativo`/`carga_optativa_minima`). Esse
-componente **deve estar sempre `ativo=False`**: não é uma disciplina
-cursável, apenas o valor de referência; se aparecer `ativo=True` com
-`tipo=carga_optativa`, o validador reporta `COMPONENTE_AGREGADOR_OPTATIVO`
-(ver `docs/VALIDACOES.md`). Manter esse valor em dois lugares (a aba
+`ppcgen.calculo.eh_agregador_optativo`/`carga_optativa_minima`). O que o
+distingue de uma disciplina real é o **nome**, não os campos `ativo`/`tipo`
+— ele pode estar `ativo=True` (decisão de cada perfil) sem afetar nenhum
+cálculo: `ppcgen.calculo.componentes_oficiais` e a soma do pool real de
+optativas (`ppcgen.validadores.cargas`) sempre o excluem por nome, para que
+sua carga entre uma única vez. Manter esse valor em dois lugares (a aba
 `Perfil` e este componente) já foi um bug real deste projeto — os dois
 números divergiam sempre que só um era atualizado —, por isso a aba
 `Perfil` não tem mais campo equivalente.
@@ -175,9 +176,9 @@ via `gerado/tab_disciplinas_equivalentes.tex` (só escrito se houver ao
 menos uma equivalência). Não existe mais um arquivo `equivalencias.xlsx`
 separado — tudo fica nesta aba.
 
-### Padrão `componentes` (comum a `Nucleos`/`Areas`/`Temas`/`Conteudos`/`Competencias`)
+### Padrão `componentes` (comum a `Nucleos`/`Areas`/`Temas`/`Conteudos`/`Competencias`/`EnfasesFormativas`)
 
-As cinco abas de catálogo abaixo têm, todas, uma coluna `componentes`:
+As seis abas de catálogo abaixo têm, todas, uma coluna `componentes`:
 texto com os códigos dos componentes vinculados àquele item, separados
 por `|` (ex.: `FAMAT31011|FEELT31204`) — nunca por vírgula, para não
 colidir com o separador usado em `pre_requisitos`/`correquisitos`. É essa
@@ -187,19 +188,22 @@ direção é catálogo → componente.
 No carregamento (`ppcgen.leitores.excel._aplicar_vinculos_catalogo`), cada
 código listado em `componentes` é usado para preencher o campo
 correspondente do componente (`nucleo`/`areas`/`temas_transversais`/
-`conteudos`/`competencias`, em `ppcgen.modelos.ComponenteCurricular`) — o
-resultado final tem exatamente a mesma forma de antes, só muda de onde
-vem. `nucleo` é cardinalidade 1: se o mesmo código aparecer em
-`componentes` de mais de uma linha da aba `Nucleos`, o primeiro vence e o
-validador emite `NUCLEO_MULTIPLO_PARA_COMPONENTE` (erro); os demais
-campos aceitam qualquer número de vínculos.
+`conteudos`/`competencias`/`enfases_formativas`, em
+`ppcgen.modelos.ComponenteCurricular`) — o resultado final tem exatamente
+a mesma forma de antes, só muda de onde vem. `nucleo` é cardinalidade 1:
+se o mesmo código aparecer em `componentes` de mais de uma linha da aba
+`Nucleos`, o primeiro vence e o validador emite
+`NUCLEO_MULTIPLO_PARA_COMPONENTE` (erro); os demais campos — inclusive
+`enfases_formativas` — aceitam qualquer número de vínculos (um componente
+pode legitimamente pertencer a mais de uma ênfase formativa).
 
 Um código em `componentes` que não existe na aba `Componentes` não é
 descartado silenciosamente — o leitor preserva a lista bruta em
 `<Catalogo>.componentes` e `ppcgen.validadores.referenciais` reporta um
 erro por catálogo: `NUCLEO_COMPONENTE_INEXISTENTE`,
 `AREA_COMPONENTE_INEXISTENTE`, `TEMA_TRANSVERSAL_COMPONENTE_INEXISTENTE`,
-`CONTEUDO_COMPONENTE_INEXISTENTE`, `COMPETENCIA_COMPONENTE_INEXISTENTE`.
+`CONTEUDO_COMPONENTE_INEXISTENTE`, `COMPETENCIA_COMPONENTE_INEXISTENTE`,
+`ENFASE_FORMATIVA_COMPONENTE_INEXISTENTE`.
 
 ### Aba `Nucleos`
 
@@ -272,6 +276,30 @@ Catálogo de competências do curso — substitui o antigo
 `obrigatoria: TRUE` faz o validador emitir
 `COMPETENCIA_OBRIGATORIA_SEM_COBERTURA` (alerta) se `componentes` estiver
 vazio ou só tiver códigos inativos.
+
+### Aba `EnfasesFormativas` (opcional)
+
+Catálogo das ênfases formativas (áreas de formação optativa) do curso —
+percursos de aprofundamento entre os quais o curso pode exigir a
+integralização de um número mínimo (`curriculo.enfases_formativas_minimas`
+na aba `Perfil`), cada uma com sua própria carga horária mínima
+(`curriculo.carga_horaria_minima_por_enfase`). Aba ausente ou vazia
+significa que o curso não usa o mecanismo (ex.: o Tecnólogo) —
+`ppcgen.validadores.enfases_formativas` não emite nenhuma checagem nesse
+caso.
+
+| Campo | Tipo | Obrigatório | Exemplo |
+|---|---|---|---|
+| `id` | texto | sim | `MIAPI` |
+| `nome` | texto | sim | `Máquinas Inteligentes, Acionamentos e Proteção Industrial` |
+| `sigla` | texto | não | `MIAPI` |
+| `conteudos_estruturantes` | texto | não | — |
+| `aderencia_profissional` | texto | não | — |
+| `componentes` | texto (lista, códigos separados por `\|`) | não | `FEELT!TEC1\|FEELT!TEC2` |
+
+Vínculo componente ↔ ênfase é N:N (ver "Padrão `componentes`" acima): um
+componente pode ser pertinente a mais de uma ênfase, contando
+integralmente para a carga horária de cada uma.
 
 ### Aba `Bibliografia`
 

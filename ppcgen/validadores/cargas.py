@@ -65,25 +65,20 @@ def validar_cargas(curriculo: Curriculo, perfil: Perfil) -> ResultadoValidacao:
             )
         )
 
+    # O componente agregador ("MÓDULO OPTATIVO") pode estar ativo=True ou
+    # False — o campo `ativo` não é o que o distingue de uma disciplina
+    # cursável, é o **nome** (ppcgen.calculo.eh_agregador_optativo). Por
+    # isso ele é excluído por nome tanto de `componentes_oficiais`
+    # (ppcgen.calculo) quanto da soma do pool real abaixo,
+    # independentemente do seu `ativo`/`tipo` — nenhum dos dois evita que
+    # ele seja contado (uma única vez) como a carga horária optativa
+    # mínima do curso, via ppcgen.calculo.carga_optativa_minima.
+    agregadores = [c for c in curriculo.ativos() if eh_agregador_optativo(c.nome)]
     optativas_ativas = [
         c for c in curriculo.ativos() if c.tipo == TipoComponente.CARGA_OPTATIVA
     ]
-    agregadores_optativos = [c for c in optativas_ativas if eh_agregador_optativo(c.nome)]
-    for componente in agregadores_optativos:
-        resultado.adicionar(
-            ErroValidacao(
-                "COMPONENTE_AGREGADOR_OPTATIVO",
-                f"'{componente.codigo}' ('{componente.nome}') é uma linha agregadora, "
-                "não uma disciplina cursável — deve estar inativa (ativo=False); "
-                "sua carga_total já é lida como a carga horária optativa mínima do curso "
-                "(ppcgen.calculo.carga_optativa_minima), sem duplicar esse valor na aba Perfil.",
-                componente=componente.codigo,
-                campo="nome",
-            )
-        )
-
     soma_optativas = sum(
-        c.carga_total for c in optativas_ativas if c not in agregadores_optativos
+        c.carga_total for c in optativas_ativas if c not in agregadores
     )
     minima_configurada = carga_optativa_minima(curriculo)
     if minima_configurada is not None and soma_optativas < minima_configurada:

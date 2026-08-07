@@ -1,5 +1,5 @@
-"""Validações estruturais do currículo (Seção 9 — ESTRUTURA CURRICULAR) e
-orquestração de todo o pipeline de validação.
+"""Orquestração de todo o pipeline de validação (Seção 9 — ESTRUTURA
+CURRICULAR).
 
 ``validar_curriculo`` é o ponto de entrada único usado pela CLI: chama, nesta
 ordem, os validadores de código/identificação, carga horária, extensão, EaD,
@@ -7,7 +7,13 @@ pré-requisitos/correquisitos (com detecção de ciclos), referenciais e — se
 fichas forem fornecidas — fichas curriculares. Nenhum destes módulos lança
 exceção por problema de dado; o resultado agregado é sempre um
 :class:`~ppcgen.modelos.ResultadoValidacao` que a CLI decide como reportar.
-"""
+
+Não existe mais uma checagem isolada de "componente obrigatório sem
+período": um componente sem ``periodo`` é sempre considerado ``outro`` na
+prática, qualquer que seja o ``tipo`` cadastrado — não haveria sentido em
+manter duas fontes de informação (``tipo`` declarado e presença de
+``periodo``) que pudessem divergir entre si. Por isso a ausência de
+``periodo`` nunca é, por si só, um erro a reportar."""
 
 from __future__ import annotations
 
@@ -15,11 +21,9 @@ from ppcgen.config import Perfil
 from ppcgen.modelos import (
     AlertaValidacao,
     Curriculo,
-    ErroValidacao,
     FichaCurricular,
     ReferenciaisCurso,
     ResultadoValidacao,
-    TipoComponente,
 )
 from ppcgen.validadores.cargas import validar_cargas
 from ppcgen.validadores.codigos import validar_codigos
@@ -29,31 +33,6 @@ from ppcgen.validadores.extensao import validar_extensao
 from ppcgen.validadores.fichas import SituacaoFichas, avaliar_fichas
 from ppcgen.validadores.prerequisitos import validar_equivalencias, validar_prerequisitos
 from ppcgen.validadores.referenciais import validar_referenciais
-
-_TIPOS_SEM_PERIODO_FIXO = {
-    TipoComponente.TCC,
-    TipoComponente.ESTAGIO,
-    TipoComponente.ATIVIDADE_COMPLEMENTAR,
-    TipoComponente.CARGA_OPTATIVA,
-    TipoComponente.OUTRO,
-}
-
-
-def validar_estrutura(curriculo: Curriculo, perfil: Perfil) -> ResultadoValidacao:
-    resultado = ResultadoValidacao()
-
-    for c in curriculo.componentes:
-        if c.ativo and c.periodo is None and c.tipo not in _TIPOS_SEM_PERIODO_FIXO:
-            resultado.adicionar(
-                ErroValidacao(
-                    "COMPONENTE_OBRIGATORIO_SEM_PERIODO",
-                    f"componente obrigatório '{c.codigo}' (tipo {c.tipo.value}) não tem "
-                    "período definido.",
-                    componente=c.codigo,
-                )
-            )
-
-    return resultado
 
 
 def validar_curriculo(
@@ -69,7 +48,6 @@ def validar_curriculo(
         resultado.adicionar(AlertaValidacao("LEITURA_DADO_OMITIDO", aviso))
 
     resultado.mesclar(validar_codigos(curriculo, perfil))
-    resultado.mesclar(validar_estrutura(curriculo, perfil))
     resultado.mesclar(validar_cargas(curriculo, perfil))
     resultado.mesclar(validar_extensao(curriculo, perfil))
     resultado.mesclar(validar_ead(curriculo, perfil))

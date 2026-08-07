@@ -1,14 +1,17 @@
 """Validações contra os referenciais configuráveis (Seção 8): núcleos, áreas,
-temas transversais, conteúdos e competências vivem nas abas de registro da
-matriz (``Nucleos``/``Areas``/``Temas``/``Conteudos``/``Competencias``), cada
-uma vinculando os componentes que cobre via a coluna ``componentes`` (códigos
-separados por ``|``) — a direção é catálogo → componente, não o contrário
+temas transversais, conteúdos, competências e ênfases formativas vivem nas
+abas de registro da matriz (``Nucleos``/``Areas``/``Temas``/``Conteudos``/
+``Competencias``/``EnfasesFormativas``), cada uma vinculando os componentes
+que cobre via a coluna ``componentes`` (códigos separados por ``|``) — a
+direção é catálogo → componente, não o contrário
 (``ppcgen.leitores.excel._aplicar_vinculos_catalogo`` monta o índice
 invertido no momento da carga). Este módulo confere as duas pontas dessa
 relação: que todo componente ativo tenha núcleo/área definidos, que todo
 código listado em ``componentes`` de um item de catálogo exista de fato na
 aba ``Componentes``, e que nenhum componente seja reivindicado por mais de um
-núcleo. Também reporta competências/conteúdos/temas marcados como
+núcleo (única relação N:1 deste grupo — área/tema/conteúdo/competência/
+ênfase formativa são N:N, um componente pode legitimamente pertencer a mais
+de um item). Também reporta competências/conteúdos/temas marcados como
 obrigatórios que não têm nenhum componente ativo cobrindo-os.
 """
 
@@ -64,6 +67,9 @@ def validar_referenciais(curriculo: Curriculo, referenciais: ReferenciaisCurso) 
     )
     _checar_componentes_do_catalogo(referenciais.conteudos, "conteúdo", "CONTEUDO_COMPONENTE_INEXISTENTE")
     _checar_componentes_do_catalogo(referenciais.competencias, "competência", "COMPETENCIA_COMPONENTE_INEXISTENTE")
+    _checar_componentes_do_catalogo(
+        referenciais.enfases_formativas, "ênfase formativa", "ENFASE_FORMATIVA_COMPONENTE_INEXISTENTE"
+    )
 
     contagem_nucleos = Counter(codigo for nucleo in referenciais.nucleos for codigo in nucleo.componentes)
     for codigo, qtd in contagem_nucleos.items():

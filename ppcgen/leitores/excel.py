@@ -85,7 +85,6 @@ from ppcgen.modelos import (
     TemaTransversal,
     TipoComponente,
 )
-from ppcgen.utilitarios.textos import analisar_prefixo_enfase_formativa
 
 ABAS_OBRIGATORIAS = ("Componentes",)
 ABAS_OPCIONAIS = (
@@ -298,6 +297,7 @@ def carregar_registros_referenciais(wb) -> ReferenciaisCurso:
                         sigla=_str_ou_vazio(row.get("sigla")),
                         conteudos_estruturantes=_str_ou_vazio(row.get("conteudos_estruturantes")),
                         aderencia_profissional=_str_ou_vazio(row.get("aderencia_profissional")),
+                        componentes=_lista_ids_pipe(row.get("componentes")),
                     )
                 )
 
@@ -422,6 +422,9 @@ def _aplicar_vinculos_catalogo(
     ``Nucleos``) a reivindicar um código vence; reivindicações
     conflitantes viram aviso aqui e ``NUCLEO_MULTIPLO_PARA_COMPONENTE``
     (erro) no validador, que varre ``referenciais.nucleos`` diretamente.
+    Ênfase formativa, como área/tema/conteúdo/competência, é N:N: um
+    componente pode ser vinculado a mais de uma sem que isso seja tratado
+    como conflito.
     """
 
     avisos: list[str] = []
@@ -464,32 +467,13 @@ def _aplicar_vinculos_catalogo(
             if componente is not None:
                 componente.competencias.append(competencia.id)
 
+    for enfase in referenciais.enfases_formativas:
+        for codigo in enfase.componentes:
+            componente = componentes_por_codigo.get(codigo)
+            if componente is not None:
+                componente.enfases_formativas.append(enfase.id)
+
     return avisos
-
-
-def _atribuir_enfases_formativas_por_nome(
-    componentes_por_codigo: dict[str, ComponenteCurricular], referenciais: ReferenciaisCurso
-) -> list[str]:
-    """Vincula cada componente à sua Ênfase Formativa (aba
-    ``EnfasesFormativas``) SEM nenhuma coluna de vínculo — a fonte única é
-    o próprio nome do componente, no padrão ``SIGLA NÚMERO: Nome`` (ver
-    ``ppcgen.utilitarios.textos.analisar_prefixo_enfase_formativa``).
-
-    Só vincula (``componente.enfase_formativa_id = sigla``) quando o nome
-    tem essa forma E a sigla é uma das cadastradas em ``EnfasesFormativas``
-    E o número é um inteiro positivo — qualquer outro caso (nome sem
-    prefixo, sigla desconhecida, número inválido) fica sem vínculo aqui,
-    sem lançar aviso: é o validador
-    (``ppcgen.validadores.enfases_formativas``), reaplicando o mesmo
-    parser, quem decide se isso é um erro de nomenclatura a reportar (Seção
-    29 — leitor nunca decide severidade)."""
-
-    siglas_validas = {e.sigla for e in referenciais.enfases_formativas if e.sigla}
-    for componente in componentes_por_codigo.values():
-        prefixo = analisar_prefixo_enfase_formativa(componente.nome)
-        if prefixo is not None and prefixo.sigla in siglas_validas and prefixo.numero_valido is not None:
-            componente.enfase_formativa_id = prefixo.sigla
-    return []
 
 
 def carregar_matriz(caminho: str | Path) -> tuple[Curriculo, ReferenciaisCurso, list[str]]:
@@ -580,7 +564,6 @@ def carregar_matriz(caminho: str | Path) -> tuple[Curriculo, ReferenciaisCurso, 
     # caso separadamente.
     componentes_por_codigo = {c.codigo: c for c in componentes}
     avisos.extend(_aplicar_vinculos_catalogo(componentes_por_codigo, referenciais))
-    avisos.extend(_atribuir_enfases_formativas_por_nome(componentes_por_codigo, referenciais))
 
     curriculo = Curriculo(
         versao="",

@@ -54,12 +54,12 @@ def test_pool_optativas_insuficiente():
     assert any(m.codigo_regra == "POOL_OPTATIVAS_INSUFICIENTE" for m in resultado.erros)
 
 
-def test_agregador_ativo_gera_erro_e_nao_mascara_pool_optativas_insuficiente():
-    """Cenário de dado malformado: o agregador foi deixado ``ativo=True``
-    (deveria estar sempre inativo). Mesmo assim, ele não deve ser contado
-    como um componente real do pool (o que mascararia o déficit real de
-    horas optativas) — e sua própria presença ativa já é reportada como
-    erro à parte."""
+def test_agregador_ativo_nao_mascara_pool_optativas_insuficiente():
+    """O componente agregador pode legitimamente estar ``ativo=True`` (o
+    campo ``ativo`` não o distingue de uma disciplina real, o nome
+    distingue — ver ``ppcgen.calculo.eh_agregador_optativo``). Mesmo assim,
+    ele não deve ser contado como um componente real do pool, o que
+    mascararia um déficit real de horas optativas disponíveis."""
 
     perfil = construir_perfil(curso=CursoConfig(numero_periodos=1))
     agregador = componente(
@@ -76,7 +76,6 @@ def test_agregador_ativo_gera_erro_e_nao_mascara_pool_optativas_insuficiente():
     resultado = validar_cargas(Curriculo(versao="t", componentes=[agregador, optativa_real]), perfil)
 
     codigos = {m.codigo_regra for m in resultado.erros}
-    assert "COMPONENTE_AGREGADOR_OPTATIVO" in codigos
     assert "POOL_OPTATIVAS_INSUFICIENTE" in codigos
 
 
